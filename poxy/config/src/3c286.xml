@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="ISO-8859-15"?>
+
+<source>
+    <dec>30.448477</dec> <!--declination(degrees)-->
+    <name>3C286</name> <!--source string-->
+    <telescope>MEDICINA</telescope>
+    <operator>BEST-2</operator>
+</source>

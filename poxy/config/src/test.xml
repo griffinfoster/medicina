@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="ISO-8859-15"?>
+
+<source>
+    <dec>0.0</dec> <!--declination(degrees)-->
+    <ra>0.0</ra> <!--RA(hours)-->
+    <name>Dummy source for lab testing</name> <!--source string-->
+    <telescope>Lab</telescope>
+    <operator>Lab</operator>
+</source>
