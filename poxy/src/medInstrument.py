@@ -8,13 +8,41 @@ import xmlParser
 import time,struct,numpy,logging,socket,os
 import cPickle as pickle
 
+try:
+    # Try and import the roach locking mechanism
+    import medroach.roachlock
+except:
+    # If this fails just continue regardless
+    # You will kill currently running firmware
+    # if you run without locking and call progdev
+    print '!!! Couldn\'t import medroach.locking !!!'
+    print '!!! Continuing without it -- potentialy wiping running firmware !!!'
+
+try:
+    # Try and import the medicina roach utils modules
+    import medroach.utils
+except:
+    # If this fails just continue regardless
+    print '!!! Couldn\'t import medroach.utils !!!'
+    print '!!! Continuing without it !!!'
+
 class Instrument:
     fpgas = []
     servers = []
-    def __init__(self, config_file, log_handler=None, passive=False):
+    def __init__(self, config_file=None, log_handler=None, passive=False):
         """passive: when true, do not attempt communication with FPGAs, useful for reading the config file in RX scripts
         """
         self.log_handler = log_handler
+
+        #If no config file is passed from the user, try looking for an environmental variable
+        if config_file == None:
+            config_file = os.environ.get('ROACHCONFIG')
+        #If still undefined. Exit
+        if config_file == None:
+            print 'No Config file passed to medInstrument. Exiting'
+            exit()
+
+        print 'Parsing config file: %s' %config_file
 
         self.config = xmlParser.xmlObject(config_file).xmlobj #python object containing all the information from the xml file
         self.config_file = config_file
@@ -63,6 +91,7 @@ class Instrument:
         #RX/SPEAD Parameters
         self.spead_ip_str = str(self.config.xengine.udp_output.spead_ip)
         self.spead_ip = struct.unpack('>I',socket.inet_aton(self.spead_ip_str))[0]
+
         self.tx_udp_ip_str = str(self.config.xengine.udp_output.tx_ip)
         self.tx_udp_ip = struct.unpack('>I',socket.inet_aton(self.tx_udp_ip_str))[0]
         self.rx_udp_ip_str = str(self.config.xengine.udp_output.rx_ip)
@@ -113,14 +142,37 @@ class Instrument:
         time.sleep(.1)
         for fn,fpga in enumerate(self.fpgas):
             print '   Programming %s with bitstream %s' %(self.servers[fn][0],self.bitstream)
-            fpga.progdev(self.bitstream)
+            try:
+                fpga.progdev(self.bitstream)
+            except medroach.locking.RoachLockedException:
+                print "ROACH is locked with message:\n\'%s\'" %medroach.locking.get_lock_info(fpga.host)
+                if raw_input('Do you wish to unlock it? ')[0] == 'y':
+                    medroach.locking.release(fpga.host)
+                else:
+                    exit()
+
         # Update the control software after programming
         self.get_ctrl_sw(ctrl=ctrl)
 
     def deprog(self):
         """Deprograms all the FPGAs."""
         print '   Deprogramming FPGAs'
-        for fpga in self.fpgas: fpga.progdev('')
+        for fpga in self.fpgas:
+            try:
+                fpga.progdev('')
+            except medroach.locking.RoachLockedException:
+                print "ROACH is locked with message:\n\'%s\'" %medroach.locking.get_lock_info(fpga.host)
+                if raw_input('Do you wish to unlock it? ')[0] == 'y':
+                    medroach.locking.release(fpga.host)
+                else:
+                    exit()
+            # try and remove any resulting locks (progdev('') will relock the fpga)
+            # Use blind_release so as not to require user confirmation
+            # Be careful (i.e. DON'T) use blind_release() except following progdev('')
+            try:
+                medroach.locking.blind_release(fpga.host)
+            except:
+                pass
     
     def read_uint(self, register, fpga):
         """Reads a value from register 'register' from an fpga."""
@@ -257,7 +309,7 @@ class Instrument:
             tx.send_heap(ig.get_heap())
 
 class fEngine(Instrument):
-    def __init__(self, config_file, log_handler=None, passive=False, program=False, check_adc=True):
+    def __init__(self, config_file=None, log_handler=None, passive=False, program=False, check_adc=True):
         Instrument.__init__(self, config_file, log_handler=log_handler, passive=passive)
         self.servers=[ [(self.config.fengine['name']),int(self.config.fengine['port'])] ]
         Instrument.fpgas += self.fpgas
@@ -767,7 +819,7 @@ class fEngine(Instrument):
             tx.send_heap(ig.get_heap())
 
 class xEngine(Instrument):
-    def __init__(self, config_file, log_handler=None, passive=False, program=False):
+    def __init__(self, config_file=None, log_handler=None, passive=False, program=False):
         Instrument.__init__(self, config_file, log_handler=log_handler, passive=passive)
         self.servers=[ [(self.config.xengine['name']),int(self.config.xengine['port'])] ]
         Instrument.servers += self.servers
@@ -986,7 +1038,7 @@ class xEngine(Instrument):
         for f,fpga in enumerate(self.xfpgas):
             ip = self.tx_udp_ip
             port = self.rx_udp_port
-            mac = (2<<40) + (2<<32) + ip
+            mac = (0<<40) + (96<<32) + ip #Medicina MAC generation convention
             tap_dev = 'xengtge0'
             fpga.tap_start(tap_dev,'tge_out',mac,ip,port)
             #fpga.tap_start(tap_dev,'tge_out0',mac,ip,port)
@@ -1178,7 +1230,7 @@ class xEngine(Instrument):
         tx.send_heap(ig.get_heap())
 
 class sEngine(Instrument):
-    def __init__(self, config_file, log_handler=None, passive=False, program=False):
+    def __init__(self, config_file=None, log_handler=None, passive=False, program=False):
         Instrument.__init__(self, config_file, log_handler=log_handler, passive=passive)
         self.servers=[ [(self.config.sengine['name']),int(self.config.sengine['port'])] ]
         self.bitstream=str(self.config.sengine.bitstream)
@@ -1223,6 +1275,37 @@ class sEngine(Instrument):
                 print '   Getting current ctrl_sw state'
                 self.get_ctrl_sw()
 
+    def configure_beam_output(self):
+        """Configures the S engine 10GbE output cores and beam ordering system"""
+        for f,fpga in enumerate(self.fpgas):
+            for beam_output in self.sConf.beam_output:
+                #Generate the beam output order
+                for beam in beam_output.beam:
+                    self.set_beam(beam.id,beam.x,beam.y)
+                ip = beam_output.ip #IP as a string
+                port = beam_output.port
+                mac = beam_output.mac
+                dest_ip = beam_output.dest_ip
+                tap_dev = beam_output.name
+                id = beam_output.id
+                n_beams = len(beam_output.beam)
+                ip_int = 0          #IP as a number
+                dest_ip_int = 0
+                for byte,ip_byte in enumerate(ip.split('.')[::-1]):
+                    ip_int += (int(ip_byte)<<(8*byte))
+                for byte,ip_byte in enumerate(dest_ip.split('.')[::-1]):
+                    dest_ip_int += (int(ip_byte)<<(8*byte))
+                fpga.tap_start('tge_b%i'%id,tap_dev,mac,ip_int,port)
+                print "  S-Engine:%s Beam Output:%d is transmitting from %s:%i MAC:%i"%(fpga.host,id,ip,port,mac)
+                fpga.write_int('n_beams', n_beams-1) #register stores the number of the largest beam ID, numbering from 0
+                fpga.write_int('gbe_dest_ip', dest_ip_int)
+                fpga.write_int('gbe_dest_port', port)
+                print "  S-Engine:%s Beam Output:%d is transmitting %d beams to %s:%i"%(fpga.host,id,n_beams,dest_ip,port)
+
+    def set_beam(self, id, x, y):
+        """Set beam <id> to be the beam <x,y>"""
+        print "    ###Not yet implemented: setting beam %d to (%d,%d)" %(id,x,y)
+                
     def set_x_fft_shift(self,val):
         self.change_ctrl_sw_bits(0,2,val)
 
@@ -1237,6 +1320,12 @@ class sEngine(Instrument):
 
     def set_y_fft_mask(self,val):
         self.change_ctrl_sw_bits(12,19,val)
+
+    def tge_reset(self):
+        self.change_ctrl_sw_bits(20,20,0)
+        self.change_ctrl_sw_bits(20,20,0)
+        self.change_ctrl_sw_bits(20,20,1)
+        self.change_ctrl_sw_bits(20,20,0)
 
     def reset_packet_cnt(self):
         self.change_ctrl_sw_bits(24,24,0)
@@ -1280,7 +1369,13 @@ class sEngine(Instrument):
                  'XAUI RX Valid'                 :{'val':bool(value&(1<<8)),  'default':True},
                  'S-Engine Accumulator Overflow' :{'val':bool(value&(1<<9)),  'default':False},
                  'S-Engine Y-FFT Overflow'       :{'val':bool(value&(1<<10)), 'default':False},
-                 'S-Engine X-FFT Overflow'       :{'val':bool(value&(1<<11)), 'default':False}} for value in all_values]
+                 'S-Engine X-FFT Overflow'       :{'val':bool(value&(1<<11)), 'default':False},
+                 'S-Engine Window Sync'          :{'val':bool(value&(1<<12)), 'default':True},
+                 'S-Engine GbE Packetiser Error' :{'val':bool(value&(1<<13)), 'default':False},
+                 'S-Engine GbE Packetiser Reset' :{'val':bool(value&(1<<14)), 'default':False},
+                 'S-Engine GbE TX Overflow'      :{'val':bool(value&(1<<15)), 'default':False},
+                 'S-Engine GbE TX Valid'         :{'val':bool(value&(1<<16)), 'default':True},
+                 'S-Engine GbE link up'          :{'val':bool(value&(1<<17)), 'default':True}} for value in all_values]
 
     def config_udp_output(self,fpga):
         """Configures the X engine 10GbE output cores."""

@@ -28,8 +28,11 @@ if __name__ == '__main__':
     opts, args = p.parse_args(sys.argv[1:])
 
     if args==[]:
-        print 'Please specify a configuration file! \nExiting.'
-        exit()
+        config_file = None
+        print 'Using default config file'
+    else:
+        config_file = args[0]
+        
     verbose=opts.verbose
     prog_fpga=opts.prog_fpga
     check_errs=opts.check_errs
@@ -40,9 +43,9 @@ if __name__ == '__main__':
     print '======================'
     
     print ' Loading configuration file and connecting...'
-    xeng=poxy.medInstrument.xEngine(args[0],program=prog_fpga)
+    xeng=poxy.medInstrument.xEngine(config_file,program=prog_fpga)
     print ' done'
-    feng=poxy.medInstrument.fEngine(args[0],program=False,check_adc=False)
+    feng=poxy.medInstrument.fEngine(config_file,program=False,check_adc=False)
     
     # Set the secondary accumulation length, the X Engine does a 128 sample first stage accumulation
     # acc_num to time conversion:

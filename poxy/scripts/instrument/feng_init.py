@@ -30,14 +30,17 @@ if __name__ == '__main__':
     opts, args = p.parse_args(sys.argv[1:])
 
     if args==[]:
-        print 'Please specify a configuration file! \nExiting.'
-        exit()
+        config_file = None
+        print 'Using default config file'
+    else:
+        config_file = args[0]
+
     verbose=opts.verbose
     prog_fpga=opts.prog_fpga
     noise=opts.noise
 
     print 'Loading configuration file and connecting...'
-    feng=poxy.medInstrument.fEngine(args[0],program=prog_fpga)
+    feng=poxy.medInstrument.fEngine(config_file,program=prog_fpga)
 
     print '\n======================'
     print 'Initial configuration:'

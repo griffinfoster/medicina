@@ -40,8 +40,11 @@ if __name__ == '__main__':
     opts, args = p.parse_args(sys.argv[1:])
 
     if args==[]:
-        print 'Please specify a configuration file! \nExiting.'
-        exit()
+        config_file = None
+        print 'Using default config file'
+    else:
+        config_file = args[0]
+
     verbose=opts.verbose
     prog_fpga=opts.prog_fpga
 
@@ -49,7 +52,7 @@ lh=log_handlers.DebugLogHandler()
 
 try:
     print 'Loading configuration file and connecting...'
-    seng = medInstrument.sEngine(args[0],lh,program=opts.prog_fpga)
+    seng = medInstrument.sEngine(config_file,lh,program=opts.prog_fpga)
 
     sConf = seng.config.sengine
     rec_conf = seng.config.receiver.sengine
@@ -97,6 +100,11 @@ try:
     print ''' Setting Y-FFT mask to %i...''' %ymask,
     seng.set_y_fft_mask(ymask)
     print '\t%s' %('done')
+
+    #Set beam output connection
+    print ''' Configuring 10GbE beam output'''
+    seng.configure_beam_output()
+    seng.tge_reset()
 
     # Check status
     print ''' Checking status...'''

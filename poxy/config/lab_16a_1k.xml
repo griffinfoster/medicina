@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="ISO-8859-15"?>
 
 <instrument>
-    <fengine id='0' name="fftt0" port='7147'>
+    <fengine id='0' name="tokolosh" port='7147'>
         <!--<bitstream>x64_32f_024a_2011_Apr_12_1732.bof</bitstream>-->
         <bitstream>x64_32f_024i_2011_Apr_17_1634.bof</bitstream>
 
@@ -140,8 +140,8 @@
         </udp_output>
     </xengine>
 
-    <sengine id='0' name="fftt2" port='7147'>
-        <bitstream>x64_32s_001_2011_Apr_01_1205.bof</bitstream>
+    <sengine id='0' name="hammy" port='7147'>
+        <bitstream>beam_test.bof</bitstream>
         <clk>205000000</clk> <!-- clk rate in Hz-->
         <n_ants>32</n_ants> <!-- Number of antennas processed -->
         <grid>
@@ -165,6 +165,12 @@
             <rx_ip>192.168.10.4</rx_ip> <!-- IP address to send integration packets to-->
             <rx_port>7149</rx_port> <!-- Port to sent integration packets to-->
         </udp_output>
+        <beam_output id='0' name='ten_Gbe_v2' ip='192.168.10.100' dest_ip='192.168.10.4' port='10000' mac='0x123456123456'>
+            <beam id='0'>
+                <x>0</x>
+                <y>0</y>
+            </beam>
+        </beam_output>
     </sengine>
 
     <receiver>

@@ -219,6 +219,15 @@
             <rx_ip>192.168.10.4</rx_ip> <!-- IP address to send integration packets to-->
             <rx_port>7149</rx_port> <!-- Port to sent integration packets to-->
         </udp_output>
+        <!--The IP and MAC below are required by the medicina system. They can be generated for a given roach and port
+             using the medroach.utils.get_port_params(roach_hostname, 10gbe_port). These must be changed if the roach
+             being used changes, otherwise address clashes will occur on the network-->
+        <beam_output id='0' name='ten_Gbe_v2' ip='192.168.11.133' dest_ip='192.168.11.12' port='10000' mac='0x0060c0a80b85'>
+            <beam id='0'>
+                <x>0</x>
+                <y>0</y>
+            </beam>
+        </beam_output>
     </sengine>
 
     <receiver>
