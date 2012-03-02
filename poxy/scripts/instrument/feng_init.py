@@ -17,9 +17,13 @@ if __name__ == '__main__':
     p.add_option('-d', '--adc_debug', dest='adc_debug',action='store_true', default=False, 
         help='Turn on ADC debug mode')
     p.add_option('-e', '--skip_eq', dest='prog_eq',action='store_false', default=True, 
-        help='Skip configuration of the correlator equalization.  Default: set the EQ according to config file.')
+        help='Skip configuration of the correlator equalization.  Default: reset the EQ based on config/pickle files')
+    p.add_option('-l', '--load_pickle', dest='load_pickle',action='store_true', default=False, 
+        help='Load EQ values stored in the eq pickle files. Default: set EQ according to config')
     p.add_option('-c', '--skip_phs_eq', dest='prog_phs_eq',action='store_false', default=True, 
-        help='Skip configuration of the phase equalisation.  Default: Initialise phase multipliers to zero.')
+        help='Skip configuration of the phase equalisation.  Default: Initialise phase multipliers to zero. / Use pickled values')
+    p.add_option('-s', '--manual_sync', dest='manual_sync',action='store_true', default=False, 
+        help='Send a manual sync to the F-engines (rather than waiting for a pps signal)')
     p.add_option('-n', '--noise', dest='noise',action='store_true', default=False, 
         help='Turn on the test noise signals.  Default: noise off')
     p.add_option('-C', '--cal', dest='cal',action='store_true', default=False, 
@@ -49,7 +53,7 @@ if __name__ == '__main__':
     # ARM THE FENGINE
     print ''' Arming F Engine and setting FFT Shift...''',
     sys.stdout.flush()
-    trig_time=feng.feng_arm()
+    trig_time=feng.feng_arm(send_sync=opts.manual_sync)
     print ' Armed. Expect trigger at %s local (%s UTC).'%(time.strftime('%H:%M:%S',time.localtime(trig_time)),time.strftime('%H:%M:%S',time.gmtime(trig_time))), 
     print 'SPEAD time meta packet has been sent.'
 
@@ -63,7 +67,7 @@ if __name__ == '__main__':
     time.sleep(0.1)
     feng.set_fft_shift(feng.fft_shift)
     feng.xaui_tx_en(True)
-    feng.arm_sync()
+    #feng.arm_sync()
 
     # Set ADC Debug Mode
     print ' Using test inputs?', opts.adc_debug
@@ -79,8 +83,12 @@ if __name__ == '__main__':
 
     # SET INITIAL EQUALIZATION LEVELS
     if opts.prog_eq:
-        print ''' Setting X-Engine Amplitude Equalization...''',
-        feng.eq_init_amp(load_pickle=False, verbose=opts.verbose, use_base=True, use_bandpass=True, use_cal=False)
+        print ''' Setting X-Engine Amplitude Equalization...'''
+        if opts.load_pickle:
+            print '   Using pickled values...',
+        else:
+            print '   Using values from config file...',
+        feng.eq_init_amp(load_pickle=opts.load_pickle, verbose=opts.verbose, use_base=True, use_bandpass=True, use_cal=True)
         feng.spead_eq_amp_meta_issue()
         time.sleep(0.1)
         sys.stdout.flush()
@@ -89,8 +97,12 @@ if __name__ == '__main__':
 
     # SET INITIAL PHASE COEFFICIENTS
     if opts.prog_phs_eq:
-        print ''' Setting Phase Equalization...''',
-        feng.eq_init_phs(verbose=opts.verbose, load_pickle=False)
+        print ''' Setting Phase Equalization...'''
+        if opts.load_pickle:
+            print '   Using pickled values...',
+        else:
+            print '   Using values from config file...',
+        feng.eq_init_phs(verbose=opts.verbose, use_base=True, use_bandpass=True, use_cal=True, load_pickle=opts.load_pickle)
         feng.spead_eq_phs_meta_issue()
         time.sleep(0.1)
         sys.stdout.flush()

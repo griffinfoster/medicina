@@ -106,13 +106,12 @@ if __name__ == '__main__':
 
     # Output over 10 GbE to rx computer
     if output_tge:
-        print ' Enabling UDP output...',
-        sys.stdout.flush()
-        xeng.enable_10gbe_tx()
-        print  'done'
-
         print ' Configuring UDP 10GbE output to %s:%i...'%(xeng.rx_udp_ip_str,xeng.rx_udp_port)
         sys.stdout.flush()
         for fpga in xeng.xfpgas: xeng.config_udp_output(fpga)
         print ''
 
+        print ' Enabling UDP output...',
+        sys.stdout.flush()
+        xeng.enable_10gbe_tx()
+        print  'done'

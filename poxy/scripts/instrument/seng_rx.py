@@ -35,15 +35,10 @@ if __name__ == '__main__':
         inst=medInstrument.Instrument(args[0], passive=True)
         data_ip= inst.config.receiver.sengine.rx_ip
         data_port = inst.config.receiver.sengine.rx_port
-        data_dir = inst.config.receiver.sengine.data_dir.rstrip('/')
         if opts.time != -1:
             file_time = opts.time
         else:
             file_time = inst.config.receiver.sengine.file_time
-
-print 'Making data directory %s...' %data_dir,
-os.system('mkdir -p %s' %data_dir)
-print 'done.'
 
 print 'Recording file of length %d seconds' %file_time
 
@@ -60,7 +55,7 @@ t_index = '%7.5f'%conv_time(time.time())
 #t_index = str(int(time.time()))
 
 # Create the file to write
-fn = data_dir + '/' + "img." + t_index + ".h5"
+fn = "img." + t_index + ".h5"
 print 'Creating file: %s' %fn,
 f = h5py.File(fn, mode="w")
 print 'done.'
@@ -100,12 +95,16 @@ try:
             if not datasets.has_key(name):
                 # check to see if we have encountered this type before
                 shape = ig[name].shape if item.shape == -1 else item.shape
-                dtype = np.dtype(type(ig[name])) if shape == [] else item.dtype                 
+                if not name.startswith('timestamp'):
+                    dtype = np.dtype(type(ig[name])) if shape == [] else item.dtype                 
+                else:
+                    dtype = np.uint64
                 if dtype is None: dtype = ig[name].dtype
                 # if we can't get a dtype from the descriptor try and get one from the value
                 print "Creating dataset for name:",name,", shape:",shape,", dtype:",dtype
                 f.create_dataset(name,[1] + ([] if list(shape) == [1] else list(shape)), maxshape=[None] + ([] if list(shape) == [1] else list(shape)), dtype=dtype)
-                dump_size += np.multiply.reduce(shape) * dtype.itemsize
+                if not name.startswith('timestamp'):
+                   dump_size += np.multiply.reduce(shape) * dtype.itemsize
                 datasets[name] = f[name]
                 datasets_index[name] = 0
                 if not item._changed:
@@ -114,87 +113,41 @@ try:
                 print "Adding",name,"to dataset. New size is",datasets_index[name]+1
                 f[name].resize(datasets_index[name]+1, axis=0)
 
-            ##interleave the xeng data, on short accumulations this may be too expensive
-            #if name.startswith("xeng_raw"):
-            #    d_inter = np.zeros(ig[name].shape)
-            #    for ch in range(ig['n_chans']/2):
-            #        d_inter[2*ch,:,:,:] = ig[name][ch,:,:,:]
-            #        d_inter[2*ch+1,:,:,:] = ig[name][ch+ig['n_chans']/2,:,:,:]
-            #    f[name][datasets_index[name]] = d_inter
-            #else:
-            #    #whatever SPEAD data we received, store it anyway:
-            #    #This appending scheme is dangerous... if an X engine drops out and then reappears, it will have mis-aligned data.
-            #    f[name][datasets_index[name]] = ig[name]
-
             if name.startswith("seng_raw") and datasets_index[name]==0:
                 recording=True
                 last_save_time=time.time()
+
             f[name][datasets_index[name]] = ig[name]
-            datasets_index[name] += 1
             item._changed = False
+            datasets_index[name] += 1
 
-
-            ##deal with special cases:
-
-            #if sd_frame is not None and name.startswith("seng_raw"):
-            #    #now we store this s engine's data for sending sd data.
-            #    seng_id = int(name[8:])
-            #    sd_frame[seng_id::ig['n_sengs']] = ig[name]
-
-            #if sd_frame is not None and name.startswith("timestamp"):
-            #    #we got a timestamp. 
-            #    #We Need to check all the X engines are issuing the same timestamp.
-            #    # for now, just assume they're all correct and the same. BAD!
-            #    seng_id = int(name[9:])
-            #    #print time.time() - last_time
-            #    #last_time = time.time()
-            #    #print ig['sync_time'], ig['timestamp0'], ig['scale_factor_timestamp'] #in seconds since unix epoch
-            #    timestamp = ig['sync_time'] + (ig['timestamp0'] / ig['scale_factor_timestamp']) #in seconds since unix epoch
-            #    print "Decoded timestamp:", timestamp," (",time.ctime(timestamp),")"
-            #    sd_slots[seng_id] = timestamp 
-            #    #sd_slots[xeng_id] = int(timestamp) #record that this xengine's data was received. Round to nearest second. Don't care about Signal displays misaligned by less than 1s.
-
-            #if timestamp is not None and sd_frame is not None and sd_slots is not None and (np.min(sd_slots)==np.max(sd_slots)):
-            #    #figure out if we've received an entire integration, and if so, send the SD frame
-            #    # send a signal display frame which should hopefully be full...
-            #    print "Sending signal display frame, %s, with timestamp %i." % (
-            #       "Unscaled" if not acc_scale else "Scaled by %i" %(ig['n_accs']),
-            #        timestamp)
-            #    #print "Sending signal display frame, %s, with timestamp %i. Max: %i, Mean: %i" % (
-            #    #   "Unscaled" if not acc_scale else "Scaled by %i" %(ig['n_accs']),
-            #    #    timestamp,np.max(ig[name]),np.mean(ig[name]))
-            #    timestamp = None
-            #    sd_slots = np.zeros(len(sd_slots))
-            #    sd_frame = np.zeros((ig['n_chans'],ig['n_ants']*4,ig['n_stokes']),dtype=sd_frame.dtype)
-
-            if time.time() - last_save_time > file_time and recording:
+            if time.time() - last_save_time > file_time and recording and name.startswith("seng_raw"):
                 last_save_time = time.time()
                 next_datasets = {}
                 next_datasets_index = {}
                 #create the next file
                 t_index = '%7.5f'%conv_time(time.time())
                 #t_index = str(int(time.time()))
-                new_fn = data_dir + '/' + "img." + t_index + ".h5"
+                new_fn = "img." + t_index + ".h5"
                 new_f = h5py.File(new_fn, mode="w")
                 #close current file
                 print "Writing file: %s"%(fn)
                 for (name,idx) in datasets_index.iteritems():
-                    if idx == 1 and not name.startswith('eq'):
-                        print name
-                        #print name, idx
-                        #print f[name].value[0]
-                        next_datasets[name] = f[name].value[0]
+                    #if idx == 1 and not name.startswith('eq'):
+                    if not name.startswith('timestamp') and not name.startswith('seng_raw') and not name.startswith('eq'):
+                        #next_datasets[name] = f[name].value[0]
+                        next_datasets[name] = f[name].value[-1]
                         next_datasets_index[name] = 0
                         
                         if (type(f[name].value[0])==np.string_):
-                            new_f.create_dataset(name,[1], data=f[name].value[0])
+                            new_f.create_dataset(name,[1], data=f[name].value[-1])
                         else:
-                            new_f.create_dataset(name,[1], maxshape=[None], dtype=type(f[name].value[0]))
-                        new_f[name][next_datasets_index[name]] = f[name].value[0]
+                            new_f.create_dataset(name,[1], maxshape=[None], dtype=type(f[name].value[-1]))
+                        new_f[name][next_datasets_index[name]] = f[name].value[-1]
                         next_datasets_index[name] += 1
                         
                         print "Repacking dataset",name,"as an attribute as it is singular.",
-                        f['/'].attrs[name] = f[name].value[0]
+                        f['/'].attrs[name] = f[name].value[-1]
                         print 'done'
                         f.__delitem__(name)
                     elif name.startswith('eq'):
@@ -220,9 +173,9 @@ try:
 except KeyboardInterrupt:
     print "Closing file."
     for (name,idx) in datasets_index.iteritems():
-        if idx == 1 and not name.startswith('eq'):
+        if not name.startswith('timestamp') and not name.startswith('seng_raw') and not name.startswith('eq'):
             print "Repacking dataset",name,"as an attribute as it is singular."
-            f['/'].attrs[name] = f[name].value[0]
+            f['/'].attrs[name] = f[name].value[-1]
             f.__delitem__(name)
 
     f.flush()

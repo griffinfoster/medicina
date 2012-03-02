@@ -10,5 +10,5 @@ setup(name = 'poxy',
       provides = ['poxy'],
       package_dir = {'poxy':'src'},
       packages = ['poxy'],
-      scripts=glob.glob('scripts/instrument/*.py')+glob.glob('scripts/analysis/*.py'),
+      scripts=glob.glob('scripts/instrument/*.py')+glob.glob('scripts/analysis/*.py')+glob.glob('scripts/instrument/*.ui'),
 )

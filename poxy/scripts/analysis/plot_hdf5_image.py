@@ -13,6 +13,21 @@ rc('text', usetex=True)
 import pylab
 import matplotlib.cm as cm
 
+#Helper function to read hdf5 attributes
+def get_attr(fh,attr):
+    if attr in fh.attrs.keys():
+        rv = fh.attrs.get(attr)
+    elif attr in fh.keys():
+        # sometimes there's a glitch in the matrix and attributes end up packed as datasets
+        # TODO: fix this at the source
+        print 'WARNING: tried to get attribute %s and failed. Trying to extract from data set.'%attr
+        print fh.get(attr)[-1]
+        rv = fh.get(attr)[-1] #use the latest value in the dataset
+    else:
+        print 'ERROR: could not find attribute %s in hdf5 file' %attr
+    return rv
+
+
 if __name__ == '__main__':
     from optparse import OptionParser
     o = OptionParser()
@@ -80,7 +95,7 @@ def convert_pol(arg):
 
 def gen_obs(lat=None,long=None,el=0,telescope=None):
     obs = ephem.Observer()
-    if telescope == 'Medicina':
+    if telescope == 'Medicina' or telescope == 'MEDICINA':
         obs.lat = '44:31:24.88'
         obs.long = '11:38:45.56'
     elif ((lat is not None) and (long is not None)):
@@ -141,10 +156,12 @@ for fi, fname in enumerate(fnames):
     else: time_index = convert_arg_range(opts.time)
     if fi==0:
         # Generate the ephem Observer from the location of the observatory in the file
-        print 'Telescope: %s' %fh.attrs.get('telescope')
-        print 'Source: %s' %fh.attrs.get('source')
-        obs = gen_obs(telescope=fh.attrs.get('telescope'))
-        if opts.chan_index == 'all': chan_index = range(0,fh.attrs.get('n_chans'))
+        print 'Telescope: %s' %get_attr(fh,'telescope')
+        print 'Source: %s' %get_attr(fh,'source')
+        if opts.time_scale=='ha':
+            #if we are plotting hour angles we need to know where the observatory is
+            obs = gen_obs(telescope=get_attr(fh,'telescope'))
+        if opts.chan_index == 'all': chan_index = range(0,get_attr(fh,'n_chans'))
         else: chan_index = convert_arg_range(opts.chan_index)
         # Can only use one vector as an index at a time
         dn = fh.get('seng_raw0')[time_index]
@@ -159,10 +176,10 @@ for fi, fname in enumerate(fnames):
         if opts.ypixel == 'all': y_pixels = numpy.arange(dn.shape[3])
         else: y_pixels = convert_arg_range(opts.ypixel)
         
-        n_stokes = fh.attrs.get('n_stokes')
-        if n_stokes == 1:
-            is_single_pol = True
-        n_ants = fh.attrs.get('n_ants')
+        n_stokes = get_attr(fh,'n_stokes')
+        is_dual_pol = get_attr(fh, 'is_dual_pol')
+        is_single_pol = not is_dual_pol #(!)
+        n_ants = get_attr(fh,'n_ants')
         pols = convert_pol(opts.pol)[0:n_stokes]
         n_pols = len(pols)
         d = dn
@@ -174,11 +191,11 @@ for fi, fname in enumerate(fnames):
         t = numpy.append(t,fh['timestamp0'][time_index])
     if fi==n_files-1:
         #Generate proper times
-        scale_factor = float(fh.attrs.get('adc_clk')/2/fh.attrs.get('seng_acc_len'))
+        scale_factor = float(get_attr(fh,'adc_clk')/2/get_attr(fh,'seng_acc_len'))
         if opts.time_scale == 'time':
-            t = gen_time_axis(t,scale_factor,fh.attrs.get('sync_time'))
+            t = gen_time_axis(t,scale_factor,get_attr(fh,'sync_time'))
         else:
-            t = gen_ha_axis(t,scale_factor,fh.attrs.get('sync_time'),ephem.hours('23:23:26.0'))
+            t = gen_ha_axis(t,scale_factor,get_attr(fh,'sync_time'),ephem.hours('23:23:26.0'))
     fh.close()
 
 

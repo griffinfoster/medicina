@@ -14,7 +14,7 @@ import cPickle as pickle
 from optparse import OptionParser
 
 p = OptionParser()
-p.set_usage('gaincal.py [options] INST_CONFIG_FILE GAIN_CAL_FILE')
+p.set_usage('gaincal.py [options] HDF5_FILE')
 p.set_description(__doc__)
 p.add_option('-v', '--verbose', dest='verbose', action='store_true', default=False,
         help='Print lots of lovely debug information')
@@ -38,6 +38,7 @@ chan_start, chan_stop = map(int,opts.chan_range.split('_'))
 #d_all_t = fh['xeng_raw0'][t_range,:,:,0,:]
 #d_all_t = d_all_t[:,:,:,1]+d_all_t[:,:,:,0]*1j #complexify
 n_files = len(fnames)
+eq = {}
 for fi, fname in enumerate(fnames):
     print "Opening: %s (%d of %d)" %(fname, fi+1, n_files)
     fh = h5py.File(fname, 'r')
@@ -51,9 +52,27 @@ for fi, fname in enumerate(fnames):
         print 'Number of antennas:', n_ants
         print 'Number of channels:', n_chans
         bl_order = fh['bl_order'].value
-        d = fh.get('xeng_raw0')[:,:,:,0,:]
+        d = fh.get('xeng_raw0')[:,:,:,0,:] #Single pol
+        for key in fh.get('EQ').keys(): eq[key] = n.array(fh.get('EQ')[key][:])
     else: d = n.concatenate((d, fh.get('xeng_raw0')[:,:,:,0,:]))
     fh.close()
+
+#Grab the amplitude coeffs and put them in a [nants,nchans] array
+n_coeffs = len(eq['eq_amp_coeff_0x'][-1])
+dec_factor = n_chans/n_coeffs
+eq_array_master   = n.zeros([n_ants,n_chans])
+eq_array_bandpass = n.zeros([n_ants,n_chans])
+eq_array_cal      = n.zeros([n_ants,n_chans])
+eq_array_base     = n.zeros([n_ants,n_chans])
+print 'Number of EQ coefficients: %d. Number of channels: %d.'%(n_coeffs,n_chans)
+print 'Decimation factor: %d' %dec_factor
+for ant in range(n_ants):
+    for i in range(n_coeffs):
+        eq_array_base[ant,i*dec_factor:(i+1)*dec_factor] = eq['eq_amp_coeff_base_%dx'%ant][-1][i]
+        eq_array_bandpass[ant,i*dec_factor:(i+1)*dec_factor] = eq['eq_amp_coeff_bandpass_%dx'%ant][-1][i]
+        eq_array_cal[ant,i*dec_factor:(i+1)*dec_factor] = eq['eq_amp_coeff_cal_%dx'%ant][-1][i]
+        eq_array_master[ant,i*dec_factor:(i+1)*dec_factor] = eq['eq_amp_coeff_%dx'%ant][-1][i]
+
 d = d[:,:,:,1]+d[:,:,:,0]*1j #complexify
 print 'Averaging time range %d - %d' %(time_start, time_stop)
 d = n.mean(d[time_start:time_stop,:,:],axis=0)
@@ -67,8 +86,9 @@ for bl_n, bl in enumerate(bl_order):
     R[:,bl[0],bl[1]] = d[:,bl_n]
     R[:,bl[1],bl[0]] = n.conj(d[:,bl_n])
 
-print 'Using subset of antennas -- TESTING ONLY!!!!'
-ant_range = [0,8,16,24,4,12,20,28]
+#print 'Using subset of antennas -- TESTING ONLY!!!!'
+#ant_range = [0,8,16,24,4,12,20,28]
+ant_range = range(n_ants)
 R = R[:,ant_range,:]
 R = R[:,:,ant_range]
 n_ants = len(R[0][0])
@@ -160,7 +180,7 @@ for iter_n in range(Niter):
     g[g==0]=1
 
     f = open(calname+'.pkl', 'w')
-    pickle.dump(g,f)
+    pickle.dump({'cal':g,'eq_base':eq_array_base, 'eq_cal':eq_array_cal, 'eq_bandpass':eq_array_bandpass, 'eq_master':eq_array_master, 'chans':[chan_start,chan_stop], 'time':[time_start,time_stop], 'dataset':fnames},f)
     f.close()
     
     print 'Correcting R matrix'
@@ -185,7 +205,7 @@ test_chan=610 #For plotting
 pylab.figure(0)
 pylab.subplot(2,2,1)
 pylab.title('Phase Before Correction (chan %d)' %test_chan)
-pylab.pcolor(n.angle(R[test_chan]))
+pylab.pcolor(n.angle(R[test_chan])*(180./n.pi))
 pylab.colorbar()
 pylab.subplot(2,2,2)
 pylab.title('Amp Before Correction (chan %d)' %test_chan)
@@ -193,12 +213,14 @@ pylab.pcolor(n.abs(R[test_chan]))
 pylab.colorbar()
 pylab.subplot(2,2,3)
 pylab.title('Phase After Correction (chan %d)' %test_chan)
-pylab.pcolor(n.angle(Rc[test_chan]))
+pylab.pcolor(n.angle(Rc[test_chan])*(180./n.pi))
 pylab.colorbar()
 pylab.subplot(2,2,4)
 pylab.title('Amp After Correction (chan %d)' %test_chan)
 pylab.pcolor(n.abs(Rc[test_chan]))
 pylab.colorbar()
+
+print "Standard deviation of phases in bin %d: %f" %(test_chan, n.std(n.angle(Rc[test_chan]))*180./n.pi)
 
 #pylab.figure(1)
 #pylab.subplot(2,2,1)
