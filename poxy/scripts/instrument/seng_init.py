@@ -28,6 +28,8 @@ if __name__ == '__main__':
     p.set_description(__doc__)
     p.add_option('-p', '--skip_prog', dest='prog_fpga',action='store_false', default=True, 
         help='Skip FPGA programming (assumes already programmed).  Default: program the FPGAs')
+    p.add_option('-b', '--beam_tvg', dest='beam_tvg',action='store_true', default=False, 
+        help='Use this flag to enable the beam test vector generator (over 10GbE).  Default: TVG disabled')
     p.add_option('-x', '--xmask', dest='xmask', default=0, 
         help='Mask one or more of the 4 X-FFT inputs with zeros. Valid values are 4 bit integers')
     p.add_option('-y', '--ymask', dest='ymask', default=0, 
@@ -79,6 +81,13 @@ try:
     seng.set_y_fft_shift(sConf.y_fft_shift)
     print '\t%s' %('done')
 
+    # Set the window functions (initialise to 1)
+    print (''' Initialising the fft windowing functions to 1 ...''')
+    sys.stdout.flush()
+    seng.init_x_window()
+    seng.init_y_window()
+    print '\t%s' %('done')
+
     # Set the pre-QDR scaling
     print (''' Setting the pre-QDR scaling to %i ...'''%(sConf.acc_scale)),
     sys.stdout.flush()
@@ -101,10 +110,29 @@ try:
     seng.set_y_fft_mask(ymask)
     print '\t%s' %('done')
 
+    # Set EQ bram
+    print ''' Loading inverse EQ coefficients into S-engine ...'''
+    seng.load_eq(verbose=opts.verbose)
+
     #Set beam output connection
     print ''' Configuring 10GbE beam output'''
     seng.configure_beam_output()
     seng.tge_reset()
+
+    #Set beam test vector generator
+    print ''' Setting beam test vector generator status to:''', opts.beam_tvg
+    seng.beam_tvg_en(opts.beam_tvg)
+
+    #Check beam output rate
+    print ''' Checking beam output:'''
+    seng.reset_packet_cnt()
+    init_val = numpy.array(seng.read_uint_all('gbe_packet_cnt'))
+    time.sleep(1)
+    final_val = numpy.array(seng.read_uint_all('gbe_packet_cnt'))
+    packet_cnt = final_val-init_val
+    for pn,p in enumerate(packet_cnt):
+        print '    FPGA %d: Sent %d packets in the last second' %(pn,p)
+
 
     # Check status
     print ''' Checking status...'''

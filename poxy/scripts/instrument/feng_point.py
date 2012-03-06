@@ -69,7 +69,7 @@ if __name__ == '__main__':
     trig_factor = n.sin(point_dir)
     if opts.verbose:
         print 'trig factor', trig_factor
-    ant_pos_unit = 3e8/408e6 #Wavelengths at 408MHz
+    ant_pos_unit = 3e8/408e6 #Wavelengths at 408MHz //TODO: dehardcode this
 
     for ant in range(array.n_ants):
         x,y,z = array.loc(ant)
@@ -91,9 +91,10 @@ if __name__ == '__main__':
         coeffs = n.cos(phases)+n.sin(phases)*1j
         if opts.verbose:
             print coeffs
-        feng.eq_phs.calibrate_coeffs(ant,0,coeffs[::-1],closed_loop=False) #Reverse coeffs because medicina spectrum is inverted
+        feng.eq_phs.coeff['base'].modify_coeffs(ant,0,coeffs[::-1],closed_loop=False, verbose=opts.verbose) #Reverse coeffs because medicina spectrum is inverted
     print ' Writing phase coefficients...',
-    feng.eq_write_phs(verbose=opts.verbose)
+    feng.eq_write_all_phs(verbose=opts.verbose, use_base=True, use_bandpass=True, use_cal=True)
+    feng.eq_phs.write_pkl()
     print 'done'
 
 if opts.verbose:

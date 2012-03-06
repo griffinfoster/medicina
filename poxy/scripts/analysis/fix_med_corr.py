@@ -125,7 +125,15 @@ for fn in h5fns:
     eq_group=new_fh.create_group("EQ")
     for ds in fh.iterkeys():
         if ds.startswith('eq_amp_coeff'):
-            prefix='eq_amp_coeff_'
+            if ds.startswith('eq_amp_coeff_cal'):
+                prefix='eq_amp_coeff_cal_'
+            elif ds.startswith('eq_amp_coeff_bandpass'):
+                prefix='eq_amp_coeff_bandpass_'
+            elif ds.startswith('eq_amp_coeff_base'):
+                prefix='eq_amp_coeff_base_'
+            else:
+               prefix='eq_amp_coeff_'
+
             ant=int(ds.split('_')[-1][:-1])
             if ds[-1] == 'y': ant+=n_ants/2
             ant=rewire[ant]

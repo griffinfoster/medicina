@@ -45,9 +45,11 @@ try:
     print 'done'
 
     
+    seng.load_eq(verbose=opts.verbose)
     print ''' Issuing static metadata...''',
     sys.stdout.flush()
     seng.spead_static_meta_issue()
+    seng.seng_spead_eq_meta_issue()
     print 'SPEAD packet sent.'
     
     print ''' Issuing timing metadata...''',

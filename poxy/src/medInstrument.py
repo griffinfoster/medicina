@@ -100,7 +100,7 @@ class Instrument:
         self.spead_listeners = ([self.config.xengine.udp_output.spead_ip, self.config.xengine.udp_output.rx_port],[self.config.receiver.sengine.spead_ip, self.config.receiver.sengine.rx_port])
         self.seng_spead_rx_ip_str = self.config.receiver.sengine.spead_ip
         self.seng_spead_rx_port = self.config.receiver.sengine.rx_port
-       
+
     def connect_to_servers(self):
         self.fpgas=[katcp_wrapper.FpgaClient(s[0],s[1],timeout=10) for s in self.servers]
 
@@ -383,6 +383,7 @@ class fEngine(Instrument):
     def arm_sync(self):
         self.change_ctrl_sw_bits(11,11,0)
         self.change_ctrl_sw_bits(11,11,1)
+        self.change_ctrl_sw_bits(11,11,0)
 
     def sync_arm_rst(self):
         self.change_ctrl_sw_bits(11,11,0)
@@ -390,6 +391,7 @@ class fEngine(Instrument):
     def send_sync(self):
         self.change_ctrl_sw_bits(12,12,0)
         self.change_ctrl_sw_bits(12,12,1)
+        self.change_ctrl_sw_bits(12,12,0)
 
     def xaui_tx_en(self,val):
         self.change_ctrl_sw_bits(13,13,int(val))
@@ -457,7 +459,7 @@ class fEngine(Instrument):
                 'x2':bool(value&(1<<1)),
                 'x3':bool(value&(1<<0))}
 
-    def feng_arm(self, spead_update=True):
+    def feng_arm(self, spead_update=True, send_sync=False):
         """Arms all F engines, records arm time in config file and issues SPEAD update. Returns the UTC time at which the system was sync'd in seconds since the Unix epoch (MCNT=0)"""
         #wait for within 100ms of a half-second, then send out the arm signal.
         ready=(int(time.time()*10)%5)==0
@@ -466,8 +468,8 @@ class fEngine(Instrument):
         trig_time=time.time()
         self.arm_sync() #implicitally affects all FPGAs
         self.sync_time=trig_time
-        #self.sync_arm_rst()
-        self.send_sync()
+        if send_sync:
+            self.send_sync()
         if spead_update: self.spead_sync_meta_issue_all_listeners()
         base_dir = os.path.dirname(self.config_file)
         base_name = os.path.basename(self.config_file)
@@ -606,7 +608,7 @@ class fEngine(Instrument):
     def eq_write_all_amp(self,send_spead_update=True,verbose=False,use_base=False,use_bandpass=False,use_cal=False):
         """Write to Amplitude BRAM the equalization coefficents for a given antpol on the F Engine"""
         self.eq_amp.build_coeffs(use_base=use_base,use_bandpass=use_bandpass,use_cal=use_cal)
-        coeffs = self.eq_amp.coeff['master'].get_real_fp(32,0,signed=False)
+        coeffs = self.eq_amp.coeff['master'].get_real_fp(32,16,signed=False)
         if verbose:
             print 'Coefficient 256 for all pols'
             print coeffs[:,:,256]
@@ -636,7 +638,13 @@ class fEngine(Instrument):
         # Update the pkl file
         self.eq_amp.write_pkl()
         if send_spead_update:
-            self.spead_eq_amp_meta_issue()
+            self.spead_eq_amp_meta_issue(coeffset='master')
+            if use_base:
+                self.spead_eq_amp_meta_issue(coeffset='base')
+            if use_bandpass:
+                self.spead_eq_amp_meta_issue(coeffset='bandpass')
+            if use_cal:
+                self.spead_eq_amp_meta_issue(coeffset='cal')
 
     #def eq_write_amp_orig(self,eqi,ant,pol='x',verbose=False):
     #    """Write to Amplitude BRAM the equalization coefficents for a given antpol on the F Engine"""
@@ -708,20 +716,35 @@ class fEngine(Instrument):
         # Write pickle file
         self.eq_amp.write_pkl()
 
-    def spead_eq_amp_meta_issue(self):
+    def spead_eq_amp_meta_issue(self, coeffset='master'):
         """Issues a SPEAD heap for the Amplitude EQ settings."""
         import spead
+        coeff_id = {'master':0,'base':1,'bandpass':2,'cal':3}
+
+        if coeffset not in self.eq_amp.coeff.keys():
+            print "Error: SPEAD issue requested on non-existent coefficient set '%s'" %coeffset
+            print "       Defaulting to master coefficients"
+            coeffset = 'master'
+
+        #For backwards compatibility. If the master coefficient set is requested, name the spead item
+        #eq_amp_coeff. For all other coefficient sets, name the spead item eq_amp_coeff_<coeffset>
+
+        if coeffset=='master':
+            coeffset_name_str = ''
+        else:
+            coeffset_name_str = '_'+coeffset
+
         for l in self.spead_listeners:
             tx=spead.Transmitter(spead.TransportUDPtx(l[0],l[1]))
             ig=spead.ItemGroup()
 
             for ant in range(self.fConf.n_ants_sp):
                 for pn,pol in enumerate(['x','y'][0:self.fConf.pols_per_ant]):
-                    ig.add_item(name="eq_amp_coeff_%i%c"%(ant,pol),id=0x1400+ant*self.n_pols+pn,
+                    ig.add_item(name="eq_amp_coeff%s_%i%c"%(coeffset_name_str,ant,pol),id=((0x3400+ant*self.n_pols+pn) + (0x0100*coeff_id[coeffset])),
                         description="The unitless per-channel digital amplitude scaling factors implemented prior to requantisation, post-FFT, for input %i%c."%(ant,pol),
-                        init_val=self.eq_amp.coeff['master'].get_coeffs()[ant,pn,:])
+                        init_val=self.eq_amp.coeff[coeffset].get_coeffs()[ant,pn,:])
 
-            ig.add_item(name='eq_amp_time',id=0x1500,
+            ig.add_item(name='eq_amp_time',id=0x3900,
                     description="Time at which the amplitude EQ coefficents last changed.",
                     shape=[],fmt=spead.mkfmt(('u',spead.ADDRSIZE)),
                     init_val=numpy.ceil(time.time()))
@@ -797,22 +820,42 @@ class fEngine(Instrument):
         # Update the pkl file
         self.eq_phs.write_pkl()
         if send_spead_update:
-            self.spead_eq_phs_meta_issue()
+            self.spead_eq_phs_meta_issue(coeffset='master')
+            if use_base:
+                self.spead_eq_phs_meta_issue(coeffset='base')
+            if use_bandpass:
+                self.spead_eq_phs_meta_issue(coeffset='bandpass')
+            if use_cal:
+                self.spead_eq_phs_meta_issue(coeffset='cal')
         
-    def spead_eq_phs_meta_issue(self):
+    def spead_eq_phs_meta_issue(self, coeffset='master'):
         """Issues a SPEAD heap for the Phase EQ settings."""
         import spead
+        coeff_id = {'master':0,'base':1,'bandpass':2,'cal':3}
+        if coeffset not in self.eq_phs.coeff.keys():
+            print "Error: SPEAD issue requested on non-existent coefficient set '%s'" %coeffset
+            print "       Defaulting to master coefficients"
+            coeffset = 'master'
+
+        #For backwards compatibility. If the master coefficient set is requested, name the spead item
+        #eq_phs_coeff. For all other coefficient sets, name the spead item eq_phs_coeff_<coeffset>
+
+        if coeffset=='master':
+            coeffset_name_str = ''
+        else:
+            coeffset_name_str = '_'+coeffset
+
         for l in self.spead_listeners:
             tx=spead.Transmitter(spead.TransportUDPtx(l[0],l[1]))
             ig=spead.ItemGroup()
 
             for ant in range(self.fConf.n_ants_sp):
                 for pn,pol in enumerate(['x','y'][0:self.fConf.pols_per_ant]):
-                    ig.add_item(name="eq_phs_coeff_%i%c"%(ant,pol),id=0x2400+ant*self.n_pols+pn,
+                    ig.add_item(name="eq_phs_coeff%s_%i%c"%(coeffset_name_str,ant,pol),id=((0x2400+ant*self.n_pols+pn) + (0x0100*coeff_id[coeffset])),
                         description="The per-channel digital phase correction factors implemented prior to requantisation, post-FFT, for input %i%c."%(ant,pol),
-                        init_val=self.eq_phs.coeff['master'].get_coeffs()[ant,pn,:])
+                        init_val=self.eq_phs.coeff[coeffset].get_coeffs()[ant,pn,:])
 
-            ig.add_item(name='eq_phs_time',id=0x2500,
+            ig.add_item(name='eq_phs_time',id=0x2900,
                     description="Time at which the phase EQ coefficents last changed.",
                     shape=[],fmt=spead.mkfmt(('u',spead.ADDRSIZE)),
                     init_val=numpy.ceil(time.time()))
@@ -966,12 +1009,12 @@ class xEngine(Instrument):
         min_ld_time = 0.5
         mcnt = ffpga.feng_get_current_mcnt(ffpga.ffpgas[0])
         ld_mcnt = int(mcnt + min_ld_time*self.mcnt_scale_factor)
-        #print mcnt, ld_mcnt
+        print mcnt, ld_mcnt
 
         for fpga in self.xfpgas:
             self.write_int('vacc_time_lsw',(ld_mcnt&0xffffffff),fpga)
-            self.write_int('vacc_time_msw',(ld_mcnt>>32)+1<<31,fpga)
-            self.write_int('vacc_time_msw',(ld_mcnt>>32)+0<<31,fpga)
+            self.write_int('vacc_time_msw',(ld_mcnt>>32)+(1<<31),fpga)
+            self.write_int('vacc_time_msw',(ld_mcnt>>32)+(0<<31),fpga)
 
         time.sleep(self.time_from_mcnt(ld_mcnt) - self.time_from_mcnt(mcnt))
         after_mcnt = ffpga.feng_get_current_mcnt(ffpga.ffpgas[0])
@@ -1222,6 +1265,7 @@ class xEngine(Instrument):
                 description='Timestamp of start of this integration. uint counting multiples of ADC samples since last sync (sync_time, id=0x1027). Divide this number by timestamp_scale (id=0x1046) to get back to seconds since last sync when this integration was actually started. Note that the receiver will need to figure out the centre timestamp of the accumulation (eg, by adding half of int_time, id 0x1016).',
                 shape=[], fmt=spead.mkfmt(('u',spead.ADDRSIZE)),
                 init_val=0)
+                
 
             ig.add_item(name=("xeng_raw%i"%x),id=(0x1800+x),
                 description="Raw data for xengine %i out of %i. Frequency channels are split amongst xengines. Frequencies are distributed to xengines in a round-robin fashion, starting with engine 0. Data from all X engines must thus be combed or interleaved together to get continuous frequencies. Each xengine calculates all baselines (n_bls given by SPEAD ID 0x100B) for a given frequency channel. For a given baseline, -SPEAD ID 0x1040- stokes parameters are calculated (nominally 4 since xengines are natively dual-polarisation; software remapping is required for single-baseline designs). Each stokes parameter consists of a complex number (two real and imaginary unsigned integers)."%(x,self.n_xeng),
@@ -1275,10 +1319,122 @@ class sEngine(Instrument):
                 print '   Getting current ctrl_sw state'
                 self.get_ctrl_sw()
 
+    def load_eq(self,verbose=False, send_spead_update=True):
+        in_name='xengine'
+        out_name ='sengine'
+        mode = 'amp'
+        base_dir = os.path.dirname(self.config_file)
+        base_name = os.path.basename(self.config_file)
+        input_pkl_file = base_dir + "/eq_"+ in_name + "_" + 'amp' + ".pkl"
+        output_pkl_file = base_dir + "/eq_"+ out_name + "_" + 'amp' + ".pkl"
+
+        try:
+            #Try and open the coefficient pickle file
+            if verbose:
+                print "Loading EQ from %s" %input_pkl_file
+            eq_amp_x = equalization.EQ()
+            eq_amp_x.read_pkl(input_pkl_file)
+        except:
+            raise IOError("Couldn't read input EQ pickle file %s" %input_pkl_file)
+            
+        if verbose:
+            for i in range(32):
+                print i, eq_amp_x.get_coeffs('base')
+
+        inverse_coeffs = 1./eq_amp_x.get_coeffs('base')
+        # Normalise to 1
+        inverse_coeffs = inverse_coeffs/numpy.max(inverse_coeffs)
+
+        self.eq_amp = equalization.EQ(mode='amp',nchans=self.fConf.n_chan, nants=self.fConf.n_ants_sp, npols=self.fConf.pols_per_ant, decimation=2, dtype=float, fn=output_pkl_file)
+
+        for ant in range(self.fConf.n_ants_sp):
+            if verbose:
+                print "Modifying coefficients for ANT:%d" %ant
+            self.eq_amp.coeff['base'].modify_coeffs(ant,0,inverse_coeffs[ant,0,:],closed_loop=False, verbose=verbose)
+
+        self.eq_amp.build_coeffs(use_base=True,use_bandpass=False,use_cal=False)
+        coeffs = self.eq_amp.coeff['master'].get_real_fp(25,24,signed=True)
+        if verbose:
+            print 'Coefficient 256 for all pols'
+            print coeffs[:,:,256]
+            print 'ABS'
+            print numpy.abs(coeffs[:,:,256])
+        uints = numpy.array(coeffs,dtype=numpy.uint32)
+        MAP = [0,4,1,5,2,6,3,7]
+        #TODO: we use n_ants_sp here as the number of ants per fpga, and the TOTAL number of ants.
+        #In general these are not the same. Fix.
+        for fpga in self.fpgas:
+            for pn,pol in enumerate(['x','y'][0:self.fConf.pols_per_ant]):
+                for eq_subsys in range(self.fConf.n_ants_sp//8):
+                    bin_str = ''
+                    for ant_mux_index in range(8):
+                        offset = self.fConf.n_chan/self.eq_amp.dec*MAP*4 #Offset in bytes, not words
+                        if verbose:
+                            print '(ant %d%s): Packing %d coefficients to be written to ram %d' %(MAP[ant_mux_index]+8*eq_subsys,pol,len(uints[MAP[ant_mux_index],pn]),eq_subsys)
+                        bin_str = bin_str + numpy.array(uints[MAP[ant_mux_index]+8*eq_subsys,pn],dtype='>u4').tostring()
+                        if verbose:
+                            print 'Coefficients as packed:'
+                            print uints[MAP[ant_mux_index]+8*eq_subsys,pn]
+                        #for uint in uints[ant,pn]:
+                        #    bin_str = bin_str + struct.pack('>L', uint)
+                    if verbose:
+                        print 'Writing %d coeffs to amp_EQ%d_coeff_bram' %(len(bin_str)/4,eq_subsys)
+                    fpga.write('eq_amp_EQ%d_coeff_bram' %eq_subsys, bin_str)
+        # Update the pkl file
+        self.eq_amp.write_pkl()
+        if send_spead_update:
+            self.seng_spead_eq_meta_issue()
+
+    def seng_spead_eq_meta_issue(self, coeffset='master'):
+        """Issues a SPEAD heap for the Phase EQ settings."""
+        import spead
+        coeff_id = {'master':0,'base':1,'bandpass':2,'cal':3}
+        if coeffset not in self.eq_amp.coeff.keys():
+            print "Error: SPEAD issue requested on non-existent coefficient set '%s'" %coeffset
+            print "       Defaulting to master coefficients"
+            coeffset = 'master'
+
+        #For backwards compatibility. If the master coefficient set is requested, name the spead item
+        #eq_phs_coeff. For all other coefficient sets, name the spead item eq_phs_coeff_<coeffset>
+
+        if coeffset=='master':
+            coeffset_name_str = ''
+        else:
+            coeffset_name_str = '_'+coeffset
+
+        for l in self.spead_listeners:
+            tx=spead.Transmitter(spead.TransportUDPtx(l[0],l[1]))
+            ig=spead.ItemGroup()
+
+            for ant in range(self.fConf.n_ants_sp):
+                for pn,pol in enumerate(['x','y'][0:self.fConf.pols_per_ant]):
+                    ig.add_item(name="eq_seng_amp_coeff%s_%i%c"%(coeffset_name_str,ant,pol),id=((0x5400+ant*self.n_pols+pn) + (0x0100*coeff_id[coeffset])),
+                        description="The per-channel digital amplitude correction factors implemented after XAUI reception on the S-engine. These are designed to undo the requantisation scaling. For input %i%c."%(ant,pol),
+                        init_val=self.eq_amp.coeff[coeffset].get_coeffs()[ant,pn,:])
+
+            ig.add_item(name='eq_seng_amp_time',id=0x5900,
+                    description="Time at which the phase EQ coefficents last changed.",
+                    shape=[],fmt=spead.mkfmt(('u',spead.ADDRSIZE)),
+                    init_val=numpy.ceil(time.time()))
+            tx.send_heap(ig.get_heap())
+
+    def init_x_window(self):
+        for fpga in self.fpgas:
+            for x in range(self.x_dim):
+                fpga.write_int('x_window_mult_%d_coeff'%x, (2**17-1)) #Coefficient is Real Fix18_17 
+
+    def init_y_window(self):
+        for fpga in self.fpgas:
+            for y in range(self.y_dim):
+                fpga.write_int('y_window_mult_%d_coeff'%y, (2**17-1)) #Coefficient is Real Fix18_17
+ 
     def configure_beam_output(self):
         """Configures the S engine 10GbE output cores and beam ordering system"""
+        beam_config = self.sConf.beam_config
+        self.set_beam_channels(beam_config.start_chan,beam_config.end_chan)
+        self.set_heap_size(beam_config.bytes_per_sample,beam_config.samples_per_block,(beam_config.end_chan-beam_config.start_chan+1))
         for f,fpga in enumerate(self.fpgas):
-            for beam_output in self.sConf.beam_output:
+            for beam_output in beam_config.beam_output:
                 #Generate the beam output order
                 for beam in beam_output.beam:
                     self.set_beam(beam.id,beam.x,beam.y)
@@ -1296,15 +1452,48 @@ class sEngine(Instrument):
                 for byte,ip_byte in enumerate(dest_ip.split('.')[::-1]):
                     dest_ip_int += (int(ip_byte)<<(8*byte))
                 fpga.tap_start('tge_b%i'%id,tap_dev,mac,ip_int,port)
-                print "  S-Engine:%s Beam Output:%d is transmitting from %s:%i MAC:%i"%(fpga.host,id,ip,port,mac)
+                print "    S-Engine:%s Beam Output:%d is transmitting from %s:%i MAC:%i"%(fpga.host,id,ip,port,mac)
                 fpga.write_int('n_beams', n_beams-1) #register stores the number of the largest beam ID, numbering from 0
                 fpga.write_int('gbe_dest_ip', dest_ip_int)
                 fpga.write_int('gbe_dest_port', port)
-                print "  S-Engine:%s Beam Output:%d is transmitting %d beams to %s:%i"%(fpga.host,id,n_beams,dest_ip,port)
+                print "    S-Engine:%s Beam Output:%d is transmitting %d beams to %s:%i"%(fpga.host,id,n_beams,dest_ip,port)
+
+    def set_beam_channels(self,start_chan,end_chan):
+        '''Set the registers which control the channel output
+        for the spead 10GbE beam tx module '''
+        print '    Setting channel range to %d:%d' %(start_chan,end_chan)
+        for fpga in self.fpgas:
+            fpga.write_int('first_chan', start_chan)
+            fpga.write_int('last_chan', end_chan)
+
+    def set_heap_size(self,sample_bytes,n_samples,n_chans):
+        '''Set the heap size for the spead packetiser header'''
+        heap_size = sample_bytes*n_samples*n_chans
+        print '    Setting SPEAD heap size to %d' %heap_size
+        for fpga in self.fpgas:
+            fpga.write_int('heap_size',heap_size)
 
     def set_beam(self, id, x, y):
         """Set beam <id> to be the beam <x,y>"""
-        print "    ###Not yet implemented: setting beam %d to (%d,%d)" %(id,x,y)
+        print "    Setting beam %d to (%d,%d)" %(id,x,y)
+        for fpga in self.fpgas:
+            #disable write enable for all reorder blocks (just in case)
+            fpga.write_int('beam_mux_order_we',0)
+            #set the reorder block to place the correct 'X' beam in required output position
+            fpga.write_int('beam_mux_order_in', x)
+            fpga.write_int('beam_mux_order_out', id)
+            #write settings to correct reorder block
+            fpga.write_int('beam_mux_order_we', 1<<y)
+            #disable write enable
+            fpga.write_int('beam_mux_order_we',0)
+            #Now set the correct 'Y' stream in the required output position
+            fpga.write_int('beam_mux_order_out', id)
+            fpga.write_int('beam_mux_order_in', y)
+            #toggle write enable
+            fpga.write_int('beam_mux_order_we',1<<31)
+            fpga.write_int('beam_mux_order_we',0)
+
+
                 
     def set_x_fft_shift(self,val):
         self.change_ctrl_sw_bits(0,2,val)
@@ -1314,6 +1503,9 @@ class sEngine(Instrument):
 
     def xaui_tvg_en(self,val):
         self.change_ctrl_sw_bits(7,7,int(val))
+
+    def beam_tvg_en(self,val):
+        self.change_ctrl_sw_bits(31,31,int(val))
 
     def set_x_fft_mask(self,val):
         self.change_ctrl_sw_bits(8,11,val)
@@ -1375,7 +1567,8 @@ class sEngine(Instrument):
                  'S-Engine GbE Packetiser Reset' :{'val':bool(value&(1<<14)), 'default':False},
                  'S-Engine GbE TX Overflow'      :{'val':bool(value&(1<<15)), 'default':False},
                  'S-Engine GbE TX Valid'         :{'val':bool(value&(1<<16)), 'default':True},
-                 'S-Engine GbE link up'          :{'val':bool(value&(1<<17)), 'default':True}} for value in all_values]
+                 'S-Engine GbE link up'          :{'val':bool(value&(1<<17)), 'default':True},
+                 'S-Engine EQ Overflow'          :{'val':bool(value&(1<<18)), 'default':False}} for value in all_values]
 
     def config_udp_output(self,fpga):
         """Configures the X engine 10GbE output cores."""
@@ -1581,8 +1774,8 @@ class sEngine(Instrument):
         for x in range(self.n_seng):
             ig.add_item(name=('timestamp%i'%x), id=0x1700+x,
                 description='Timestamp of start of this integration. uint counting multiples of ADC samples since last sync (sync_time, id=0x1027). Divide this number by timestamp_scale (id=0x1046) to get back to seconds since last sync when this integration was actually started. Note that the receiver will need to figure out the centre timestamp of the accumulation (eg, by adding half of int_time, id 0x1016).',
-                shape=[], fmt=spead.mkfmt(('u',spead.ADDRSIZE)),
-                init_val=0)
+                shape=[], fmt=spead.mkfmt(('u',spead.ADDRSIZE)))
+                #init_val=0)
 
             ig.add_item(name=("seng_raw%i"%x),id=(0x1900+x),
                 description="Raw data for S-engine %i out of %i. Frequency channels are split amongst s-engines. Frequencies are distributed to xengines in contiguous blocks, starting with engine 0. Data from all S engines must thus be combined to cover the whole observed band. Each sengine calculates all beams for a given frequency channel. For a given beam, -SPEAD ID 0x1040- stokes parameters are calculated. Each stokes parameter consists of a single uint, which represents acculumated power."%(x,self.n_seng),

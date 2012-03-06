@@ -432,5 +432,5 @@ class NicePlotter(gui.QMainWindow):
 if __name__ == "__main__":
     app = gui.QApplication(sys.argv)
     app.setApplicationName("feng_plotter")
-    window = NicePlotter("feng_plotter.ui")
+    window = NicePlotter("/usr/local/bin/feng_plotter.ui")
     sys.exit(app.exec_())

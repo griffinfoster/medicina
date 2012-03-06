@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="ISO-8859-15"?>
 
 <source>
-    <dec>29.693092</dec> <!--declination(degrees)-->
-    <ra>04.62</ra> <!--RA(hours)-->
-    <name>3C123</name> <!--source string-->
+    <dec>52.2058</dec> <!--declination(degrees)-->
+    <ra>08.18</ra> <!--RA(hours)-->
+    <name>3C295</name> <!--source string-->
     <telescope>MEDICINA</telescope>
     <operator>BEST-2</operator>
 </source>

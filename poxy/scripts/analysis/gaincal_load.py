@@ -18,6 +18,10 @@ if __name__ == '__main__':
             help='Print lots of lovely debug information')
     p.add_option('-c', '--closed_loop', dest='closed_loop',action='store_true', default=False,
             help='Use this flag to modify (by multiplication), rather than replace, the current calibration coefficient set')
+    p.add_option('-e', '--load_eq', dest='load_eq',action='store_false', default=True,
+            help='By default the script will replace the current EQ with the EQ used for generating the calibration. Use this flag if you don\'t want this to happen, but beware, your amplitude calibration may then be off')
+    p.add_option('-n', '--norm_cal', dest='norm_cal',action='store_true', default=False,
+            help='Multiple the amplitude calibration by the EQ settings from the calibration file. This effectively results in a calibration set which is valid whenever the EQ settings are uniform across all channels/ants. You are then free to apply a new set of eq coefficients, but these must be \'undone\' before any beam processing')
 
     opts, args = p.parse_args(sys.argv[1:])
 
@@ -34,8 +38,22 @@ if __name__ == '__main__':
 
     print 'Loading Gain calibration file: %s' %(args[1])
     f = open(args[1])
-    g = 1./pickle.load(f) #g is an [nchans,nants] array
+    pk = pickle.load(f)
+    g = 1./pk['cal'] #g is an [nchans,nants] array
+    eq_base     = pk['eq_base']
+    eq_bandpass = pk['eq_bandpass']
+    eq_cal      = pk['eq_cal']
+    eq_master   = pk['eq_master']
     f.close()
+
+    
+    #print 'Bundling old calibration into new coefficient set'
+    #g = g*n.transpose(eq_cal)
+    
+    if opts.norm_cal:
+        print "Multiplying calibration by EQ set, to create EQ independent calibration values"
+        print "You *MUST* use either uniform EQ values, or use a pair of EQ, 1/EQ sets for this calibration set to be correct"
+        g = g*n.transpose(eq_base) #eq is nants x nchans, g is nchans x n_ants
 
     # The correlator does not order antennas in the same way as the
     # F-engine, so remap them here...
@@ -47,22 +65,31 @@ if __name__ == '__main__':
     #print 'NOT UPLOADING CORRECTIONS FOR ALL CHANNELS!'
     #ant_remap = [0,1,2,3,4,5,6,7]
 
-    pylab.subplot(4,1,1)
-    pylab.plot(n.abs(g[:,0]))
-    pylab.subplot(4,1,2)
-    pylab.plot(n.angle(g[:,0]))
-    pylab.subplot(4,1,3)
-    pylab.plot(n.abs(g[:,1]))
-    pylab.subplot(4,1,4)
-    pylab.plot(n.angle(g[:,1]))
-    pylab.show()
-    #for ant in range(fConf.n_ants_sp):
-    for ant in range(8):
+    #pylab.subplot(4,1,1)
+    #pylab.plot(n.abs(g[:,0]))
+    #pylab.subplot(4,1,2)
+    #pylab.plot(n.angle(g[:,0]))
+    #pylab.subplot(4,1,3)
+    #pylab.plot(n.abs(g[:,1]))
+    #pylab.subplot(4,1,4)
+    #pylab.plot(n.angle(g[:,1]))
+    #pylab.show()
+
+    for ant in range(fConf.n_ants_sp):
+        print 'Modifying calibration coefficients for antenna %d' %ant
         amp_coeffs = n.array(n.abs(g[:,ant_remap[ant]]),dtype=float)
         phase_coeffs = n.array(g[:,ant_remap[ant]]/amp_coeffs,dtype=complex)
+        eq_coeffs = n.array(eq_base[ant_remap[ant]])
         #amp_coeffs = n.ones_like(amp_coeffs)
         feng.eq_phs.coeff['cal'].modify_coeffs(ant,0,phase_coeffs[::-1],closed_loop=opts.closed_loop, verbose=opts.verbose) #Reverse coeffs because medicina spectrum is inverted
         feng.eq_amp.coeff['cal'].modify_coeffs(ant,0,amp_coeffs[::-1],closed_loop=opts.closed_loop, verbose=opts.verbose) #Reverse coeffs because medicina spectrum is inverted
+        if opts.load_eq:
+            print 'Loading EQ...'
+            if opts.norm_cal:
+                print '!!!!!!!!!!!!!!!!! DID YOU *REALLY* WANT TO DO THIS? !!!!!!!!!!!!!!!!!!'
+            print 'Modifying eq coefficients for antenna %d' %ant
+            feng.eq_amp.coeff['base'].modify_coeffs(ant,0,eq_coeffs[::-1],closed_loop=False, verbose=opts.verbose) #Reverse coeffs because medicina spectrum is inverted
+
     print ' Writing phase coefficients...',
     feng.eq_write_all_phs(verbose=opts.verbose, use_base=True, use_bandpass=True, use_cal=True)
     feng.eq_phs.write_pkl()
