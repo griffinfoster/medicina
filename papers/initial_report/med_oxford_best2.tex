@@ -1,7 +1,8 @@
-\documentclass[useAMS,usenatbib,onecolumn]{mn2e}
+\documentclass[useAMS,macros,usenatbib,onecolumn]{mn2e}
 \usepackage{multirow}
 \usepackage{graphicx}
 \usepackage{subfig}
+\usepackage{aas_macros}
 
 \title[]{A Spatial FFT and FX Correlator for the BEST-2 Array}
 \author[G. Foster, J. Hickish, D. Price and K. Zarb Adami]{G. Foster$^{1}$, J. Hickish$^{1}$, D. Price$^{1}$, K. Zarb Adami$^{1}$\\
@@ -25,31 +26,39 @@ During the initial deployment of the instruments several bright radio sources we
 
 \section{Introduction}
 
-The BEST-2 test bed at the Radiotelescopi di Medicina in Italy has been extended with a new digital backend.
-This digital backend consists of a 32 element digitizer, FX correlator, spatial FFT imager and beamformer implimented on ROACH FPGA boards.
-The Basic Element for SKA Training (BEST) test beds, consisting of BEST-1, BEST-2, and BEST-3lo, were developed as prototype systems for SKA hardware development.
-Simplicity of interfacing with different digital backends was a core component of each design.
-Digital firmware development was designed and tested at Oxford and the designs transfered with minimal changes to the available hardware at Medicina.
-A digital backend was installed during the initial setup of BEST-2 using a previous generation of CASPER FPGA hardware \citep{}.
-This new backend implimenets the same FX correlator functionality but also provides a high speed 10 GbE output interface for millisecond resolution correlations.
-Along with the correlator a spatial fast Fourier Transform (FFT) imager is incorporated which uses the antenna array grid layout to perform a spatial transform to produce a uniform grid of beams covering the array field of view.
-The imager also has a selectable 10 GbE beam output with can be used with a pulsar processor.
+The Basic Element for SKA Training (BEST) 2 array is a subset of the Northern Cross cylindrical array, at the Radiotelescopi di Medicina in Italy.
+In this paper we describe a new digital backend designed for this array, implemented on CASPER \citep{casper} designed FPGA-based hardware, and comprising fast correlation, direct imaging, beamforming and transient processing capabilities.
+
+%This digital backend consists of a 32 element digitizer, FX correlator, spatial FFT imager and beamformer implimented on ROACH FPGA boards.
+%The Basic Element for SKA Training (BEST) test beds, consisting of BEST-1, BEST-2, and BEST-3lo, were developed as prototype systems for SKA hardware development.
+%Simplicity of interfacing with different digital backends was a core component of each design.
+%Digital firmware development was designed and tested at Oxford and the designs transfered with minimal changes to the available hardware at Medicina.
+%A digital backend was installed during the initial setup of BEST-2 using a previous generation of CASPER FPGA hardware \citep{}.
+%This new backend implimenets the same FX correlator functionality but also provides a high speed 10 GbE output interface for millisecond resolution correlations.
+%Along with the correlator a spatial fast Fourier Transform (FFT) imager is incorporated which uses the antenna array grid layout to perform a spatial transform to produce a uniform grid of beams covering the array field of view.
+%The imager also has a selectable 10 GbE beam output with can be used with a pulsar processor.
 These instruments have been installed as prototypes for larger scale instruments currently in development.
 The correlator is beinging used to study the handling of large output data rates and the development of real time millisecond imaging using many antenna elements.
-The feasablitiy and limitations of the spatial FFT imagger is not well understood.
-Design and deployment of a prototype design is key to understanding the possible future uses for such an instrument.
-We have successfully observed a number of sources with the correlator and imager over the deployment period.
+The direct imaging system is being used to study the feasibility of such systems in arrays with regular geometric structure, as well as providing a platform for pulsar surveys and space-debris tracking capabilities with BEST-2.
+%Design and deployment of a prototype design is key to understanding the possible future uses for such an instrument.
+Since deployment, a number of sources with the correlator and imager have been successfully observed.
 Data has been reduced and calibrated using a combination of custom software and standard radio synthesis imaging packages.
 
-\subsection{BEST-2 Array}
+In the first section of this paper we give an overview of the BEST-2 Array, followed by a description of the channelization, correlation and image-domain processing systems in Sections \ref{channelization}, \ref{correlator} and \ref{s-engine}, respectively. Results from preliminary observations of bright radio sources from these systems are presented in Section \ref{results}, with a discussion of these in Section \ref{discussion}.
 
-The BEST-2 testbed at the Medicina Radio Observatory consists of 32 recievers on 8 cylindrical concetrators which make up a portion of the North Cross array.
-The array is laid out on a \emph{4-by-8} grid, fig. \ref{fig:ant_layout}, this makes it possible to perform the spatial FFT transform.
-This system was developed as a reliable, low cost develpment backend \citep{best2}.
-The array has an effective collecting area of approximately 1000 $m^2$ and covers a 16 MHz band centered at 408 MHz.
-The longest North-South baseline is 70 m and East-West 17 m for a synthesized beam of $0.9^{\circ}$ square at 408 MHz.
-Further specifications of the array characteristics have been listed in table \ref{tbl:best2}.
-Exstensive documentation and development of the analogue chain can be found in a number of papers \citep{best2-lna} \citep{best2-rec}.
+\subsection{BEST-2 Array}
+\label{best-2 array}
+
+The BEST-2 testbed at the Medicina Radio Observatory consists of 8 East-West oriented cylindrical concetrators, each with 64 dipole receivers critically sampling for focal line at 408MHz.
+Thses 64 dipoles are summed in groups of 16, resulting in 4 channels per cylinder, and a total of 32 effective receiving elements laid out on a \emph{4-by-8} grid, fig. \ref{fig:ant_layout}.
+
+BEST-2 was developed as a reliable, low cost frontend to be used in SKA development, with simplicity of interfacing with different digital backends a core design requirement \citep{best2}.
+Extensive documentation of the development of the BEST-2 analogue chain can be found in a number of papers \citep{best2-lna} \citep{best2-rec}. The top level specifications of the array are shown in table \ref{tbl:best2}.
+
+%The array has an effective collecting area of approximately 1000 $m^2$ and covers a 16 MHz band centered %at 408 MHz.
+%The longest North-South baseline is 70 m and East-West 17 m for a synthesized beam of $0.9$ square %degrees at 408 MHz.
+%Further specifications of the array characteristics have been listed in table \ref{tbl:best2}.
+
 In 2008 the initial digital correlator backend of the array was based on iBOB and BEE2 FPGA boards from the Collaboration for Astronomy Signal Processing and Electronics Research (CASPER)\citep{best2-casper}.
 An upgraded digital backend has been developed using the ROACH board, also developed by CASPER, which includes an FX correlator, spatial FFT imager and beamformer.
 
@@ -59,65 +68,65 @@ An upgraded digital backend has been developed using the ROACH board, also devel
 \hline
 \multicolumn{3}{|c|}{BEST-2 Array Specifications}\\
 \hline
-Cylinder Properties & &\\
+Cylinder \& Element Properties & &\\
 \hline
-Number of RX per Cylinder &          4 &            \\
-Cylinder Diameter &        7.5 &          m \\
-Cylinder Lenght &       23.5 &          m \\
-Element Diameter &        7.5 &          m \\
-Element Lenght &       5.88 &          m \\
-Element Collecting Area &       44.1 &        $m^2$ \\
-Aperture Efficiency &       0.71 &            \\
-Element Effective Area &     31.311 &        $m^2$ \\
-           &            &            \\
+Number of RX per Cylinder 	&          4 &            	\\
+Cylinder Diameter 		&        7.5 &          m 	\\
+Cylinder Length 		&       23.5 &          m 	\\
+Element Diameter 		&        7.5 &          m 	\\
+Element Length 			&       5.88 &          m 	\\
+Element Collecting Area 	&       44.1 &        $m^2$ 	\\
+Aperture Efficiency 		&       0.71 &            	\\
+Element Effective Area 		&       31.3 &        $m^2$ 	\\
+				&            &            	\\
 \hline
-BEST-2 &            &            \\
+BEST-2 Array Properties		&            &            	\\
 \hline
-Number of Cylinders &          8 &            \\
-Total Number of RX &         32 &            \\
-Total Collective Area &     1411.2 &        $m^2$ \\
-Total Effective Area &    1001.95 &        $m^2$ \\
-Sensitivity / Ant. gain &       0.36 &       K/Jy \\
-$A_{eff}/T_{sys}$ &      11.65 &      $m^2/K$ \\
-Antenna Temperature &         35 &          K \\
-Receiver Temperature &         51 &          K \\
-System Temperature  &         86 &          K \\
-           &            &            \\
+Number of Cylinders 		&          8 &            	\\
+Total Number of RX 		&         32 &            	\\
+Total Collective Area 		&     1411.2 &        $m^2$ 	\\
+Total Effective Area 		&    1001.95 &        $m^2$ 	\\
+Sensitivity / Ant. gain 	&       0.36 &       K/Jy 	\\
+$A_{eff}/T_{sys}$ 		&      11.65 &      $m^2/K$ 	\\
+Antenna Temperature 		&         35 &          K 	\\
+Receiver Temperature 		&         51 &          K 	\\
+System Temperature  		&         86 &          K 	\\
+				&            &            	\\
 \hline
-Longest Baseline &            &            \\
+Longest Baseline 		&            &            	\\
 \hline
-E-W &      17.04 &         m \\
-N-S &      70.00 &         m \\
-           &            &            \\
+E-W 				&      17.04 &         m 	\\
+N-S 				&      70.00 &         m 	\\
+				&            &            	\\
 \hline
-Bandpass        &           &       \\
+Bandpass        		&            &       		\\
 \hline
-Central Frequency &        408 &        MHz \\
-Analog Bandwidth &         16 &        MHz \\
-        &            &            \\
+Central Frequency 		&        408 &        MHz 	\\
+Analog Bandwidth 		&         16 &        MHz 	\\
+				&            &            	\\
 \hline
-Pointing Limits &            &            \\
+Pointing Limits 		&            &            	\\
 \hline
-Declination &    (0,+90) &        deg \\
-Right Ascension &    Local Meridian &  \\
-           &            &            \\
+Declination 			&    (0,+90) &        deg 	\\
+Right Ascension 		&    Local Meridian &  		\\
+				&            &            	\\
 \hline
-Primary Beam &          &           \\
+Primary Beam 			&            &           	\\
 \hline
-Primary Beam Size &      37.62 &      $\textrm{deg}^2$ \\
-Declination &        5.7 &        deg \\
-Right Ascension &        6.6 &        deg \\
-           &            &            \\
+Primary Beam Size 		&      37.62 & $\textrm{deg}^2$ \\
+Declination 			&        5.7 &        deg 	\\
+Right Ascension 		&        6.6 &        deg 	\\
+				&            &            	\\
 \hline
-PSF    &       &       \\
+PSF    				&            &       		\\
 \hline
-PSF FWHM &        0.9 &      $\textrm{deg}^2$ \\
-Declination &       0.52 &     deg \\
-Right ascension &        1.73 &     deg \\
-           &            &            \\
+PSF FWHM 			&        0.9 & $\textrm{deg}^2$ \\
+Declination 			&       0.52 &     deg 		\\
+Right ascension 		&       1.73 &     deg 		\\
+				&            &            	\\
 \hline
 \end{tabular}
-\caption{The North Cross array is a transitting array, a section of the North-South arm was upgraded in 2008 as BEST-2.}
+\caption{The top level specifications of the BEST-2 Array, a subset of the collecting area of the Northern Cross, located in Medicina, Italy.}
 \label{tbl:best2}
 \end{center}
 \end{table}
@@ -125,11 +134,12 @@ Right ascension &        1.73 &     deg \\
 \begin{figure}
     \centering
     \includegraphics[scale=0.6]{graphics/layout.png}
-    \caption{Each cylinder has 64 dipoles, 16 dipoles are analog beamformed to create four independent receivers.}
+    \caption{The 32 effective receiving elements of BEST-2, indicated by crosses, lie on a regular 4x8 grid. Each receiver is the analogue sum of 16 dipoles, critically spaced at 408MHz in the East-West direction.}
     \label{fig:ant_layout}
 \end{figure}
 
 \section{Instrument Design}
+\label{instrument design}
 
 An FX correlator and spatial FFT imager instrument have been built for BEST-2.
 Both instruments use the same digitization and channelization frontend.
@@ -154,31 +164,31 @@ Instrument design specifications are presented in table \ref{tbl:digital_specs},
 \hline
 \multicolumn{3}{|c|}{Digital Backend Specifications}\\
 \hline
-Digitizer/Channelizer (f-engine) & &\\
+Digitizer/Channelizer (F-Engine) & &\\
 \hline
-Bandwidth & 20 & MHz\\
-ADC Sampling & 12 & bit \\
-Antenna-polarizations & 32 & single pol \\
-PFB & 4 tap 2048 point & \\
-FFT & 2048 point & Radix-2 Biplex Real\\
-Quantization & 4 & bit\\
+ADC Sampling Rate	& 40 			& MHz\\
+ADC Sampling Precision	& 12 			& bit \\
+Antenna-polarizations 	& 32 			& single pol \\
+PFB 			& 4 tap FIR + 2048 point FFT	& Radix-2 Biplex Real FFT\\
+%FFT 			& 2048 point 		& Radix-2 Biplex Real\\
+Quantization 		& 4 			& bit\\
 & & \\
 \hline
-FX Correlator (x-engine) & &\\
+FX Correlator (X-Engine) & &\\
 \hline
-Auto Correlations & 32 & \\
-Cross Correlations & 496 & \\
-Minimum Integration Length & 6.55 & ms\\
-Output & 10 GbE & SPEAD protocol\\
+Auto Correlations 	& 32 			& \\
+Cross Correlations 	& 496 			& \\
+Minimum Integration Length & 6.55 		& ms\\
+Output 			& 10 GbE 		& SPEAD protocol\\
 & & \\
 \hline
-Spatial FFT Imager (s-engine) & &\\
+Spatial FFT Imager (S-Engine) & &\\
 \hline
-2D FFT & 8 x 16 & \\
-Beams & 128 & \\
-Minimum Integration Length & 1 & s\\
-Output & 1 GbE & SPEAD protocol\\
-Beamformer Output & 10 GbE & Up to 8 Beams\\
+2D FFT 			& 8 x 16 		& \\
+Beams 			& 128 			& \\
+Minimum Integration Length & 1 			& s\\
+Output 			& 1 GbE 		& SPEAD protocol\\
+Beamformer Output 	& 10 GbE 		& Up to 8 Beams\\
 & & \\
 \hline
 \end{tabular}
@@ -188,6 +198,7 @@ Beamformer Output & 10 GbE & Up to 8 Beams\\
 \end{table}
 
 \subsection{Digitization and Channelization}
+\label{channelization}
 
 Signal digitization is performed using the Texas Instruments ADS5272 8 channel, 12 bit ADC.
 The ADC board, developed by Rick Raffanti \citep{}, uses eight of these ADCs to channelize 64 streams at up to 65 Msps.
@@ -218,14 +229,14 @@ After data reordering each stream is sent over high speed XAUI at a rate of 5.12
 \hline
 \multicolumn{3}{|c|}{F-Engine ROACH Resource Utilization (Virtex 5 SX95T)}\\
 \hline
-ADC Clock & 40 MHz \\
-System Clock & 160 MHz & Demux:4 \\
-Slice Registers & 30217 / 58880 & $51\%$\\
-Look Up Tables & 24319 / 58880 & $41\%$\\
-BRAM (36kb) & 205 / 244 & $84\%$\\
-DSP48e (Multipliers) & 185 / 640 & $28\%$\\
-CX-4 Interface & 2 / 4 & 5.12 Gbps XAUI\\
-QDR Memory & 2 / 2 & Cornerturn\\
+ADC Clock 		& 40 MHz \\
+System Clock 		& 160 MHz 	& Demux:4 \\
+Slice Registers 	& 30217 / 58880 & $51\%$\\
+Look Up Tables 		& 24319 / 58880 & $41\%$\\
+BRAM (36kb) 		& 205 / 244 	& $84\%$\\
+DSP48e (Multipliers) 	& 185 / 640 	& $28\%$\\
+CX-4 Interface 		& 2 / 4 	& 5.12 Gbps XAUI\\
+QDR Memory 		& 2 / 2 	& Cornerturn\\
 \hline
 \end{tabular}
 \caption{DSP implementation of the 'f-engine'}
@@ -241,6 +252,7 @@ QDR Memory & 2 / 2 & Cornerturn\\
 \end{figure}
 
 \subsection{FX Correlator}
+\label{correlator}
 
 An FX correlator design is a standard design for large bandwidth and many antenna arrays.
 The F component represents the frequency channalization, and the X is a complex multiply and accumulate (CMAC).
@@ -307,9 +319,22 @@ QDR Memory & 2 / 2 & Vector Accumulator\\
 \end{figure}
 
 \subsection{Spatial FFT}
+\label{s-engine}
+ 
+When $N$ receiving elements in an antenna array are placed on a regularly spaced grid, a well known method for producing a complete set of orthogonal beams on the sky is the spatial fast fourier transform \citep{fastbeamforming}.
+Such a beamforming implementation will generate $N$ beams on the sky, with a computational cost of $O(N\log{N})$. For large arrays, where many beams are desired, this can be a significant computational saving, with the alternative, so-called \emph{DFT beamforming}, requiring $O(N)$ operations per synthesized beam.
+To date, the largest such astronomical implementation of such a spatial fast fourier transform beamformer is the 64 element dish array constructed in 1994 at Waseda University, Japan \citep{2dfft}.
 
-A spatial FFT imager is a novel instrument which takes advantage of the baseline redundancy in a regularly gridded array to reduce the correlator cost of an FX design $O(n^2)$ to a FFT cost of $O(n \log{n})$.
-Correlation of all antenna pairs in a regularly gridded array makes redundant measurements for many of the baselines.
+More recently, spatial FFT based processing has been revisited in the literature with an emphasis on the correlation matrix, rather than the collection of beams, as the mathematical object of interest \citep{fftt} \citep{omniscope}.
+In the method outlined by Tegmark \& Zaldarriaga, zero padding is applied to the matrix of antenna signals before the spatial FFT is performed, and as such, the complete set of visibilities for all unique baselines in the array can be obtained, post integration, by inverse fourier transform.
+Conversely, in the image plane, the zero-padding required by the prescribed algorithm results in the generation of $~2^{m}N$ beams on the sky and is dependent on the number of dimensions, $m$, in the antenna array.
+Regardless of potential downstream visibility domain processing, this oversampling of the sky by a factor $2^{m}$ has the benefit of increasing the instantabeous uniformity of sky coverage by synthesized beams, which somewhat aleviates the limitations associated with the inability to steer multiple beams independently.
+
+%A spatial FFT imager is a novel instrument which takes advantage of the baseline redundancy in a regularly gridded array to reduce the correlator cost of an FX design $O(n^2)$ to a FFT cost of $O(n \log{n})$.
+%Correlation of all antenna pairs in a regularly gridded array makes redundant measurements for many of the baselines.
+In the BEST-2 backend described here, the requirements on the spatial FFT processor were multifold. Firstly, the system should be capable of generating images on an $O(\mathrm{second})$ timescale, by the method descibed by \citep{fftt}. Further, the system should be capable of passing formed beams at full bandwidth, i.e. without any accumulation, to downstream time domain processing systems such as the real-time dedispersion engine \citep{dedispersion}. 
+
+
 This redundancy for the BEST-2 array is show in figure \ref{fig:redbl}.
 Instead of making individual correlations of the same baseline as in an FX correlator the correlation of the average of each baseline can be computed.
 This optimization realizes on the assumption that each redundant baseline measurement is indeed identical.
@@ -345,6 +370,7 @@ Individual beams can be selected out before accumulation and sent over 10 GbE in
 \end{figure}
 
 \section{Deployment and Initial Observations}
+\label{observations}
 
 Instrumentation was installed and tested over a two week period in April 2011.
 During that time a number of test signals were used to check the system status.
@@ -365,12 +391,14 @@ Long observations of the sky are under way to understand the system noise and ou
 During deep integration observations a cross talk issue covering part of the band has been discovered.
 
 \subsection{Calibration Methods}
+\label{calibration}
 
 The effective averaging of redundant baselines in the spatial FFT imager requires complex gain calibrations to be applied during observations.
 To derive gain coeffiecents a calibration method is applied to the FX correlator data.
 In initial observations the column ratio gain esimation method from \citep{gaindecomp} was used to compute a per channel, per antenna complex gain term.
 
 \subsection{FX Correlator Results}
+\label{fx results}
 
 The East-West FWHM beam size of an individual element is $6.6^{\circ}$ which translates to a 26 minute 'transit time' for an source.
 For the the bright A class sources this time can be extended since they remain the dominating source well after crossing the FWHM.
@@ -426,6 +454,7 @@ The flux scale on this source is off by a factor of approximately two because of
 \end{figure}
 
 \subsection{Spatial FFT Results}
+\label{sfft results}
 
 %calibrated/uncalibrated images
 
@@ -436,6 +465,7 @@ The flux scale on this source is off by a factor of approximately two because of
 %images
 
 \subsection{Crosstalk Effects}
+\label{crosstalk}
 
 A strong cross talk effect has been observed in the lower portion of the band.
 This has the effect of creating a strong correlation, constant correlation across a few Megahertz before the effect tapers off below current noise measurements.
@@ -462,44 +492,56 @@ Further testing is required to discover the route of this issue.
 \end{figure}
 
 \section{Discussion}
+\label{discussion}
 
 %what has been accomplished
 %further work on BEST-2: noise floor
 %further work: spatial FFT
 
-\newpage
-\begin{thebibliography}{9}
+\bibliography{refs}{}
+\bibliographystyle{mn2e}
 
-\bibitem[\protect\citeauthoryear{Boonstra}{2001}]{gaindecomp}
-A.J. Boonstra and A.J. Van der Veen,
-"Gain Decomposition Methods for Radio Telescope Arrays", 2001
-\emph{IEEE Workshop on Statistical Signal Processing (SSP)}, Singapore, August 2001
+%\newpage
+%\begin{thebibliography}{9}
+%
+%\bibitem[\protect\citeauthoryear{Boonstra}{2001}]{gaindecomp}
+%A.J. Boonstra and A.J. Van der Veen,
+%"Gain Decomposition Methods for Radio Telescope Arrays", 2001
+%\emph{IEEE Workshop on Statistical Signal Processing (SSP)}, Singapore, August 2001
+%
+%\bibitem[\protect\citeauthoryear{Montebugnoli}{2009}]{best2}
+%S. Montebugnoli, G. Bianchi, J. Monari, G. Naldi, F. Perini, and M. Schiaffino,
+%"BEST: Basic Element for SKA Training", 2009
+%\emph{SKADS Conference 2009: Widefield Science and Technology for the SKA}, p. 331-336
+%
+%\bibitem[\protect\citeauthoryear{Montebugnoli}{2009}]{best2-casper}
+%S. Montebugnoli, M. Bartolini, G. Bianchi, G. Naldi, J. Manley, and A. Parsons,
+%"BEST Back End", 2009
+%\emph{SKADS Conference 2009: Widefield Science and Technology for the SKA}, p. 355-358
+%
+%\bibitem[\protect\citeauthoryear{Otobe}{1994}]{2dfft}
+%E. Otobe, J. Nakajima, K. Nishibori, T. Saito, H. Kobayashi, N. Tanaka, N. Watanabe, Y. Aramaki, T. Hoshikawa, K. Asuma, and T. Daishido,
+%"Two-dimensional Direct Images with a Spatial FFT Interferometer", 1994,
+%\emph{PASJ}, Vol. 46, No. 5, p. 503-510
+%
+%\bibitem[\protect\citeauthoryear{Perini}{2009}]{best2-rec}
+%F. Perini, G. Bianchi, M. Schiaffino, and J. Monari,
+%"BEST Receiver Experience: General Architecture, Design and Integration", 2009
+%\emph{SKADS Conference 2009: Widefield Science and Technology for the SKA}, p. 351-354
+%
+%\bibitem[\protect\citeauthoryear{Perini}{2009}]{best2-lna}
+%F. Perini,
+%"Low Noise Design Experience for the SKADS/BEST Demonstrator", 2009
+%\emph{SKADS Conference 2009: Widefield Science and Technology for the SKA}, p. 341-345
+%
+%\bibitem[\protect\citeauthoryear{Parsons et al.}{2009}]{casper}
+%A. Parsons, D. Backer, C. Chang, D. Chapman, H. Chen, P. Crescini, C. de Jesus, C. Dick, P. Droz, D. MacMahon, K. Meder, J. Mock,
+%V. Nagpal, B. Nikolic, A. Parsa, B. Richards, A Siemion, J. Wawrzynek, D. Werthimer, M. Wright,
+%"PetaOp/Second FPGA Signal Processing for SETI and Radio Astronomy", 2006
+%\emph{Asilomar Conference on Signals and Systems, Pacific Grove, CA}, p. 2031-2035
+%
+%\end{thebibliography}
 
-\bibitem[\protect\citeauthoryear{Montebugnoli}{2009}]{best2}
-S. Montebugnoli, G. Bianchi, J. Monari, G. Naldi, F. Perini, and M. Schiaffino,
-"BEST: Basic Element for SKA Training", 2009
-\emph{SKADS Conference 2009: Widefield Science and Technology for the SKA}, p. 331-336
 
-\bibitem[\protect\citeauthoryear{Montebugnoli}{2009}]{best2-casper}
-S. Montebugnoli, M. Bartolini, G. Bianchi, G. Naldi, J. Manley, and A. Parsons,
-"BEST Back End", 2009
-\emph{SKADS Conference 2009: Widefield Science and Technology for the SKA}, p. 355-358
-
-\bibitem[\protect\citeauthoryear{Otobe}{1994}]{2dfft}
-E. Otobe, J. Nakajima, K. Nishibori, T. Saito, H. Kobayashi, N. Tanaka, N. Watanabe, Y. Aramaki, T. Hoshikawa, K. Asuma, and T. Daishido,
-"Two-dimensional Direct Images with a Spatial FFT Interferometer", 1994,
-\emph{PASJ}, Vol. 46, No. 5, p. 503-510
-
-\bibitem[\protect\citeauthoryear{Perini}{2009}]{best2-rec}
-F. Perini, G. Bianchi, M. Schiaffino, and J. Monari,
-"BEST Receiver Experience: General Architecture, Design and Integration", 2009
-\emph{SKADS Conference 2009: Widefield Science and Technology for the SKA}, p. 351-354
-
-\bibitem[\protect\citeauthoryear{Perini}{2009}]{best2-lna}
-F. Perini,
-"Low Noise Design Experience for the SKADS/BEST Demonstrator", 2009
-\emph{SKADS Conference 2009: Widefield Science and Technology for the SKA}, p. 341-345
-
-\end{thebibliography}
 
 \end{document}
