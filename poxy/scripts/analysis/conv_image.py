@@ -22,6 +22,15 @@ if __name__ == '__main__':
     else:
         h5fns = args
 
+eqrewire = {
+    0:0,   8:1,  16:2,  24:3,
+    4:4,  12:5,  20:6,  28:7,
+    1:8,   9:9,  17:10, 25:11,
+    5:12, 13:13, 21:14, 29:15,
+    2:16, 10:17, 18:18, 26:19,
+    6:20, 14:21, 22:22, 30:23,
+    3:24, 11:25, 19:26, 27:27,
+    7:28, 15:29, 23:30, 31:31  }
 n_files = len(h5fns)
 for N,fn in enumerate(h5fns):
     print '##### Processing file %s (File %d of %d) #####' %(fn,N+1,n_files)
@@ -33,6 +42,42 @@ for N,fn in enumerate(h5fns):
     print 'Copying attributes to new file'
     for a in fh.attrs.iteritems():
         new_fh.attrs.create(a[0], a[1])
+
+    #create EQ subgroup, rename EQs to single pol
+    eq_group=new_fh.create_group("EQ")
+    for ds in fh.iterkeys():
+        if ds.startswith('eq_amp_coeff'):
+            if ds.startswith('eq_amp_coeff_cal'):
+                prefix='eq_amp_coeff_cal_'
+            elif ds.startswith('eq_amp_coeff_bandpass'):
+                prefix='eq_amp_coeff_bandpass_'
+            elif ds.startswith('eq_amp_coeff_base'):
+                prefix='eq_amp_coeff_base_'
+            else:
+               prefix='eq_amp_coeff_'
+
+            ant=int(ds.split('_')[-1][:-1])
+            if ds[-1] == 'y': print "WHOA! Y-pol EQ value found in", ds
+            ant=eqrewire[ant]
+            new_key = prefix + '%ix'%ant
+            rv=eq_group.create_dataset(new_key, data=fh[ds])
+        elif ds.startswith('eq_phs_coeff'):
+            if ds.startswith('eq_phs_coeff_cal'):
+                prefix='eq_phs_coeff_cal_'
+            elif ds.startswith('eq_phs_coeff_bandpass'):
+                prefix='eq_phs_coeff_bandpass_'
+            elif ds.startswith('eq_phs_coeff_base'):
+                prefix='eq_phs_coeff_base_'
+            else:
+               prefix='eq_phs_coeff_'
+
+            ant=int(ds.split('_')[-1][:-1])
+            if ds[-1] == 'y': print "WHOA! Y-pol EQ value found in", ds
+            ant=eqrewire[ant]
+            new_key = prefix + '%ix'%ant
+            rv=eq_group.create_dataset(new_key, data=fh[ds])
+        elif ds.startswith('eq_amp'):
+            rv=eq_group.create_dataset(ds, data=fh[ds])
 
     print 'Getting image file parameters'
     n_ants = fh.attrs.get('n_ants')
