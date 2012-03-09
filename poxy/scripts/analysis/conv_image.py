@@ -117,12 +117,6 @@ for N,fn in enumerate(h5fns):
     new_fh.attrs['scale_factor_timestamp'] = 1.0
     new_fh.attrs['sync_time'] = 0.0
     
-    ##create EQ subgroup
-    #eq_group=new_fh.create_group("EQ")
-    #for ds in fh.iterkeys():
-    #    if ds.startswith('eq_amp'):
-    #        rv=eq_group.create_dataset(ds, data=fh[ds])
-
     #create an empty dataset to file in with corrected data
     nx = image_shape[0]//2
     ny = image_shape[1]//2
@@ -132,15 +126,37 @@ for N,fn in enumerate(h5fns):
     #Create a new dataset for baseline indices
 
     print 'Creating bl_order attribute...',
+    bl_matrix= n.zeros([2*nx, 2*ny,2])
+    for x in range(nx):
+        for y in range(ny):
+            # Fill the matrix, with the prefered reference values added last
+            # Fill bottom left corner of matrix
+            bl_matrix[nx-x][ny-y] = [-x,-y]
+            # Fill top right corner of matrix -- these are baselines relative to bottom left corner (ant 0)
+            bl_matrix[nx+x,ny+y] = [x,y]
+
+    #print bl_matrix
+
+    bl_matrix[bl_matrix[:,:,0]<0] = bl_matrix[bl_matrix[:,:,0]<0] + nx-1
+    bl_matrix[bl_matrix[:,:,1]<0] = bl_matrix[bl_matrix[:,:,1]<0] + ny-1
+
+    bl0 = ny*bl_matrix[nx:,ny:,0] + bl_matrix[nx:,ny:,1]     #top right 
+    bl1 = ny*bl_matrix[1:nx,1:ny,0] + bl_matrix[1:nx,1:ny,1] #bottom left
+
+    #print bl0
+    #print bl1
+
+    bl0 = bl0.reshape(n_ants)
+    bl1 = bl1.reshape((nx-1)*(ny-1))
+
+    #print bl0
+    #print bl1
+
     new_fh.create_dataset('bl_order', (n_bls,2), dtype=int)
-    bl_order_block = n.zeros([n_ants,2],dtype=int)
-    for i in range(n_ants):
-        bl_order_block[i] = [0,n_ants - (1+i//ny)*ny + i%ny]
-        #print 'appending', [0,n_ants - (1+i//ny)*ny + i%ny]
-    new_fh['bl_order'][0:n_ants] = bl_order_block
-    bl_order_block = bl_order_block + n.array([ny-1,0])
-    new_fh['bl_order'][n_ants:] = bl_order_block.reshape(nx,ny,2)[0:-1,0:-1].reshape((nx-1)*(ny-1),2) #add the top left block
-    #print bl_order_block.reshape(nx,ny,2)[0:-1,0:-1].reshape((nx-1)*(ny-1),2) #add the top left block
+    new_fh['bl_order'][0:n_ants,0] = 0
+    new_fh['bl_order'][0:n_ants,1] = bl0 #After the FFT the top right data will need conjugating
+    new_fh['bl_order'][n_ants:,0] = bl1  #After the FFT the bottom left data WON'T need conjugating
+    new_fh['bl_order'][n_ants:,1] = n_ants-1
     print 'done.'
 
     
@@ -164,8 +180,8 @@ for N,fn in enumerate(h5fns):
 
 
     fh.flush()
-    corr0 = n.conj(corr[:,-1::-1,1:nx+1,ny:,:]) #top right block #flip spectrum #conjugate (to match bl_order)
-    corr1 = n.conj(corr[:,-1::-1,1:nx,1:ny,:]) #top left block #flip spectrum #conjugate (to match bl_order)
+    corr0 = n.conj((corr[:,-1::-1,nx:,ny:,:])) #top right block #flip spectrum #conjugate (to match bl_order)
+    corr1 = corr[:,-1::-1,1:nx:,1:ny,:] #bottom left block #flip spectrum
     del(corr)
 
     #print corr[0,0,:,:,0].real
