@@ -6,7 +6,7 @@ the correlation matrix (with no redundant baselines)
 
 import numpy as n
 import math, time, h5py, sys
-#import pylab
+import pylab
 
 if __name__ == '__main__':
     from optparse import OptionParser
@@ -64,8 +64,13 @@ for N,fn in enumerate(h5fns):
     tv = fh['timestamp0'].value[:n_ts] #(don't remove first entry, since there seems to be the last entry missing)
     # Convert timestamps
     t_offset = fh.attrs.get('sync_time')
-    t_scale_factor = float(fh.attrs.get('adc_clk')/2/fh.attrs.get('seng_acc_len'))
+    #t_scale_factor = float(fh.attrs.get('adc_clk')/2/fh.attrs.get('seng_acc_len'))
+    t_scale_factor = fh.attrs.get('scale_factor_timestamp')
     new_fh.create_dataset('timestamp0', data=(t_offset+tv/t_scale_factor))
+    #Since we now have unix times -- set the offset to 0, and scale factor to 1 in the new file.
+    #This way, if any future scripts try and convert the times to unix, they will not mess them up
+    new_fh.attrs['scale_factor_timestamp'] = 1.0
+    new_fh.attrs['sync_time'] = 0.0
     
     ##create EQ subgroup
     #eq_group=new_fh.create_group("EQ")
@@ -98,6 +103,21 @@ for N,fn in enumerate(h5fns):
     # Get the unique baselines, and cut off the extra correlations from overpadding with zeros in the hardware spatial fft
     print 'Performing iFFT on data'
     corr = n.fft.fftshift(n.fft.ifft2(fh['seng_raw0'], axes=(2,3)),axes=(2,3))
+    #pylab.figure()
+    #pylab.subplot(2,2,1)
+    #pylab.pcolor(n.abs(corr[450,600,:,:,0]))
+    #pylab.colorbar()
+    #pylab.subplot(2,2,2)
+    #pylab.pcolor(n.angle(corr[450,600,:,:,0]))
+    #pylab.colorbar()
+    #pylab.subplot(2,2,3)
+    #pylab.pcolor(n.real(corr[450,600,:,:,0]))
+    #pylab.colorbar()
+    #pylab.subplot(2,2,4)
+    #pylab.pcolor(n.imag(corr[450,600,:,:,0]))
+    #pylab.colorbar()
+
+
     fh.flush()
     corr0 = n.conj(corr[:,-1::-1,1:nx+1,ny:,:]) #top right block #flip spectrum #conjugate (to match bl_order)
     corr1 = n.conj(corr[:,-1::-1,1:nx,1:ny,:]) #top left block #flip spectrum #conjugate (to match bl_order)
@@ -115,10 +135,12 @@ for N,fn in enumerate(h5fns):
     corr1 = corr1.reshape((n_ts,n_chans,(nx-1)*(ny-1),n_stokes))
 
     print 'Updating output file'
-    new_fh['xeng_raw0'][:,:,0:n_ants,:,0] = corr0.real
-    new_fh['xeng_raw0'][:,:,0:n_ants,:,1] = corr0.imag
-    new_fh['xeng_raw0'][:,:,n_ants:n_ants+((nx-1)*(ny-1)),:,0] = corr1.real
-    new_fh['xeng_raw0'][:,:,n_ants:n_ants+((nx-1)*(ny-1)),:,1] = corr1.imag
+    # 0 Imag!!!
+    # 1 Real (seriously, who does that)
+    new_fh['xeng_raw0'][:,:,0:n_ants,:,1] = corr0.real
+    new_fh['xeng_raw0'][:,:,0:n_ants,:,0] = corr0.imag
+    new_fh['xeng_raw0'][:,:,n_ants:n_ants+((nx-1)*(ny-1)),:,1] = corr1.real
+    new_fh['xeng_raw0'][:,:,n_ants:n_ants+((nx-1)*(ny-1)),:,0] = corr1.imag
     
     ##convert data to floats and divide by the number of correlator accumulations
     #acc=n.array(acc,dtype=float)
@@ -128,3 +150,4 @@ for N,fn in enumerate(h5fns):
     fh.close()
     new_fh.close()
 
+    #pylab.show()
