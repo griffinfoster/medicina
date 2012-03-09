@@ -18,10 +18,6 @@ if __name__ == '__main__':
             help='Print lots of lovely debug information')
     p.add_option('-c', '--closed_loop', dest='closed_loop',action='store_true', default=False,
             help='Use this flag to modify (by multiplication), rather than replace, the current calibration coefficient set')
-    p.add_option('-e', '--load_eq', dest='load_eq',action='store_false', default=True,
-            help='By default the script will replace the current EQ with the EQ used for generating the calibration. Use this flag if you don\'t want this to happen, but beware, your amplitude calibration may then be off')
-    p.add_option('-n', '--norm_cal', dest='norm_cal',action='store_true', default=False,
-            help='Multiple the amplitude calibration by the EQ settings from the calibration file. This effectively results in a calibration set which is valid whenever the EQ settings are uniform across all channels/ants. You are then free to apply a new set of eq coefficients, but these must be \'undone\' before any beam processing')
 
     opts, args = p.parse_args(sys.argv[1:])
 
@@ -47,14 +43,6 @@ if __name__ == '__main__':
     f.close()
 
     
-    #print 'Bundling old calibration into new coefficient set'
-    #g = g*n.transpose(eq_cal)
-    
-    if opts.norm_cal:
-        print "Multiplying calibration by EQ set, to create EQ independent calibration values"
-        print "You *MUST* use either uniform EQ values, or use a pair of EQ, 1/EQ sets for this calibration set to be correct"
-        g = g*n.transpose(eq_base) #eq is nants x nchans, g is nchans x n_ants
-
     # The correlator does not order antennas in the same way as the
     # F-engine, so remap them here...
     ant_remap = [0, 8,16,24,4,12,20,28,
@@ -83,12 +71,6 @@ if __name__ == '__main__':
         #amp_coeffs = n.ones_like(amp_coeffs)
         feng.eq_phs.coeff['cal'].modify_coeffs(ant,0,phase_coeffs[::-1],closed_loop=opts.closed_loop, verbose=opts.verbose) #Reverse coeffs because medicina spectrum is inverted
         feng.eq_amp.coeff['cal'].modify_coeffs(ant,0,amp_coeffs[::-1],closed_loop=opts.closed_loop, verbose=opts.verbose) #Reverse coeffs because medicina spectrum is inverted
-        if opts.load_eq:
-            print 'Loading EQ...'
-            if opts.norm_cal:
-                print '!!!!!!!!!!!!!!!!! DID YOU *REALLY* WANT TO DO THIS? !!!!!!!!!!!!!!!!!!'
-            print 'Modifying eq coefficients for antenna %d' %ant
-            feng.eq_amp.coeff['base'].modify_coeffs(ant,0,eq_coeffs[::-1],closed_loop=False, verbose=opts.verbose) #Reverse coeffs because medicina spectrum is inverted
 
     print ' Writing phase coefficients...',
     feng.eq_write_all_phs(verbose=opts.verbose, use_base=True, use_bandpass=True, use_cal=True)
