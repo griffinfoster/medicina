@@ -239,6 +239,9 @@ for iter_n in range(Niter):
 
 
 test_chan=opts.plot_chan #For plotting
+pylab.figure(3)
+pylab.title("Phase Corrections in channel %d, vs antenna"%test_chan)
+pylab.plot(n.angle(g[test_chan,:]))
 
 pylab.figure(0)
 pylab.subplot(2,2,1)
