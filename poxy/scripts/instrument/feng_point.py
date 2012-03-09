@@ -63,13 +63,13 @@ if __name__ == '__main__':
     zenith = array_lat*n.pi/180. #in radians
     point_dir = zenith-dec #pointing direction relative to zenith with 0 = zenith
     if opts.verbose:
-        print 'zenith',zenith
-        print 'pointing dec', dec
+        print 'zenith',zenith*180./n.pi
+        print 'pointing dec', dec*180./n.pi
         print 'pointing direction (degrees):', point_dir*180./n.pi
     trig_factor = n.sin(point_dir)
     if opts.verbose:
         print 'trig factor', trig_factor
-    ant_pos_unit = 3e8/408e6 #Wavelengths at 408MHz //TODO: dehardcode this
+    ant_pos_unit = 299792458./408e6 #Wavelengths at 408MHz //TODO: dehardcode this
 
     for ant in range(array.n_ants):
         x,y,z = array.loc(ant)
@@ -85,7 +85,7 @@ if __name__ == '__main__':
     df = bw/n_chans
 
     freqs = n.arange(start_f,start_f+bw,df)
-    wavelengths = 3e8/freqs
+    wavelengths = 299792458./freqs
     for ant in range(array.n_ants):
         phases = -2*n.pi*path_diff_by_chan[ant]/wavelengths #negative, since we want to compensate for the path differences
         coeffs = n.cos(phases)+n.sin(phases)*1j
