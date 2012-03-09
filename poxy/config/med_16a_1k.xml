@@ -38,40 +38,40 @@
             -->
 
             <eq_poly id="0" pol="x">200</eq_poly>
-            <eq_poly id="0" pol="y">200</eq_poly>
             <eq_poly id="1" pol="x">200</eq_poly>
-            <eq_poly id="1" pol="y">200</eq_poly>
             <eq_poly id="2" pol="x">200</eq_poly>
-            <eq_poly id="2" pol="y">200</eq_poly>
             <eq_poly id="3" pol="x">200</eq_poly>
-            <eq_poly id="3" pol="y">200</eq_poly>
-            
             <eq_poly id="4" pol="x">200</eq_poly>
-            <eq_poly id="4" pol="y">200</eq_poly>
             <eq_poly id="5" pol="x">200</eq_poly>
-            <eq_poly id="5" pol="y">200</eq_poly>
             <eq_poly id="6" pol="x">200</eq_poly>
-            <eq_poly id="6" pol="y">200</eq_poly>
             <eq_poly id="7" pol="x">200</eq_poly>
-            <eq_poly id="7" pol="y">200</eq_poly>
             
             <eq_poly id="8" pol="x">200</eq_poly>
-            <eq_poly id="8" pol="y">200</eq_poly>
             <eq_poly id="9" pol="x">200</eq_poly>
-            <eq_poly id="9" pol="y">200</eq_poly>
             <eq_poly id="10" pol="x">200</eq_poly>
-            <eq_poly id="10" pol="y">200</eq_poly>
             <eq_poly id="11" pol="x">200</eq_poly>
-            <eq_poly id="11" pol="y">200</eq_poly>
-            
             <eq_poly id="12" pol="x">200</eq_poly>
-            <eq_poly id="12" pol="y">200</eq_poly>
             <eq_poly id="13" pol="x">200</eq_poly>
-            <eq_poly id="13" pol="y">200</eq_poly><!--xtalk input-->
             <eq_poly id="14" pol="x">200</eq_poly>
-            <eq_poly id="14" pol="y">200</eq_poly>
             <eq_poly id="15" pol="x">200</eq_poly>
-            <eq_poly id="15" pol="y">200</eq_poly>
+            
+            <eq_poly id="16" pol="x">200</eq_poly>
+            <eq_poly id="17" pol="x">200</eq_poly>
+            <eq_poly id="18" pol="x">200</eq_poly>
+            <eq_poly id="19" pol="x">200</eq_poly>
+            <eq_poly id="20" pol="x">200</eq_poly>
+            <eq_poly id="21" pol="x">200</eq_poly>
+            <eq_poly id="22" pol="x">200</eq_poly>
+            <eq_poly id="23" pol="x">200</eq_poly>
+            
+            <eq_poly id="24" pol="x">200</eq_poly>
+            <eq_poly id="25" pol="x">200</eq_poly>
+            <eq_poly id="26" pol="x">200</eq_poly>
+            <eq_poly id="27" pol="x">200</eq_poly>
+            <eq_poly id="28" pol="x">200</eq_poly>
+            <eq_poly id="29" pol="x">200</eq_poly>
+            <eq_poly id="30" pol="x">200</eq_poly>
+            <eq_poly id="31" pol="x">200</eq_poly>
 
             <eq_coeff id="5" pol="x">
                 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
@@ -246,7 +246,7 @@
         <s_per_fpga>1</s_per_fpga> <!-- number of s-engine blocks per FPGA-->
         <x_fft_shift>0b111</x_fft_shift> <!-- FFT shifting schedule for first spatial FFT-->
         <y_fft_shift>0b1111</y_fft_shift> <!-- FFT shifting schedule for second spatial FFT-->
-        <acc_scale>32</acc_scale> <!--Scaling factor by which to scale 'image' before accumulating-->
+        <acc_scale>64</acc_scale> <!--Scaling factor by which to scale 'image' before accumulating-->
         <int_acc_len>128</int_acc_len> <!-- Integration length before QDR-->
         <acc_len>512</acc_len> <!-- Number of vectors to accumulate in QDR-->
         <bits>4</bits> <!-- number of quantization bits-->
