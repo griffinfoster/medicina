@@ -18,6 +18,8 @@ if __name__ == '__main__':
         help='Target declination of central beam in degrees. Default = 0.0')
     o.add_option('-r', '--ra', dest='ra', default=0.0, type='float',
         help='RA correction in degrees. Default = 0.0')
+    o.add_option('-u', '--undo', dest='undo', default=False, action='store_true',
+        help='Use this flag to phase back to zenith, from a source at ra,dec.')
     opts, args = o.parse_args(sys.argv[1:])
     if len(args)<2:
         print 'Please specify an array xml file and an hdf5 file! \nExiting.'
@@ -101,6 +103,9 @@ phase_weights = n.transpose(phase_weights, axes=(2,0,1)).reshape(n_chans, 2*ants
 pylab.pcolor(n.angle(phase_weights[600,:,:,0]))
 pylab.colorbar()
 print 'done'
+
+if opts.undo:
+    phase_weights = -phase_weights
 
 n_files = len(h5fns)
 for N,fn in enumerate(h5fns):
