@@ -130,33 +130,34 @@ for N,fn in enumerate(h5fns):
     for x in range(nx):
         for y in range(ny):
             # Fill the matrix, with the prefered reference values added last
-            # Fill bottom left corner of matrix
-            bl_matrix[nx-x][ny-y] = [-x,-y]
+            # Fill top left corner of matrix
+            bl_matrix[nx+x,ny-y] = [x,ny-1-y]
             # Fill top right corner of matrix -- these are baselines relative to bottom left corner (ant 0)
             bl_matrix[nx+x,ny+y] = [x,y]
 
+    print bl_matrix
+
+    #bl_matrix[bl_matrix[:,:,0]<0] = bl_matrix[bl_matrix[:,:,0]<0] + nx-1
+    #bl_matrix[bl_matrix[:,:,1]<0] = bl_matrix[bl_matrix[:,:,1]<0] + ny-1
     #print bl_matrix
 
-    bl_matrix[bl_matrix[:,:,0]<0] = bl_matrix[bl_matrix[:,:,0]<0] + nx-1
-    bl_matrix[bl_matrix[:,:,1]<0] = bl_matrix[bl_matrix[:,:,1]<0] + ny-1
+    bl0 = ny*bl_matrix[nx:,ny:,0] + bl_matrix[nx:,ny:,1]       #top right 
+    bl1 = ny*bl_matrix[nx+1:,1:ny,0] + bl_matrix[nx+1:,1:ny,1] #top left
 
-    bl0 = ny*bl_matrix[nx:,ny:,0] + bl_matrix[nx:,ny:,1]     #top right 
-    bl1 = ny*bl_matrix[1:nx,1:ny,0] + bl_matrix[1:nx,1:ny,1] #bottom left
-
-    #print bl0
-    #print bl1
+    print bl0
+    print bl1
 
     bl0 = bl0.reshape(n_ants)
     bl1 = bl1.reshape((nx-1)*(ny-1))
 
-    #print bl0
-    #print bl1
+    print bl0
+    print bl1
 
     new_fh.create_dataset('bl_order', (n_bls,2), dtype=int)
     new_fh['bl_order'][0:n_ants,0] = 0
-    new_fh['bl_order'][0:n_ants,1] = bl0 #After the FFT the top right data will need conjugating
-    new_fh['bl_order'][n_ants:,0] = bl1  #After the FFT the bottom left data WON'T need conjugating
-    new_fh['bl_order'][n_ants:,1] = n_ants-1
+    new_fh['bl_order'][0:n_ants,1] = bl0  #After the FFT the top right data will need conjugating
+    new_fh['bl_order'][n_ants:,0] = ny-1  #After the FFT the bottom left data Will need conjugating
+    new_fh['bl_order'][n_ants:,1] = bl1
     print 'done.'
 
     
@@ -180,8 +181,8 @@ for N,fn in enumerate(h5fns):
 
 
     fh.flush()
-    corr0 = n.conj((corr[:,-1::-1,nx:,ny:,:])) #top right block #flip spectrum #conjugate (to match bl_order)
-    corr1 = corr[:,-1::-1,1:nx:,1:ny,:] #bottom left block #flip spectrum
+    corr0 = n.conj(corr[:,-1::-1,nx:,ny:,:])    #top right block #flip spectrum #conjugate (to match bl_order)
+    corr1 = n.conj(corr[:,-1::-1,nx+1:,1:ny,:]) #top left block #flip spectrum #conjugate
     del(corr)
 
     #print corr[0,0,:,:,0].real
