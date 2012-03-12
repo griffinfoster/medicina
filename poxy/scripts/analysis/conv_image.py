@@ -135,7 +135,7 @@ for N,fn in enumerate(h5fns):
             # Fill top right corner of matrix -- these are baselines relative to bottom left corner (ant 0)
             bl_matrix[nx+x,ny+y] = [x,y]
 
-    print bl_matrix
+    #print bl_matrix
 
     #bl_matrix[bl_matrix[:,:,0]<0] = bl_matrix[bl_matrix[:,:,0]<0] + nx-1
     #bl_matrix[bl_matrix[:,:,1]<0] = bl_matrix[bl_matrix[:,:,1]<0] + ny-1
@@ -144,14 +144,14 @@ for N,fn in enumerate(h5fns):
     bl0 = ny*bl_matrix[nx:,ny:,0] + bl_matrix[nx:,ny:,1]       #top right 
     bl1 = ny*bl_matrix[nx+1:,1:ny,0] + bl_matrix[nx+1:,1:ny,1] #top left
 
-    print bl0
-    print bl1
+    #print bl0
+    #print bl1
 
     bl0 = bl0.reshape(n_ants)
     bl1 = bl1.reshape((nx-1)*(ny-1))
 
-    print bl0
-    print bl1
+    #print bl0
+    #print bl1
 
     new_fh.create_dataset('bl_order', (n_bls,2), dtype=int)
     new_fh['bl_order'][0:n_ants,0] = 0
