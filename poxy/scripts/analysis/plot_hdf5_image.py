@@ -145,7 +145,11 @@ def gen_ha_axis(timestamps,scale,offset,RA):
     ha = numpy.unwrap(ha)
     ha = numpy.rad2deg(ha)
     ha = ha + opts.ha_fudge
-    return {'times':ha, 'scale':"Hour Angle", 'ref':RA, 'gmtref':gmt_ref, 'jd_ref':jd_ref, 'unit':'[degrees]'}
+    if RA == 0:
+        scale = 'Local Sidereal Time'
+    else:
+        scale = 'Hour Angle'
+    return {'times':ha, 'scale':scale, 'ref':RA, 'gmtref':gmt_ref, 'jd_ref':jd_ref, 'unit':''}
 
 n_files = len(fnames)
 for fi, fname in enumerate(fnames):
@@ -156,11 +160,16 @@ for fi, fname in enumerate(fnames):
     else: time_index = convert_arg_range(opts.time)
     if fi==0:
         # Generate the ephem Observer from the location of the observatory in the file
-        print 'Telescope: %s' %get_attr(fh,'telescope')
-        print 'Source: %s' %get_attr(fh,'source')
-        if opts.time_scale=='ha':
+        try: telescope = get_attr(fh,'telescope')
+        except: telescope = 'MEDICINA'
+
+        try: source = get_attr(fh,'source')
+        except: source = None
+        print 'Telescope: %s' %telescope
+        print 'Source: %s' %source
+        if opts.time_scale=='ha' or opts.time_scale=='lst':
             #if we are plotting hour angles we need to know where the observatory is
-            obs = gen_obs(telescope=get_attr(fh,'telescope'))
+            obs = gen_obs(telescope=telescope)
         if opts.chan_index == 'all': chan_index = range(0,get_attr(fh,'n_chans'))
         else: chan_index = convert_arg_range(opts.chan_index)
         # Can only use one vector as an index at a time
@@ -194,8 +203,10 @@ for fi, fname in enumerate(fnames):
         scale_factor = float(get_attr(fh,'adc_clk')/2/get_attr(fh,'seng_acc_len'))
         if opts.time_scale == 'time':
             t = gen_time_axis(t,scale_factor,get_attr(fh,'sync_time'))
-        else:
+        elif opts.time_scale == 'ha':
             t = gen_ha_axis(t,scale_factor,get_attr(fh,'sync_time'),ephem.hours('23:23:26.0'))
+        else: 
+            t = gen_ha_axis(t,scale_factor,get_attr(fh,'sync_time'),0.0)
     fh.close()
 
 
@@ -304,7 +315,19 @@ else:
                     pylab.plot(di[0],label=label)
                 if not opts.share and opts.legend:
                     pylab.legend()
-    
+  
+            # Set the x axis to be hours/mins/secs
+            if opts.time_scale == 'ha' or 'lst':
+                #plot ha every degree
+                xticks_loc, xticks_labels = pylab.xticks()
+                xticks_labels = []
+                for x in xticks_loc:
+                    ra_hours = '%s' %ephem.hours(numpy.deg2rad(x))
+                    hours, mins, secs = map(float,ra_hours.split(':'))
+                    xticks_labels.append('$%d^{\mathrm{h}} %d^{\mathrm{m}} %d^{\mathrm{s}}$' %(hours,mins,secs))
+            pylab.xticks(xticks_loc, xticks_labels)
+
+  
             if not opts.share:
                 if not plot_waterfall:
                     pylab.ylim(dmin,dmax)
