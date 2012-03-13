@@ -15,6 +15,7 @@ class Array:
         self.ants=self.config.antennas.ant
         self.ref_ant=self.config.antennas.reference
         self.receiver = self.config.receiver
+        self.grid = self.config.grid
 
     def loc(self,ant_index):
         '''Return the location of an antenna element in list format'''

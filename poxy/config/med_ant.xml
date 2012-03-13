@@ -5,6 +5,11 @@
         <center_freq>0.408</center_freq><!-- Center frequency in GHz -->
     </receiver>
 
+    <grid>
+        <x_spacing>8.0</x_spacing>
+        <y_spacing>13.609415</y_spacing>
+    </grid>
+
     <antennas>
         <reference>
             <position>
