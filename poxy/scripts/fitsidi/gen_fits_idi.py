@@ -237,6 +237,8 @@ def config_uv_data(h5fh, tbl_uv_data, antpos, obs, src, ti, verbose=False):
  
     if verbose: print('Creating baseline IDs...')
     bl_order = h5fh['bl_order'].value
+    #WARNING: hardcore the antenna position frequency (GHz)
+    cfreq=.408
     for bl in range(0,bl_len):
         # Baseline is in stupid 256*baseline1 + baseline2 format
         ant1, ant2 = bl_order[bl][0], bl_order[bl][1] 
@@ -246,7 +248,8 @@ def config_uv_data(h5fh, tbl_uv_data, antpos, obs, src, ti, verbose=False):
         # From CASA measurement set definition
         # uvw coordinates for the baseline from ANTENNE2 to ANTENNA1, 
         # i.e. the baseline is equal to the difference POSITION2 - POSITION1. 
-        bl_vector = antpos[ant2] - antpos[ant1]
+        bl_vector = (antpos[ant2] - antpos[ant1])*cfreq
+        #print bl_vector, antpos[ant2], antpos[ant1]
         baselines.append((bl_id,bl_vector))  
       
     if verbose: print('Computing UVW coordinates...\n')
@@ -288,9 +291,9 @@ def config_uv_data(h5fh, tbl_uv_data, antpos, obs, src, ti, verbose=False):
     for t in range(0,len(ti)):
         if verbose: print('processing time sample set %i/%i'%(t+1,len(ti)))
         # The time is seconds since midnight
-        tbl_uv_data.data['TIME'][t*bl_len:(t+1)*bl_len]     = np.ones(bl_len)*elapsed[t]
-        tbl_uv_data.data['DATE'][t*bl_len:(t+1)*bl_len]     = julian_midnight
-        tbl_uv_data.data['INTTIM'][t*bl_len:(t+1)*bl_len]   = np.ones(bl_len)*int_time
+        tbl_uv_data.data['TIME'][t*bl_len:(t+1)*bl_len] = np.ones(bl_len)*elapsed[t]
+        tbl_uv_data.data['DATE'][t*bl_len:(t+1)*bl_len] = julian_midnight
+        tbl_uv_data.data['INTTIM'][t*bl_len:(t+1)*bl_len] = np.ones(bl_len)*int_time
         #tbl_uv_data.data['SOURCE'][t*bl_len:(t+1)*bl_len]= np.ones(bl_len,dtype=np.int32)*1
         tbl_uv_data.data['SOURCE_ID'][t*bl_len:(t+1)*bl_len]= np.ones(bl_len,dtype=np.int32)*1
         tbl_uv_data.data['FREQID'][t*bl_len:(t+1)*bl_len]   = np.ones(bl_len,dtype=np.int32)*1
@@ -489,7 +492,7 @@ if __name__ == '__main__':
             print('Generating blank UV_DATA rows...')
         
         if opts.time_index == 'all':
-            time_index=range(fh['timestamp0'].len())
+            time_index=range(h5fh['timestamp0'].len())
         else: time_index = convert_arg_range(opts.time_index)
         tbl_uv_data = make_uv_data(config=opts.config, num_rows=len(time_index)*bl_len, n_chans=n_chans)
         uv_cmn = cmn

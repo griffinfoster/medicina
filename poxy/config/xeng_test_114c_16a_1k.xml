@@ -203,7 +203,8 @@
 
     <xengine id='0' name="x" port='7147'>
         <!--<bitstream>xeng_hdl.bof</bitstream> --><!-- hdl xengine - in testing -->
-        <bitstream>med_16a_2x_r113c_2011_Mar_31_1159.bof</bitstream> <!-- sw reg for mux idle time-->
+        <!--<bitstream>med_16a_2x_r113c_2011_Mar_31_1159.bof</bitstream>--> <!-- sw reg for mux idle time-->
+        <bitstream>med_16a_2x_r114c_2012_Feb_08_1052.bof</bitstream> <!-- sw reg for mux idle time-->
         <!--<bitstream>med_16a_2x_r113a_2011_Mar_23_1358.bof</bitstream>--> <!-- use for > 1 second integrations-->
         <!--<bitstream>med_16a_2x_r113b_2011_Mar_23_1703.bof</bitstream>--> <!-- use for < 1 second integrations-->
         <clk>200000000</clk> <!-- clk rate in Hz-->
@@ -234,8 +235,8 @@
     </xengine>
 
     <sengine id='0' name="s" port='7147'>
-        <bitstream>seng_latest3.bof</bitstream>
-        <clk>180000000</clk> <!-- clk rate in Hz-->
+        <bitstream>seng_latest2.bof</bitstream>
+        <clk>205000000</clk> <!-- clk rate in Hz-->
         <n_ants>32</n_ants> <!-- Number of antennas processed -->
         <grid>
             <x_dim>4</x_dim> <!-- size of grid in x dimension -->
@@ -246,9 +247,7 @@
         <s_per_fpga>1</s_per_fpga> <!-- number of s-engine blocks per FPGA-->
         <x_fft_shift>0b111</x_fft_shift> <!-- FFT shifting schedule for first spatial FFT-->
         <y_fft_shift>0b1111</y_fft_shift> <!-- FFT shifting schedule for second spatial FFT-->
-        <!-- acc scale: 1 gaurantees no overflow. 2^(16-N) where N is 16-log2(qdr_acc_len) should
-             not be able to overflow -->
-        <acc_scale>4096</acc_scale> <!--Scaling factor by which to scale 'image' before accumulating-->
+        <acc_scale>64</acc_scale> <!--Scaling factor by which to scale 'image' before accumulating-->
         <int_acc_len>128</int_acc_len> <!-- Integration length before QDR-->
         <acc_len>512</acc_len> <!-- Number of vectors to accumulate in QDR-->
         <bits>4</bits> <!-- number of quantization bits-->
@@ -264,8 +263,8 @@
             <packet_size>4096</packet_size>
             <samples_per_block>128</samples_per_block>
             <bytes_per_sample>4</bytes_per_sample>
-            <start_chan>200</start_chan> <!--THIS SHOULD BE IN INCREMENTS OF CHANS/PACKET, CURRENTLY 8-->
-            <end_chan>711</end_chan>  <!--THIS SHOULD BE IN INCREMENTS OF (N_CHANS-1) - CHANS/PACKET-->
+            <start_chan>0</start_chan> <!--THIS SHOULD BE IN INCREMENTS OF CHANS/PACKET, CURRENTLY 8-->
+            <end_chan>1023</end_chan>  <!--THIS SHOULD BE IN INCREMENTS OF (N_CHANS-1) - CHANS/PACKET-->
             <!--The IP and MAC below are required by the medicina system. They can be generated for a given roach and port
              using the medroach.utils.get_port_params(roach_hostname, 10gbe_port). These must be changed if the roach
              being used changes, otherwise address clashes will occur on the network-->

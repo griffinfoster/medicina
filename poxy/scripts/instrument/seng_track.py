@@ -21,6 +21,18 @@ def rotate_about_x(theta,x):
     M = np.array([[1,0,0],[0, np.cos(theta), -np.sin(theta)], [0, np.sin(theta), np.cos(theta)]])
     return np.dot(M,x)
 
+def plot_centres(x_centres,y_centres,x_chosen,y_chosen):
+    # plot the positions of the beam centres
+    for xn,x_beam in enumerate(x_centres_pc):
+        for yn,y_beam in enumerate(y_centres_pc):
+            if xn==x_chosen and yn==y_chosen:
+                pylab.scatter(np.rad2deg(x_beam),np.rad2deg(y_beam), c='b', marker='o', label=None)
+            else:
+                pylab.scatter(np.rad2deg(x_beam),np.rad2deg(y_beam), c='r', marker='o', label=None)
+
+def plot_src(src_pos_list, name=None):
+    pylab.scatter(np.rad2deg(src_pos_list[:,0]), np.rad2deg(src_pos_list[:,1]), s=80, c='g', marker=(6,1,0), label=name)
+
 if __name__ == '__main__':
     from optparse import OptionParser
 
@@ -105,6 +117,9 @@ if __name__ == '__main__':
     dx = array.grid.x_spacing
     dy = array.grid.y_spacing*array_proj_factor #The grid must be projected to the relevant dec
 
+    x_spacing = 2*np.pi/k/dx/float(beams_x)
+    y_spacing = 2*np.pi/k/dy/float(beams_y)
+
     # Calculate the centres of the beams in sin(theta) space
     x_centres = np.arange(beams_x,dtype=float)*2*np.pi/k/dx/float(beams_x)
     y_centres = np.arange(beams_y,dtype=float)*2*np.pi/k/dy/float(beams_y)
@@ -127,6 +142,11 @@ if __name__ == '__main__':
     beam_remap_x[beams_x//2 + 1 :] = np.arange(beams_x//2, beams_x)
     beam_remap_y[0:beams_y//2 + 1] = np.arange(beams_y//2 + 1)
     beam_remap_y[beams_y//2 + 1 :] = np.arange(beams_y//2, beams_y)
+
+    pylab.hold(True)
+    pylab.ion()
+    plot_centres(x_centres_pc,y_centres_pc,0,0)
+    pylab.draw()
 
     if opts.verbose:
         print 'X pointing centres (relative to pointing centre)'
@@ -157,6 +177,11 @@ if __name__ == '__main__':
             src.compute(obs)
             print src.name, src.ra, src.dec
 
+    history_len = 1024
+    source_history = np.zeros([history_len,2])
+    history_timestamps = np.zeros(history_len)
+    history_index = 0
+    history_initialised = 0
     while(True):
         try:
             for sn,src in enumerate(srcs): 
@@ -166,7 +191,7 @@ if __name__ == '__main__':
                 if opts.verbose:
                     print 'Local Sidereal Time:', obs.sidereal_time()
                 
-                obs.sidereal_time()
+                lst = obs.sidereal_time()
                 src.compute(obs) 
 
                 src_alt_offset = point_zen_dist - (np.pi/2 - src.alt)
@@ -188,6 +213,15 @@ if __name__ == '__main__':
                 x_rot = -x_rot # X-axis points East, but beam offsets increase westwards
                 y_rot = -y_rot # Y-axis points towards increasing dec, but beam offsets increment in negative dec direction
 
+                # record position for plotting
+                if history_initialised == 0:
+                    history_timestamps[:] = lst
+                    source_history[:] = [x_rot,y_rot]
+                    history_initialised = 1
+
+                source_history[history_index] = [x_rot,y_rot]
+                history_timestamps[history_index] = lst
+
 
                 if opts.verbose:
                     print "%s: Altitude: %.3f\tN/S offset from pointing centre %.3f"%(src.name,np.rad2deg(src.alt),np.rad2deg(src_alt_offset))
@@ -196,14 +230,28 @@ if __name__ == '__main__':
                 if opts.verbose:
                     print '%s: x,y distance from point centre is %.3f, %.3f' %(src.name, np.rad2deg(x_rot),np.rad2deg(y_rot))
 
-                nearest_x_beam = beam_remap_x[np.argmin(np.abs(x_centres_pc-x_rot))]
-                nearest_y_beam = beam_remap_y[np.argmin(np.abs(y_centres_pc-y_rot))]
+                
+                nearest_x_beam = np.argmin(np.abs(x_centres_pc-x_rot))
+                nearest_y_beam = np.argmin(np.abs(y_centres_pc-y_rot))
 
-                if (nearest_x_beam != src_beams[sn,0]) or (nearest_y_beam != src_beams[sn,1]):
-                    print "Updating beam %d (%s) from (%d,%d) to (%d,%d)"%(sn,src.name,src_beams[sn,0], src_beams[sn,1], nearest_x_beam, nearest_y_beam)
-                    seng.set_beam(sn,nearest_x_beam, nearest_y_beam)
-                    src_beams[sn,0] = nearest_x_beam
-                    src_beams[sn,1] = nearest_y_beam
+                nearest_x_beam_remap = beam_remap_x[nearest_x_beam]
+                nearest_y_beam_remap = beam_remap_y[nearest_y_beam]
+
+                pylab.cla() #clear plot
+                pylab.title('History Start: %s Current LST: %s'%(ephem.hours(history_timestamps[(history_index+1)%history_len]),obs.sidereal_time()))
+                plot_src(source_history, src.name)
+                #pylab.annotate('%s'%src.name, (np.rad2deg(x_rot),np.rad2deg(y_rot)))
+                pylab.legend()
+                plot_centres(x_centres_pc,y_centres_pc,nearest_x_beam,nearest_y_beam)
+                pylab.draw()
+
+                history_index= (history_index+1)%history_len
+
+                if (nearest_x_beam_remap != src_beams[sn,0]) or (nearest_y_beam_remap != src_beams[sn,1]):
+                    print "Updating beam %d (%s) from (%d,%d) to (%d,%d)"%(sn,src.name,src_beams[sn,0], src_beams[sn,1], nearest_x_beam_remap, nearest_y_beam_remap)
+                    seng.set_beam(sn,nearest_x_beam_remap, nearest_y_beam_remap)
+                    src_beams[sn,0] = nearest_x_beam_remap
+                    src_beams[sn,1] = nearest_y_beam_remap
 
             time.sleep(opts.sleep_time)
 
