@@ -397,8 +397,32 @@ The effective averaging of redundant baselines in the spatial FFT imager require
 To derive gain coefficients a calibration method is applied to the FX correlator data.
 In initial observations the column ratio gain estimation method from \citep{gaindecomp} was used to compute a per channel, per antenna complex gain term.
 
+%SFFT correlations of Tau/3c144 before and after calibration
+\begin{figure}
+    \centering
+    \subfloat[Dirty image of Tau/3c144 formed before applying complex gain calibrations in the F-Engine for the spatial FFT.]{
+    \includegraphics[scale=0.5]{{graphics/img.2455985.25525.tau.uncal.s.ms.DATA.channel.1ch}.pdf}
+    \label{fig:uncal_sfft}
+    }
+    \hspace{10pt}
+    \subfloat[Dirty image of Tau/3c144 with complex gain calibrations applied. This image has a signal to noise ratio around 20, a standard CLEAN method can be used to improve the image dynamic range.]{
+    \includegraphics[scale=0.5]{{graphics/img.2455999.21403.tau.cal.s.ms.DATA.channel.1ch}.pdf}
+    \label{fig:cal_sfft}
+    }
+    \label{fig:sfft_calibration}
+    \caption{After applying complex gain calibration a bright point source such as Tau/3c144 appears similar to the array psf, and has a significant improvement in the image fidelity compared to the uncalibrated image.
+    Scales in both images are based on raw spatial FFT visibilities.}
+\end{figure}
+
 \subsection{FX Correlator Imaging}
 \label{fx results}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.6]{{graphics/img.2455999.21403.tau.cal.s.ms.psf.channel.1ch.mod}.pdf}
+    \caption{PSF of a two minute snapshot image.}
+    \label{fig:psf}
+\end{figure}
 
 The East-West FWHM beam size of an individual element is $6.6^{\circ}$ which translates to a 26 minute 'transit time' for an source.
 For the the bright A class sources this time can be extended since they remain the dominating source well after crossing the FWHM.
