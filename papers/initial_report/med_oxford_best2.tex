@@ -21,7 +21,9 @@ Both instruments use the same digitizing/channelizing front end.
 The spatial FFT imager takes advantage of BEST-2 as a regularly gridded array to perform a 2D spatial FFT using $O(n \log n)$ operations.
 The FX correlator has been used to solve complex gain calibrations which are applied in the spatial FFT during observation.
 During the initial deployment of the instruments several bright radio sources were observed over multiple epochs.
-%are the sfft images any good?
+An analysis of the spatial FFT imager baseline quality is performed and compared to that of the FX correlator.
+Our study shows the spatial FFT data to be comparable in quality to the FX correlator.
+Further methods can be implemented in the real time calibration and post integration calibration to improve the spatial FFT data quality.
 \end{abstract}
 
 \section{Introduction}
@@ -392,12 +394,12 @@ A suite of python scripts have been written to interface and manipulate the data
 A python FITS-IDI package has been written to convert HDF5 files into the standard FITS format which can be read by AIPS and CASA\footnote{https://github.com/telegraphic/pyfitsidi}.
 This allows for conversion to the Measurement Set format which most packages can interface with.
 
-A number of calibration methods has been tested on the initial data sets.
-Traditional CASA based calibration has been used to form correlator images.
-To produce calibration coefficients for the spatial FFT imager a column ratio gain estimation method has been employed.
-A study of the baseline redundancy and possible calibration has also been undertaken.
-Long observations of the sky are under way to understand the system noise and our ability to reach the confusion limit.
-During deep integration observations a cross talk issue covering part of the band has been discovered.
+%A number of calibration methods has been tested on the initial data sets.
+%Traditional CASA based calibration has been used to form correlator images.
+%To produce calibration coefficients for the spatial FFT imager a column ratio gain estimation method has been employed.
+%A study of the baseline redundancy and possible calibration has also been undertaken.
+%Long observations of the sky are under way to understand the system noise and our ability to reach the confusion limit.
+%During deep integration observations a cross talk issue covering part of the band has been discovered.
 
 \subsection{Calibration Methods}
 \label{calibration}
@@ -406,16 +408,19 @@ The effective averaging of redundant baselines in the spatial FFT imager require
 To derive gain coefficients a calibration method is applied to the FX correlator data.
 In initial observations the column ratio gain estimation method from \citep{gaindecomp} was used to compute a per channel, per antenna complex gain term.
 
+%realtime complex gain calibration
+%post integration methods
+
 %SFFT correlations of Tau/3c144 before and after calibration
 \begin{figure}
     \centering
     \subfloat[Dirty image of Tau/3c144 formed before applying complex gain calibrations in the F-Engine for the spatial FFT.]{
-    \includegraphics[scale=0.5]{{graphics/img.2455985.25525.tau.uncal.s.ms.DATA.channel.1ch}.pdf}
+    \includegraphics[scale=0.3]{{graphics/img.2455985.25525.tau.uncal.s.ms.DATA.channel.1ch}.pdf}
     \label{fig:uncal_sfft}
     }
     \hspace{10pt}
     \subfloat[Dirty image of Tau/3c144 with complex gain calibrations applied. This image has a signal to noise ratio around 20, a standard CLEAN method can be used to improve the image dynamic range.]{
-    \includegraphics[scale=0.5]{{graphics/img.2455999.21403.tau.cal.s.ms.DATA.channel.1ch}.pdf}
+    \includegraphics[scale=0.3]{{graphics/img.2455999.21403.tau.cal.s.ms.DATA.channel.1ch}.pdf}
     \label{fig:cal_sfft}
     }
     \label{fig:sfft_calibration}
@@ -426,152 +431,99 @@ In initial observations the column ratio gain estimation method from \citep{gain
 \subsection{FX Correlator Imaging}
 \label{fx results}
 
+The East-West full width half max (FWHM) beam size of an individual element is $\approx11.25^{\circ}$ which translates to a 45 minute 'transit time' for an source as seen in the measured primary beam, figure \ref{fig:best2_pb}.
+For the the bright A class sources this time can be extended since they remain the dominating source well after crossing the FWHM.
+Observations of 80-90 minutes are possible which gives an small improvement in uv coverage at the cost of properly accounting for the amplitude modulation due to the primary beam.
+This warrants a small sensitivity benefit for a large calibration cost.
+Most images are created using data within a few minutes of the source transit time.
+The high sidelobes in the primary beam, figure \ref{fig:best2_pb}, cause the bright class A sources to dominate even when they are past their transit time and makes it difficult to perform calibration and imaging near these sources.
+During setup intial obseravtions were made of Cygnus A, Cassiopeia A, Taurus A along with a number of 3C sources.
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.6]{{graphics/pb/best2_3_20_primary_beam}.pdf}
+    \caption{Measured east-west primary beam for antenna 1N-6-1, which is representitive of a typical antenna, based on a Cassiopeia A transit. The dashed lines indicate the FWHM points. Note the first sidelobes are only -15 dB down.}
+    \label{fig:best2_pb}
+\end{figure}
+
+%calibration/flux scale
+A transiting array provides a unique challenge of gain calibration since a source's apparent gain will change as it transits the primary beam.
+To account for this a two stage gain calibation method is used.
+Phase calibration and setting the flux scale is accomplished using Cas A and Cyg A observations as point source sky models set to their 3C flux levels and known spectral indices.
+Since these sources are very bright a only a few seconds at transit is needed produce a high SNR dataset to use for calibration.
+Over this period the primary beam can be approximated as flat.
+A time independent complex gain is derived for a coarse calibration.
+After applying the gain corrections an observation will be set to a flux scale relative to the flux of the calibration source.
+Each individual source is further calibrated in MeqTrees\citep{meqtrees} based on a local sky model taken from the 3C catalog.
+This stage is calibrated on short time intervals to account for amplitude changes from the primary beam.
+
+%psf/dirty/clean
+An effect of the density of the antenna layout is a low point spread function(PSF) to field of view ratio thus images tend to contain at most a few point sources.
+The grid layout of the BEST-2 array produces strong sidelobes and grating lobes in the PSF as seen in figure \ref{fig:psf}.
+
+%dynamic range/noise
+%weighting
+%image: tau(raw,psf,dirty,clean)
 \begin{figure}
     \centering
     \includegraphics[scale=0.6]{{graphics/img.2455999.21403.tau.cal.s.ms.psf.channel.1ch.mod}.pdf}
-    \caption{PSF of a two minute snapshot image.}
+    \caption{PSF of a two minute snapshot image. The high, regular sidelobes are an effect of the regularly gridded array.}
     \label{fig:psf}
 \end{figure}
 
-The East-West FWHM beam size of an individual element is $6.6^{\circ}$ which translates to a 26 minute 'transit time' for an source.
-For the the bright A class sources this time can be extended since they remain the dominating source well after crossing the FWHM.
-Observations of 40-50 minutes are possible which gives an improvement in uv coverage. 
-Initial calibration and imaging has been performed using the bright sources: Cygnus A, Cassiopeia A, Virgo A and Taurus A.
-
-A transiting array provides a unique challenge of gain calibration since a source's apparent gain will change as it transits the primary beam.
-A typical beam transit of a strong source, Cygnus A, is show in figure \ref{fig:gain_change}.
-The auto correlations asymmetry is due to the changing galactic plane pass through the beam.
-In the cross correlations the first and second sidelobes are evident.
-Much of the sky surrounding a bright source is contaminated due to these high sidelobes.
-The traditional method of using a gain calibrator is not possible.
-Gain calibration of bright sources was done by fitting a solution on short time intervals.
-A model of the beam will be necessary to set a better flux scale and time independent gain solution.
-
 \begin{figure}
     \centering
-    \subfloat[A selection of typical auto correlations over a period of five hours during a transit of Cygnus A. The asymmetry is due to the background galactic plane.]{
-    \includegraphics[scale=0.4]{graphics/gain_change_auto.png}
-    \label{fig:gain_change_auto}
+
+    \subfloat[]{
+    \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.DATA.channel.1ch}.pdf}
+    \label{fig:fx_tau_data}
     }
-    \hspace{10pt}
-    \subfloat[Cross correlation power over a period of five hours during a Cygnus A transit. The first sidelobes are around 100 times lower then the primary lobe. A bright source like Cygnus A remains the dominant source in the field even into the second sidelobe.]{
-    \includegraphics[scale=0.4]{graphics/gain_change_cross.png}
-    \label{fig:gain_change_cross}
+    \subfloat[]{
+    \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.psf.channel.1ch}.pdf}
+    \label{fig:fx_tau_psf}
     }
-    \label{fig:gain_change}
-    \caption{Typical auto and cross correlations of a transiting source.}
+    
+    \subfloat[]{
+    \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \label{fig:fx_tau_dirty}
+    }
+    \subfloat[]{
+    \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
+    \label{fig:fx_tau_clean}
+    }
+    
+    \label{fig:fx_tau}
+    \caption{
+    }
 \end{figure}
 
-%Bright class A sources dominate the noise in a few seconds of integration.
-%Images can be formed by taking short periods of time where the gain is effectively flat across the time interval.
-%
-%%casseopia a image from CASA
-%\begin{figure}
-%    \centering
-%    \includegraphics[scale=0.6]{graphics/cas_1319623663.pdf}
-%    \caption{Calibrated image of Cassiopeia A using a 1 MHz portion of the band. This multi-frequency synthesis image was formed using a 40 minute transit of Cas A across the main lobe of the beam.
-%    The two 'sources' above and below the main source are artifacts of the first sidelobe. Beam effects are currently a limiting factor in improving the dynamic range of the image.
-%    The grayscale is Jy/Beam, with a nominal noise floor of $\approx 10$ Jy.}
-%    \label{fig:cas_a_corr}
-%\end{figure}
-%
-%Other sources, which are bright but a few orders of magnitude weaker than the class A sources have also been imaged.
-%The bright 3C source 3C 196 can be imaged with 10's of seconds of integration.
-%The flux scale on this source is off by a factor of approximately two because of our ability to set a flux scale based on a standard calibrator source and rely on a crude estimation using Cygnus A and Cassiopeia A.
-%
-%\begin{figure}
-%    \centering
-%    \includegraphics[scale=0.6]{graphics/3c196_01.pdf}
-%    \caption{}
-%    \label{fig:3c196_corr}
-%\end{figure}
+%image: cas, cas+sun
+%image: natural,uniform
 
 \subsection{Spatial FFT Results}
 \label{sfft results}
 
-%calibrated/uncalibrated images
+%beam crossing/imaging/beamformer
+%conversion to baselines
+%dirty/clean images
 
 \subsection{Comparison of FX Correlator and Spatial FFT}
 
-%baselines
-%images
+In the ideal case observations using the spatial FFT will be identical to observations using an FX correlator.
 
-%\subsection{Crosstalk Effects}
-%\label{crosstalk}
-%
-%A strong cross talk effect has been observed in the lower portion of the band.
-%This has the effect of creating a strong correlation, constant correlation across a few Megahertz before the effect tapers off below current noise measurements.
-%Every baseline is affected to varying degrees, figure \ref{fig:xtalk}.
-%The cross talk does not appear to be location or antenna dependent which suggests that it is not primarily from antenna coupling.
-%A lab setup of the digital design has not been able to reproduce this effect but could still be related to the ADC cabling interface.
-%Components with in the analogue chain could not be functioning within specification and causing the signal leakage.
-%Further testing is required to discover the route of this issue.
-%
-%\begin{figure}
-%    \centering
-%    \subfloat[]{\label{fig:xtalka}\includegraphics[width=0.3\textwidth]{graphics/xtalk/xtalk_plot_a.png}}
-%    \subfloat[]{\label{fig:xtalkb}\includegraphics[width=0.3\textwidth]{graphics/xtalk/xtalk_plot_b.png}}
-%
-%    \subfloat[]{\label{fig:xtalkc}\includegraphics[width=0.3\textwidth]{graphics/xtalk/xtalk_plot_c.png}}
-%    \subfloat[]{\label{fig:xtalkd}\includegraphics[width=0.3\textwidth]{graphics/xtalk/xtalk_plot_d.png}}
-%    \caption{The lower portion of the band has a strong correlation effect caused by cross talk.
-%    On observing strong sources the effect is weak but becomes a dominate effect when observing a cold patch of the sky, fig. \ref{fig:xtalka}.
-%    Cross talk is noticeable in almost all the cross correlations, fig. \ref{fig:xtalkc} shows a handful of baselines.
-%    This effect is difficult to localize, there is no obvious systematic effects with regard to antenna locations or cabling.
-%    Figure \ref{fig:xtalkb} is a phase plot (Radians) of the observation of bright source.
-%    Figure \ref{fig:xtalkd} is a phase plot of a region with no sources, the cross talk has the effect of flattening the lower end of the band.}
-%    \label{fig:xtalk}
-%\end{figure}
+%calibration variation
+%images: 3c48 dirty/clean
+%images: cas + sun
+%baselines: fx,avg,mdl,sfft
 
 \section{Discussion}
 \label{discussion}
 
 %what has been accomplished
-%further work on BEST-2: noise floor
-%further work: spatial FFT
+%further work on SFFT calibration
+%uses: space debris, transient detection/pulsars
 
 \bibliography{refs}{}
 \bibliographystyle{mn2e}
-
-%\newpage
-%\begin{thebibliography}{9}
-%
-%\bibitem[\protect\citeauthoryear{Boonstra}{2001}]{gaindecomp}
-%A.J. Boonstra and A.J. Van der Veen,
-%"Gain Decomposition Methods for Radio Telescope Arrays", 2001
-%\emph{IEEE Workshop on Statistical Signal Processing (SSP)}, Singapore, August 2001
-%
-%\bibitem[\protect\citeauthoryear{Montebugnoli}{2009}]{best2}
-%S. Montebugnoli, G. Bianchi, J. Monari, G. Naldi, F. Perini, and M. Schiaffino,
-%"BEST: Basic Element for SKA Training", 2009
-%\emph{SKADS Conference 2009: Widefield Science and Technology for the SKA}, p. 331-336
-%
-%\bibitem[\protect\citeauthoryear{Montebugnoli}{2009}]{best2-casper}
-%S. Montebugnoli, M. Bartolini, G. Bianchi, G. Naldi, J. Manley, and A. Parsons,
-%"BEST Back End", 2009
-%\emph{SKADS Conference 2009: Widefield Science and Technology for the SKA}, p. 355-358
-%
-%\bibitem[\protect\citeauthoryear{Otobe}{1994}]{2dfft}
-%E. Otobe, J. Nakajima, K. Nishibori, T. Saito, H. Kobayashi, N. Tanaka, N. Watanabe, Y. Aramaki, T. Hoshikawa, K. Asuma, and T. Daishido,
-%"Two-dimensional Direct Images with a Spatial FFT Interferometer", 1994,
-%\emph{PASJ}, Vol. 46, No. 5, p. 503-510
-%
-%\bibitem[\protect\citeauthoryear{Perini}{2009}]{best2-rec}
-%F. Perini, G. Bianchi, M. Schiaffino, and J. Monari,
-%"BEST Receiver Experience: General Architecture, Design and Integration", 2009
-%\emph{SKADS Conference 2009: Widefield Science and Technology for the SKA}, p. 351-354
-%
-%\bibitem[\protect\citeauthoryear{Perini}{2009}]{best2-lna}
-%F. Perini,
-%"Low Noise Design Experience for the SKADS/BEST Demonstrator", 2009
-%\emph{SKADS Conference 2009: Widefield Science and Technology for the SKA}, p. 341-345
-%
-%\bibitem[\protect\citeauthoryear{Parsons et al.}{2009}]{casper}
-%A. Parsons, D. Backer, C. Chang, D. Chapman, H. Chen, P. Crescini, C. de Jesus, C. Dick, P. Droz, D. MacMahon, K. Meder, J. Mock,
-%V. Nagpal, B. Nikolic, A. Parsa, B. Richards, A Siemion, J. Wawrzynek, D. Werthimer, M. Wright,
-%"PetaOp/Second FPGA Signal Processing for SETI and Radio Astronomy", 2006
-%\emph{Asilomar Conference on Signals and Systems, Pacific Grove, CA}, p. 2031-2035
-%
-%\end{thebibliography}
 
 \end{document}
