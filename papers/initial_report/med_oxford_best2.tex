@@ -11,7 +11,7 @@ $^{1}$Oxford University, Department of Physics}
 
 \date{\today}
 
-\pagerange{\pageref{firstpage}--\pageref{lastpage}} \pubyear{2011}
+\pagerange{\pageref{firstpage}--\pageref{lastpage}} \pubyear{2012}
 
 \maketitle
 
@@ -133,9 +133,16 @@ Right ascension 		&       1.73 &     deg 		\\
 
 \begin{figure}
     \centering
+    \subfloat[The 32 effective receiving elements of BEST-2, indicated by crosses, lie on a regular 4x8 grid. Each receiver is the analogue sum of 16 dipoles, critically spaced at 408MHz in the East-West direction.]{
     \includegraphics[scale=0.6]{graphics/layout.png}
-    \caption{The 32 effective receiving elements of BEST-2, indicated by crosses, lie on a regular 4x8 grid. Each receiver is the analogue sum of 16 dipoles, critically spaced at 408MHz in the East-West direction.}
     \label{fig:ant_layout}
+    }
+    \hspace{10pt}
+    \subfloat[BEST-2 is a subset of eight cylinders in the north-south arm of the Croce del Nord.]{
+    \includegraphics[scale=0.4]{graphics/best2.pdf}
+    \label{fig:best2}
+    }
+    \label{fig:array_layout}
 \end{figure}
 
 \section{Instrument Design}
@@ -147,7 +154,7 @@ This allow a streamlined process of calibrating the spatial FFT imager, reduces 
 The instrument has been implemented on ROACH boards which are a generic field programmable gate array (FPGA) board designed by CASPER for radio astronomy applications.
 A ROACH consist of a XILINX Virtex 5 SX95T FPGA with interfaces to DRAM and QDR memory, high speed CX-4 connectors and a generic Z-DOK interface for connecting ADCs and various daughter boards, fig \ref{fig:roach}.
 Additionally, the board has a PowerPC running BORPH, a variant of Debian Linux, which allows access to software registers and shared memory on the FPGA.
-Firmware is designed using MATLAB Simulink which is extended with XILINX DSP blocks and CASPER's open source DSP blocks\citep{}.
+Firmware is designed using MATLAB Simulink which is extended with XILINX DSP blocks and CASPER's open source DSP blocks\footnote{https://casper.berkeley.edu/}.
 Design specific DSP blocks and hardware interfaces have also created, design models and control software are available from our project repository\footnote{https://github.com/griffinfoster/medicina}.
 Instrument design specifications are presented in table \ref{tbl:digital_specs}, further design detail is described in the following sections.
 
@@ -170,7 +177,6 @@ ADC Sampling Rate	& 40 			& MHz\\
 ADC Sampling Precision	& 12 			& bit \\
 Antenna-polarizations 	& 32 			& single pol \\
 PFB 			& 4 tap FIR + 2048 point FFT	& Radix-2 Biplex Real FFT\\
-%FFT 			& 2048 point 		& Radix-2 Biplex Real\\
 Quantization 		& 4 			& bit\\
 & & \\
 \hline
@@ -201,7 +207,7 @@ Beamformer Output 	& 10 GbE 		& Up to 8 Beams\\
 \label{channelization}
 
 Signal digitization is performed using the Texas Instruments ADS5272 8 channel, 12 bit ADC.
-The ADC board, developed by Rick Raffanti \citep{}, uses eight of these ADCs to channelize 64 streams at up to 65 Msps.
+The ADC board, developed by Rick Raffanti \footnote{https://casper.berkeley.edu/wiki/64ADCx64-12}, uses eight of these ADCs to channelize 64 streams at up to 65 Msps.
 In our design only 32 signal streams are digitized at 40 Msps which more then covers the 16 MHz analog band.
 The ADC is clocked with a 160 MHz clock which is locked to a local maser source.
 During the analog stage the RF, centered at 408 MHz, has been mixed down to baseband.
@@ -286,10 +292,13 @@ For reasons related to the design the 32 single polarization signals are treated
 This causes a small number of redundant baseline correlations and a conjugation effect which is corrected in post processing.
 During the x-engine stage an initial accumulation of 128 sample is performed after the complex multiply to reduce the output rate to roughly the input rate.
 This limits the minimum integration time to 6.55 ms.
+In addition to the standard CASPER pipelined x-engine design an optimized version has been tested.
+This new optimized design efficiently uses the full bit width of the Xilinx DSP48 multipliers to reduce the total multiplier usage by a 75\%.
+A full description of this design is in preparation.
 A vector accumulator using the on board QDR memory is used for longer integration lengths.
 This second accumulator is software controlled with integration lengths ranging from milliseconds to minutes.
 A completed integration is sent to a receive computer over a 10 GbE connection.
-Integrations are split up based on the SPEAD protocol\citep{} and transmitted as UDP packets.
+Integrations are split up based on the SPEAD protocol\footnote{https://github.com/ska-sa/PySPEAD} and transmitted as UDP packets.
 
 \begin{table}
 \begin{center}
@@ -402,7 +411,7 @@ In initial observations the column ratio gain estimation method from \citep{gain
 
 The East-West FWHM beam size of an individual element is $6.6^{\circ}$ which translates to a 26 minute 'transit time' for an source.
 For the the bright A class sources this time can be extended since they remain the dominating source well after crossing the FWHM.
-Observations of 40-50 minutes are possible which gives an improvement in uv coverage.
+Observations of 40-50 minutes are possible which gives an improvement in uv coverage. 
 Initial calibration and imaging has been performed using the bright sources: Cygnus A, Cassiopeia A, Virgo A and Taurus A.
 
 A transiting array provides a unique challenge of gain calibration since a source's apparent gain will change as it transits the primary beam.
