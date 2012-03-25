@@ -6,7 +6,7 @@ A script to automatically switch beams, to follow a source
 import numpy as np
 import sys,os
 import ephem,time
-import pylab
+import pylab, matplotlib.cm as cm
 import poxy
 
 def juldate2ephem(num):
@@ -21,17 +21,17 @@ def rotate_about_x(theta,x):
     M = np.array([[1,0,0],[0, np.cos(theta), -np.sin(theta)], [0, np.sin(theta), np.cos(theta)]])
     return np.dot(M,x)
 
-def plot_centres(x_centres,y_centres,x_chosen,y_chosen):
+def plot_centres(x_centres,y_centres,chosen_beams):
     # plot the positions of the beam centres
     for xn,x_beam in enumerate(x_centres_pc):
         for yn,y_beam in enumerate(y_centres_pc):
-            if xn==x_chosen and yn==y_chosen:
+            if np.any(np.all([xn,yn] == chosen_beams, axis=1)):
                 pylab.scatter(np.rad2deg(x_beam),np.rad2deg(y_beam), c='b', marker='o', label=None)
             else:
                 pylab.scatter(np.rad2deg(x_beam),np.rad2deg(y_beam), c='r', marker='o', label=None)
 
-def plot_src(src_pos_list, name=None):
-    pylab.scatter(np.rad2deg(src_pos_list[:,0]), np.rad2deg(src_pos_list[:,1]), s=80, c='g', marker=(6,1,0), label=name)
+def plot_src(src_pos_list, name=None, color='g'):
+    pylab.scatter(np.rad2deg(src_pos_list[:,0]), np.rad2deg(src_pos_list[:,1]), s=80, marker=(6,1,0), c=color, label=name)
 
 if __name__ == '__main__':
     from optparse import OptionParser
@@ -41,7 +41,7 @@ if __name__ == '__main__':
     p.set_description(__doc__)
     p.add_option('-d', '--dec', type='string', dest='dec', default='zenith',
             help='The declination at which the telescope is pointed <XX:XX:XX.X> or \'zenith\' Default:zenith')
-    p.add_option('-s', '--sleep_time', dest='sleep_time', default=10,
+    p.add_option('-s', '--sleep_time', dest='sleep_time', default=10.0, type=float,
             help='Number of seconds between passes of pointing checking. Default:10')
     p.add_option('-v', '--verbose', dest='verbose', action='store_true', default=False,
             help='Print lots of lovely debug information')
@@ -71,7 +71,8 @@ if __name__ == '__main__':
             srcs.append(ephem.readdb(ephemline))
         # Initialise the beams to (-1,-1), which will get updated
         # on the first pass of the pointing loop later
-        src_beams = -1*np.ones([len(srcs),2])
+        n_srcs = len(srcs)
+        src_beams = -1*np.ones([n_srcs,2])
         print '########################################'
     
     print 'Loading configuration file...', opts.ant_config
@@ -145,7 +146,7 @@ if __name__ == '__main__':
 
     pylab.hold(True)
     pylab.ion()
-    plot_centres(x_centres_pc,y_centres_pc,0,0)
+    plot_centres(x_centres_pc,y_centres_pc,src_beams)
     pylab.draw()
 
     if opts.verbose:
@@ -178,20 +179,22 @@ if __name__ == '__main__':
             print src.name, src.ra, src.dec
 
     history_len = 1024
-    source_history = np.zeros([history_len,2])
-    history_timestamps = np.zeros(history_len)
+    source_history = np.zeros([n_srcs,history_len,2])
+    history_timestamps = np.zeros([history_len])
     history_index = 0
     history_initialised = 0
+    plot_beam_ids = np.ones([n_srcs,2]) #un-remapped beam IDs, for plotting
     while(True):
         try:
+            pylab.cla() #clear plot
+            obs.date = juldate2ephem(ephem.julian_date())
+
+            if opts.verbose:
+                print 'Local Sidereal Time:', obs.sidereal_time()
+            
+            lst = obs.sidereal_time()
             for sn,src in enumerate(srcs): 
                 
-                obs.date = juldate2ephem(ephem.julian_date())
-
-                if opts.verbose:
-                    print 'Local Sidereal Time:', obs.sidereal_time()
-                
-                lst = obs.sidereal_time()
                 src.compute(obs) 
 
                 src_alt_offset = point_zen_dist - (np.pi/2 - src.alt)
@@ -216,10 +219,9 @@ if __name__ == '__main__':
                 # record position for plotting
                 if history_initialised == 0:
                     history_timestamps[:] = lst
-                    source_history[:] = [x_rot,y_rot]
-                    history_initialised = 1
+                    source_history[sn,:] = [x_rot,y_rot]
 
-                source_history[history_index] = [x_rot,y_rot]
+                source_history[sn,history_index] = [x_rot,y_rot]
                 history_timestamps[history_index] = lst
 
 
@@ -234,25 +236,30 @@ if __name__ == '__main__':
                 nearest_x_beam = np.argmin(np.abs(x_centres_pc-x_rot))
                 nearest_y_beam = np.argmin(np.abs(y_centres_pc-y_rot))
 
+                plot_beam_ids[sn] = [nearest_x_beam,nearest_y_beam] #un-remapped beam ID's for plotting
+
                 nearest_x_beam_remap = beam_remap_x[nearest_x_beam]
                 nearest_y_beam_remap = beam_remap_y[nearest_y_beam]
+                
+                plot_src(source_history[sn], src.name, color=cm.jet(sn/float(n_srcs),1))
 
-                pylab.cla() #clear plot
-                pylab.title('History Start: %s Current LST: %s'%(ephem.hours(history_timestamps[(history_index+1)%history_len]),obs.sidereal_time()))
-                plot_src(source_history, src.name)
-                #pylab.annotate('%s'%src.name, (np.rad2deg(x_rot),np.rad2deg(y_rot)))
-                pylab.legend()
-                plot_centres(x_centres_pc,y_centres_pc,nearest_x_beam,nearest_y_beam)
-                pylab.draw()
-
-                history_index= (history_index+1)%history_len
+                if opts.verbose:
+                    print '%s: Nearest beam (not remapped) is (%d,%d) with x,y pointing %.3f, %.3f'%(src.name,nearest_x_beam,nearest_y_beam,np.rad2deg(x_centres_pc[nearest_x_beam]),np.rad2deg(y_centres_pc[nearest_y_beam]))
 
                 if (nearest_x_beam_remap != src_beams[sn,0]) or (nearest_y_beam_remap != src_beams[sn,1]):
-                    print "Updating beam %d (%s) from (%d,%d) to (%d,%d)"%(sn,src.name,src_beams[sn,0], src_beams[sn,1], nearest_x_beam_remap, nearest_y_beam_remap)
+                    print "%s: Updating beam %d (%s) from (%d,%d) to (%d,%d)"%(lst,sn,src.name,src_beams[sn,0], src_beams[sn,1], nearest_x_beam_remap, nearest_y_beam_remap)
                     seng.set_beam(sn,nearest_x_beam_remap, nearest_y_beam_remap)
                     src_beams[sn,0] = nearest_x_beam_remap
                     src_beams[sn,1] = nearest_y_beam_remap
 
+            #pylab.annotate('%s'%src.name, (np.rad2deg(x_rot),np.rad2deg(y_rot)))
+            # Add a legend for the sources, and plot the beam centres
+            history_initialised = 1
+            pylab.title('History Start: %s Current LST: %s'%(ephem.hours(history_timestamps[(history_index+1)%history_len]),lst))
+            pylab.legend()
+            plot_centres(x_centres_pc,y_centres_pc,plot_beam_ids)
+            pylab.draw()
+            history_index= (history_index+1)%history_len
             time.sleep(opts.sleep_time)
 
         except KeyboardInterrupt:
