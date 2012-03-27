@@ -15,18 +15,18 @@ o.add_option('--lat', dest='lat', default=44.48, type='float',
     help='Latitude (N) in degrees, Default: 44.48 (Medicina)')
 o.add_option('--lon', dest='lon', default=11.63, type='float',
     help='Longitude (E) in degrees, Default: 11.63 (Medicina)')
-o.add_option('--minflux', dest='minflux', default=0.0, type='float',
-    help='Minimum flux. Default=0')
+o.add_option('-f','--minflux', dest='minflux', default=50.0, type='float',
+    help='Minimum flux. Default=50')
 o.add_option('--mindec', dest='mindec', default=-90, type='float',
     help='Minimum declination. Default=-90')
 o.add_option('--maxdec', dest='maxdec', default=90, type='float',
     help='Maximum declination. Default=90')
-o.add_option('--sort_key', dest='sort_key', type='string', default='ha',
-        help='Key by which to sort sources. Choices: transit, flux, name, ra, dec, ha. Default: ha')
-o.add_option('--descending', dest='descending', action='store_true', default=False,
+o.add_option('-s', '--sort_key', dest='sort_key', type='string', default='transit',
+        help='Key by which to sort sources. Choices: transit, flux, name, ra, dec, ha. Default: transit')
+o.add_option('-d', '--descending', dest='descending', action='store_true', default=False,
         help='Use this flag to sort sources in descending order')
-o.add_option('-c', '--cat', dest='cat', default='', type='string',
-    help='Catalogue to load.')
+o.add_option('-c', '--cat', dest='cat', default='/home/obs/github/medicina/poxy/scripts/analysis/VIII_1A_3cr-120303b.csv', type='string',
+    help='Catalogue to load. Default is 3CR at /home/obs/github/medicina/poxy/scripts/analysis/VIII_1A_3cr-120303b.csv')
 o.add_option('-v', '--verbose', dest='verbose', action='store_true', default=False,
     help='Be verbose (mainly about reading the catalogue file).')
 opts, args = o.parse_args(sys.argv[1:])
@@ -116,12 +116,22 @@ for date in args:
     for body in body_list:
         body.compute(obs)
         if (body.dec > mindec) and (body.dec < maxdec) and (10**body.mag > opts.minflux):
-            source_list.append({'name':body.name, 'ra':body.ra, 'dec':body.dec, 'transit':body.transit_time, 'flux':10**body.mag, 'ha':ephem.hours(lst-body.ra)})
+            obs.date=juldate2ephem(jd)
+            next_transit = obs.next_transit(body)
+            time_to_transit = next_transit-juldate2ephem(jd)
+            ha = lst - body.ra
+            #unwrap
+            if ha > n.pi:
+                ha = ha-2*n.pi
+            elif ha < -n.pi:
+                ha = ha + 2*n.pi
+            
+            source_list.append({'name':body.name, 'ra':body.ra, 'dec':body.dec, 'transit':next_transit, 'flux':10**body.mag, 'ha':ephem.hours(ha)})
 
     sorted_sources = sorted(source_list,key=operator.itemgetter(opts.sort_key))
     if opts.descending:
         sorted_sources.reverse()
 
     for source in sorted_sources:
-        print "%-7s %+8s : RA: %11s  DEC: %11s  FLUX: %8s  TRANSIT (UTC): %-20s HA: %12s"%(source['name'],get_common_name(source['name']),source['ra'],source['dec'],'%.2f'%source['flux'],source['transit'],source['ha'])
+        print "%-7s %+8s : RA: %11s  DEC: %11s  FLUX: %8s  TRANSIT (UTC): %-20s (%.3f)    HA: %12s"%(source['name'],get_common_name(source['name']),source['ra'],source['dec'],'%.2f'%source['flux'],source['transit'],ephem.julian_date(source['transit']),source['ha'])
     print '##########################################################################################################################'

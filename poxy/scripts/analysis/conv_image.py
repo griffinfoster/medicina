@@ -22,6 +22,15 @@ if __name__ == '__main__':
     else:
         h5fns = args
 
+eqrewire = {
+    0:0,   8:1,  16:2,  24:3,
+    4:4,  12:5,  20:6,  28:7,
+    1:8,   9:9,  17:10, 25:11,
+    5:12, 13:13, 21:14, 29:15,
+    2:16, 10:17, 18:18, 26:19,
+    6:20, 14:21, 22:22, 30:23,
+    3:24, 11:25, 19:26, 27:27,
+    7:28, 15:29, 23:30, 31:31  }
 n_files = len(h5fns)
 for N,fn in enumerate(h5fns):
     print '##### Processing file %s (File %d of %d) #####' %(fn,N+1,n_files)
@@ -33,6 +42,42 @@ for N,fn in enumerate(h5fns):
     print 'Copying attributes to new file'
     for a in fh.attrs.iteritems():
         new_fh.attrs.create(a[0], a[1])
+
+    #create EQ subgroup, rename EQs to single pol
+    eq_group=new_fh.create_group("EQ")
+    for ds in fh.iterkeys():
+        if ds.startswith('eq_amp_coeff'):
+            if ds.startswith('eq_amp_coeff_cal'):
+                prefix='eq_amp_coeff_cal_'
+            elif ds.startswith('eq_amp_coeff_bandpass'):
+                prefix='eq_amp_coeff_bandpass_'
+            elif ds.startswith('eq_amp_coeff_base'):
+                prefix='eq_amp_coeff_base_'
+            else:
+               prefix='eq_amp_coeff_'
+
+            ant=int(ds.split('_')[-1][:-1])
+            if ds[-1] == 'y': print "WHOA! Y-pol EQ value found in", ds
+            ant=eqrewire[ant]
+            new_key = prefix + '%ix'%ant
+            rv=eq_group.create_dataset(new_key, data=fh[ds])
+        elif ds.startswith('eq_phs_coeff'):
+            if ds.startswith('eq_phs_coeff_cal'):
+                prefix='eq_phs_coeff_cal_'
+            elif ds.startswith('eq_phs_coeff_bandpass'):
+                prefix='eq_phs_coeff_bandpass_'
+            elif ds.startswith('eq_phs_coeff_base'):
+                prefix='eq_phs_coeff_base_'
+            else:
+               prefix='eq_phs_coeff_'
+
+            ant=int(ds.split('_')[-1][:-1])
+            if ds[-1] == 'y': print "WHOA! Y-pol EQ value found in", ds
+            ant=eqrewire[ant]
+            new_key = prefix + '%ix'%ant
+            rv=eq_group.create_dataset(new_key, data=fh[ds])
+        elif ds.startswith('eq_amp'):
+            rv=eq_group.create_dataset(ds, data=fh[ds])
 
     print 'Getting image file parameters'
     n_ants = fh.attrs.get('n_ants')
@@ -72,12 +117,6 @@ for N,fn in enumerate(h5fns):
     new_fh.attrs['scale_factor_timestamp'] = 1.0
     new_fh.attrs['sync_time'] = 0.0
     
-    ##create EQ subgroup
-    #eq_group=new_fh.create_group("EQ")
-    #for ds in fh.iterkeys():
-    #    if ds.startswith('eq_amp'):
-    #        rv=eq_group.create_dataset(ds, data=fh[ds])
-
     #create an empty dataset to file in with corrected data
     nx = image_shape[0]//2
     ny = image_shape[1]//2
@@ -87,15 +126,38 @@ for N,fn in enumerate(h5fns):
     #Create a new dataset for baseline indices
 
     print 'Creating bl_order attribute...',
+    bl_matrix= n.zeros([2*nx, 2*ny,2])
+    for x in range(nx):
+        for y in range(ny):
+            # Fill the matrix, with the prefered reference values added last
+            # Fill top left corner of matrix
+            bl_matrix[nx+x,ny-y] = [x,ny-1-y]
+            # Fill top right corner of matrix -- these are baselines relative to bottom left corner (ant 0)
+            bl_matrix[nx+x,ny+y] = [x,y]
+
+    #print bl_matrix
+
+    #bl_matrix[bl_matrix[:,:,0]<0] = bl_matrix[bl_matrix[:,:,0]<0] + nx-1
+    #bl_matrix[bl_matrix[:,:,1]<0] = bl_matrix[bl_matrix[:,:,1]<0] + ny-1
+    #print bl_matrix
+
+    bl0 = ny*bl_matrix[nx:,ny:,0] + bl_matrix[nx:,ny:,1]       #top right 
+    bl1 = ny*bl_matrix[nx+1:,1:ny,0] + bl_matrix[nx+1:,1:ny,1] #top left
+
+    #print bl0
+    #print bl1
+
+    bl0 = bl0.reshape(n_ants)
+    bl1 = bl1.reshape((nx-1)*(ny-1))
+
+    #print bl0
+    #print bl1
+
     new_fh.create_dataset('bl_order', (n_bls,2), dtype=int)
-    bl_order_block = n.zeros([n_ants,2],dtype=int)
-    for i in range(n_ants):
-        bl_order_block[i] = [0,n_ants - (1+i//ny)*ny + i%ny]
-        #print 'appending', [0,n_ants - (1+i//ny)*ny + i%ny]
-    new_fh['bl_order'][0:n_ants] = bl_order_block
-    bl_order_block = bl_order_block + n.array([ny-1,0])
-    new_fh['bl_order'][n_ants:] = bl_order_block.reshape(nx,ny,2)[0:-1,0:-1].reshape((nx-1)*(ny-1),2) #add the top left block
-    #print bl_order_block.reshape(nx,ny,2)[0:-1,0:-1].reshape((nx-1)*(ny-1),2) #add the top left block
+    new_fh['bl_order'][0:n_ants,0] = 0
+    new_fh['bl_order'][0:n_ants,1] = bl0  #After the FFT the top right data will need conjugating
+    new_fh['bl_order'][n_ants:,0] = ny-1  #After the FFT the bottom left data Will need conjugating
+    new_fh['bl_order'][n_ants:,1] = bl1
     print 'done.'
 
     
@@ -119,8 +181,8 @@ for N,fn in enumerate(h5fns):
 
 
     fh.flush()
-    corr0 = n.conj(corr[:,-1::-1,1:nx+1,ny:,:]) #top right block #flip spectrum #conjugate (to match bl_order)
-    corr1 = n.conj(corr[:,-1::-1,1:nx,1:ny,:]) #top left block #flip spectrum #conjugate (to match bl_order)
+    corr0 = n.conj(corr[:,-1::-1,nx:,ny:,:])    #top right block #flip spectrum #conjugate (to match bl_order)
+    corr1 = n.conj(corr[:,-1::-1,nx+1:,1:ny,:]) #top left block #flip spectrum #conjugate
     del(corr)
 
     #print corr[0,0,:,:,0].real

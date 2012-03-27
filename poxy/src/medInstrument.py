@@ -646,42 +646,6 @@ class fEngine(Instrument):
             if use_cal:
                 self.spead_eq_amp_meta_issue(coeffset='cal')
 
-    #def eq_write_amp_orig(self,eqi,ant,pol='x',verbose=False):
-    #    """Write to Amplitude BRAM the equalization coefficents for a given antpol on the F Engine"""
-    #    ANT_REMAP = [0,2,4,6,1,3,5,7] #antenna 0 comes out the fft first, ant 1 comes out third, ant 2 5th, etc...
-    #    # order out it [0,4,1,5,2,6,3,7]
-    #    name='xengine'
-    #    mode='amp'
-    #    ffpga_n,feng_input = self.get_ant_location(ant)
-    #    fpga=self.ffpgas[ffpga_n]
-    #    pol_n = {'x':0,'y':1}[pol]
-    #    phy_input=int((feng_input//(self.ant_mux*2))+(2*pol_n))
-    #    register_name='amp_EQ%i_coeff_bram'%phy_input
-    #    n_coeffs = eqi.nchans/eqi.dec
-    #    start_addr = (ANT_REMAP[ant%(self.ant_mux*2)]) * n_coeffs
-    #    coeffs = eqi.coeff[ant,pol_n,:]
-    #    coeff_str=''
-    #    for i,v in enumerate(coeffs):
-    #        if verbose:
-    #            print '''Initialising EQ for antenna %i%c, input %i (register %s)'s index %i to '''%(ant,pol,feng_input,register_name,i+start_addr),v
-    #        coeff_str += struct.pack('>L', long(v))
-    #    fpga.write(register_name,coeff_str,offset=start_addr*4)
-
-    #def eq_write_amp_all(self,eqi,verbose=False):
-    #    """Write all of the Amplitude coefficents"""
-    #    pol_n=['x','y']
-    #    for ant in range(eqi.nants):
-    #        for pol in pol_n:
-    #            self.eq_write_amp(eqi,ant,pol,verbose=verbose)
-    # 
-    #def eq_init_amp(self,source='config',fmt='poly',verbose=False):
-    #    """Initialize the Amplitude Equalization coefficents and write values to BRAM"""
-    #    name='xengine'
-    #    mode='amp'
-    #    self.eq_amp=self.eq_load(name,mode,source=source,fmt=fmt)
-    #    self.eq_write_amp_all(self.eq_amp,verbose=verbose)
-    #    self.eq_save(name,mode,self.eq_amp)
-
     def eq_init_amp(self,load_pickle=False,verbose=False,use_base=True,use_bandpass=True,use_cal=True,fmt='poly',write=True):
         name='xengine'
         mode = 'amp'

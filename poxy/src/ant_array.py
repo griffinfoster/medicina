@@ -15,11 +15,16 @@ class Array:
         self.ants=self.config.antennas.ant
         self.ref_ant=self.config.antennas.reference
         self.receiver = self.config.receiver
+        self.grid = self.config.grid
 
     def loc(self,ant_index):
         '''Return the location of an antenna element in list format'''
         pos = self.ants[ant_index].position
         return [pos.x, pos.y, pos.z]
+
+    def get_grid_position(self,ant_index):
+        pos = self.ants[ant_index].position
+        return [pos.grid['x'],pos.grid['y']]
 
     def get_input_num(self,ant_index):
         '''Return the ADC input channel number of an antenna'''

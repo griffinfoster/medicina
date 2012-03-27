@@ -45,9 +45,19 @@ rewire = {
         10:20, 26:21, 11:22, 27:23,
         12:24, 28:25, 13:26, 29:27,
         14:28, 30:29, 15:30, 31:31  }
+eqrewire = {
+        0:0,   8:1,  16:2,  24:3,
+        4:4,  12:5,  20:6,  28:7,
+        1:8,   9:9,  17:10, 25:11,
+        5:12, 13:13, 21:14, 29:15,
+        2:16, 10:17, 18:18, 26:19,
+        6:20, 14:21, 22:22, 30:23,
+        3:24, 11:25, 19:26, 27:27,
+        7:28, 15:29, 23:30, 31:31  }
 
 hist_str = """CORR CORRECT:Corrected Correlator output to be aligned with the Medicina array layout,
-set to single polarization, removed redundant baselines"""
+set to single polarization, removed redundant baselines.
+08/03/2012 Fixed labelling of EQ coefficients"""
 
 for fn in h5fns:
     new_fn = fn + "c"
@@ -135,8 +145,23 @@ for fn in h5fns:
                prefix='eq_amp_coeff_'
 
             ant=int(ds.split('_')[-1][:-1])
-            if ds[-1] == 'y': ant+=n_ants/2
-            ant=rewire[ant]
+            if ds[-1] == 'y': print "WHOA! Y-pol EQ value found in", ds
+            ant=eqrewire[ant]
+            new_key = prefix + '%ix'%ant
+            rv=eq_group.create_dataset(new_key, data=fh[ds])
+        elif ds.startswith('eq_phs_coeff'):
+            if ds.startswith('eq_phs_coeff_cal'):
+                prefix='eq_phs_coeff_cal_'
+            elif ds.startswith('eq_phs_coeff_bandpass'):
+                prefix='eq_phs_coeff_bandpass_'
+            elif ds.startswith('eq_phs_coeff_base'):
+                prefix='eq_phs_coeff_base_'
+            else:
+               prefix='eq_phs_coeff_'
+
+            ant=int(ds.split('_')[-1][:-1])
+            if ds[-1] == 'y': print "WHOA! Y-pol EQ value found in", ds
+            ant=eqrewire[ant]
             new_key = prefix + '%ix'%ant
             rv=eq_group.create_dataset(new_key, data=fh[ds])
         elif ds.startswith('eq_amp'):
