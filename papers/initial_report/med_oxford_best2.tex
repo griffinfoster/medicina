@@ -456,7 +456,6 @@ An effect of the density of the antenna layout is a low point spread function(PS
 The grid layout of the BEST-2 array produces strong sidelobes and grating lobes in the PSF as seen in figure \ref{fig:fx_tau_psf}.
 Observations of bright point sources produces calibrated dirty images in which the PSF is clearly visible, fig. \ref{fig:fx_tau_dirty}.
 
-
 %image: raw,psf,dirty,clean
 \begin{figure}
     \centering
@@ -502,7 +501,7 @@ The sun is approximately a half a degree in size, since the longest north-south 
 
     \subfloat[Observation of the Cassiopeia A field on Julian Date 2455985, scale is in Janskys.]{
     \includegraphics[scale=0.3]{{graphics/fx/corr.2455985.00383.cas.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
-    \label{fig:fx_cas}
+    \label{fig:fx_cas_nosun}
     }
     \hspace{10pt}
     \subfloat[Observation of the same field ten days later on Julian Date 2455996. The Sun is slightly resolved in the North-South direction. The sun is at declination $-4^{\circ}$, about $62^{\circ}$ from the field of view but is within one of the primary beam sidelobes and has an apparent declination position at $58^{\circ}$.]{
@@ -583,11 +582,52 @@ This scale can be set during the observation or in post processing since it is a
 
 \subsection{Comparison of FX Correlator and Spatial FFT}
 
-In the ideal case, observations using the spatial FFT will be identical to observations using an FX correlator.
-
 %calibration variation
-%images: 3c48 dirty/clean
+In the ideal case, observations using the spatial FFT will be identical to observations using an FX correlator.
+The ability to solve for independent complex gain terms post observation is not possible with the spatial FFT.
+Calibration must therefore be applied in real time during the observation.
+Deriving the complex gain terms to be applied to the antennas can be achieved in any desired calibration method.
+But time dependent variations in complex gains introduce errors phase and amplitude errors into baselines.
+
+%images: 3c48 clean
+\begin{figure}
+    \centering
+
+    \subfloat[]{
+    \includegraphics[scale=0.3]{{graphics/3c48/corr.2455996.06793.3c48.s.cal.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
+    \label{fig:fx_3c48_clean}
+    }
+    \hspace{10pt}
+    \subfloat[]{
+    \includegraphics[scale=0.3]{{graphics/3c48/img.2455996.05169.48.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
+    \label{fig:sfft_3c48_clean}
+    }
+    
+    \label{fig:3c48}
+    \caption{
+    }
+\end{figure}
+
 %images: cas + sun
+\begin{figure}
+    \centering
+
+    \subfloat[]{
+    \includegraphics[scale=0.3]{{graphics/cas/corr.2455995.97200.cas.s.g.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
+    \label{fig:fx_cas_sun}
+    }
+    \hspace{10pt}
+    \subfloat[]{
+    \includegraphics[scale=0.3]{{graphics/cas/img.2455995.95763.cas.s.ms.DATA.channel.1ch.restored}.pdf}
+    \label{fig:sfft_cas_sun}
+    }
+    
+    \label{fig:cas_sun}
+    \caption{
+    }
+\end{figure}
+
+%images: 3c fields
 %baselines: fx,avg,mdl,sfft
 %error analysis
 
