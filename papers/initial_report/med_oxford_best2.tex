@@ -135,7 +135,7 @@ Right ascension 		&       1.73 &     deg 		\\
 
 \begin{figure}
     \centering
-    \subfloat[The 32 effective receiving elements of BEST-2, indicated by crosses, lie on a regular 4x8 grid. Each receiver is the analogue sum of 16 dipoles, critically spaced at 408MHz in the East-West direction.]{
+    \subfloat[The 32 effective receiving elements of BEST-2, indicated by crosses, lie on a regular 4x8 grid. Each receiver is the analogue sum of 16 dipoles, critically spaced at 408 MHz in the East-West direction.]{
     \includegraphics[scale=0.6]{graphics/layout.png}
     \label{fig:ant_layout}
     }
@@ -394,13 +394,6 @@ A suite of python scripts have been written to interface and manipulate the data
 A python FITS-IDI package has been written to convert HDF5 files into the standard FITS format which can be read by AIPS and CASA\footnote{https://github.com/telegraphic/pyfitsidi}.
 This allows for conversion to the Measurement Set format which most packages can interface with.
 
-%A number of calibration methods has been tested on the initial data sets.
-%Traditional CASA based calibration has been used to form correlator images.
-%To produce calibration coefficients for the spatial FFT imager a column ratio gain estimation method has been employed.
-%A study of the baseline redundancy and possible calibration has also been undertaken.
-%Long observations of the sky are under way to understand the system noise and our ability to reach the confusion limit.
-%During deep integration observations a cross talk issue covering part of the band has been discovered.
-
 \subsection{Calibration Methods}
 \label{calibration}
 
@@ -442,7 +435,7 @@ During setup intial obseravtions were made of Cygnus A, Cassiopeia A, Taurus A a
 \begin{figure}
     \centering
     \includegraphics[scale=0.6]{{graphics/pb/best2_3_20_primary_beam}.pdf}
-    \caption{Measured east-west primary beam for antenna 1N-6-1, which is representitive of a typical antenna, based on a Cassiopeia A transit. The dashed lines indicate the FWHM points. Note the first sidelobes are only -15 dB down.}
+    \caption{Measured east-west primary beam for antenna 1N-6-1, which is representitive of a typical antenna, based on a Cassiopeia A transit. The dashed lines indicate the FWHM points. The first sidelobes are -15 dB down from the peak.}
     \label{fig:best2_pb}
 \end{figure}
 
@@ -458,63 +451,145 @@ Each individual source is further calibrated in MeqTrees\citep{meqtrees} based o
 This stage is calibrated on short time intervals to account for amplitude changes from the primary beam.
 
 %psf/dirty/clean
-An effect of the density of the antenna layout is a low point spread function(PSF) to field of view ratio thus images tend to contain at most a few point sources.
-The grid layout of the BEST-2 array produces strong sidelobes and grating lobes in the PSF as seen in figure \ref{fig:psf}.
-
 %dynamic range/noise
-%weighting
-%image: tau(raw,psf,dirty,clean)
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.6]{{graphics/img.2455999.21403.tau.cal.s.ms.psf.channel.1ch.mod}.pdf}
-    \caption{PSF of a two minute snapshot image. The high, regular sidelobes are an effect of the regularly gridded array.}
-    \label{fig:psf}
-\end{figure}
+An effect of the density of the antenna layout is a low point spread function(PSF) to field of view ratio, or spatial fidelity, thus images tend to contain at most a few spatial seperate point sources.
+The grid layout of the BEST-2 array produces strong sidelobes and grating lobes in the PSF as seen in figure \ref{fig:fx_tau_psf}.
+Observations of bright point sources produces calibrated dirty images in which the PSF is clearly visible, fig. \ref{fig:fx_tau_dirty}.
 
+
+%image: raw,psf,dirty,clean
 \begin{figure}
     \centering
 
-    \subfloat[]{
+    \subfloat[Uncalibrated image of Taurus A, the units are raw correlator values.]{
     \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.DATA.channel.1ch}.pdf}
     \label{fig:fx_tau_data}
     }
-    \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.psf.channel.1ch}.pdf}
+    \hspace{10pt}
+    \subfloat[Point spread function. The high, regular sidelobes are an effect of the regularly gridded array.]{
+    %\includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.psf.channel.1ch}.pdf}
+    \includegraphics[scale=0.3]{{graphics/img.2455999.21403.tau.cal.s.ms.psf.channel.1ch.mod}.pdf}
     \label{fig:fx_tau_psf}
     }
     
-    \subfloat[]{
+    \subfloat[Image formed, using natural weighting, after applying complex gain solutions. The flux scale(Jy) has been set by the flux of the calibration source.]{
     \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
     \label{fig:fx_tau_dirty}
     }
+    \hspace{10pt}
     \subfloat[]{
     \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
     \label{fig:fx_tau_clean}
     }
     
     \label{fig:fx_tau}
+    \caption{Images and PSF formed from an FX correlator snapshot observation of Taurus A.
+    }
+\end{figure}
+
+%solar observation
+\subsubsection{Solar Observation during Highly Active Period}
+
+During observations in March 2012 the Sun was at a similar sidereal time as Cassiopeia A.
+In that time the Sun was undergoing a very active period.
+Even though the Sun was at a declination of approximately $-4^{\circ}$, over $60^{\circ}$ way from Cassiopeia A, the source appears in the same field.
+A combintation of high primary beam sidelobes and an active solar period led to the sun being detected $62^{\circ}$ away from it's actual position.
+The sun is approximately a half a degree in size, since the longest north-south baseline is about the same size we begin to resolve the sun in that direction.
+
+%image: cas, cas+sun
+\begin{figure}
+    \centering
+
+    \subfloat[Observation of the Cassiopeia A field on Julian Date 2455985, scale is in Janskys.]{
+    \includegraphics[scale=0.3]{{graphics/fx/corr.2455985.00383.cas.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
+    \label{fig:fx_cas}
+    }
+    \hspace{10pt}
+    \subfloat[Observation of the same field ten days later on Julian Date 2455996. The Sun is slightly resolved in the North-South direction. The sun is at declination $-4^{\circ}$, about $62^{\circ}$ from the field of view but is within one of the primary beam sidelobes and has an apparent declination position at $58^{\circ}$.]{
+    \includegraphics[scale=0.3]{{graphics/fx/corr.2455995.97200.cas.s.g.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
+    \label{fig:fx_cas_sun}
+    }
+    
+    \label{fig:fx_cas}
     \caption{
     }
 \end{figure}
 
-%image: cas, cas+sun
+%weighting
+\subsubsection{Weighting for a Regularly Gridded Array}
+
+As noted earlier, the regular gridded array produces many highly redundant baselines.
+When forming the dirty image from uv samples the choice of weighting greatly effects the outcome of the image.
+In the highly redundant array case of BEST-2 the effects of using uniform versus natural weighting can be seen in fig. \ref{fig:fx_weighting}.
+The uniform weighting scheme significantly reduces the sensitivity the image for a small improvement in spatial resolution.
+We have used a natural weighting scheme through out to produce images.
+It is worth noting that the baselines produced by the spatial FFT instrument are already in a 'natural' weighting scheme since all redundant baselines are effectively summed together into a single baseline.
+To change the weighting of the spatial FFT baselines reweighting factors must be added to the data based on how redundant each baseline is.
+
 %image: natural,uniform
+\begin{figure}
+    \centering
+
+    \subfloat[Dirty image with natural weighting of the point source Taurus A.]{
+    \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.natural.CORRECTED_DATA.channel.1ch}.pdf}
+    \label{fig:fx_tau_natural}
+    }
+    \hspace{10pt}
+    \subfloat[Dirty image with uniform weighting of the point source Taurus A.]{
+    \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.uniform.CORRECTED_DATA.channel.1ch}.pdf}
+    \label{fig:fx_tau_uniform}
+    }
+    
+    \label{fig:fx_weighting}
+    \caption{
+    }
+\end{figure}
 
 \subsection{Spatial FFT Results}
 \label{sfft results}
 
 %beam crossing/imaging/beamformer
+
 %conversion to baselines
+The output image data from the spatial FFT can be converted to uv sampled baselines by performing an inverse FFT.
+All redundant baselines are combined into a single unique baseline which makes pre-measurement calibration essential to producing a good observable.
+In total 52 unique baselines are produced along with the auto correlation.
+Each unique spatial FFT baseline is a linear combination of antenna pair baselines at the same uv position.
+Once in the baseline correlation format the same pipeline that is used for the FX correlator is used to convert the data into measurement sets.
+
 %dirty/clean images
+Antenna gain calibration can not be performed on the spatial FFT correlations since each baseline is made up of a linear combination of redundant baselines.
+Thus no calibration is applied to the output data.
+The flux scale is set by using the flux scale from the FX images.
+This scale can be set during the observation or in post processing since it is a baseline independent amplitude scaling.
+
+\begin{figure}
+    \centering
+
+    \subfloat[Dirty image of Taurus formed from the spatial FFT imagers, the flux scale(Jy) has been fixed to the scale based on the same image from the FX correlator.]{
+    \includegraphics[scale=0.3]{{graphics/sfft/img.2455996.22807.tau.s.ms.DATA.channel.1ch}.pdf}
+    \label{fig:sfft_tau_dirty}
+    }
+    \hspace{10pt}
+    \subfloat[Cleaned image of the Taurus field.]{
+    \includegraphics[scale=0.3]{{graphics/sfft/img.2455996.22807.tau.s.ms.DATA.channel.1ch.restored}.pdf}
+    \label{fig:sfft_tau_clean}
+    }
+    
+    \label{fig:sfft_tau}
+    \caption{The images produced by the spatial FFT imager are comparable in noise and dynamic range to those produced with calibrated FX correlator data.
+    }
+\end{figure}
 
 \subsection{Comparison of FX Correlator and Spatial FFT}
 
-In the ideal case observations using the spatial FFT will be identical to observations using an FX correlator.
+In the ideal case, observations using the spatial FFT will be identical to observations using an FX correlator.
 
 %calibration variation
 %images: 3c48 dirty/clean
 %images: cas + sun
 %baselines: fx,avg,mdl,sfft
+%error analysis
 
 \section{Discussion}
 \label{discussion}
