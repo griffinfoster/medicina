@@ -442,12 +442,12 @@ During setup intial obseravtions were made of Cygnus A, Cassiopeia A, Taurus A a
 %calibration/flux scale
 A transiting array provides a unique challenge of gain calibration since a source's apparent gain will change as it transits the primary beam.
 To account for this a two stage gain calibation method is used.
-Phase calibration and setting the flux scale is accomplished using Cas A and Cyg A observations as point source sky models set to their 3C flux levels and known spectral indices.
+Phase calibration and setting the flux scale is accomplished using Casseiopia A and Cygnus A observations as point source sky models set to their 3C flux levels and known spectral indices.
 Since these sources are very bright a only a few seconds at transit is needed produce a high SNR dataset to use for calibration.
 Over this period the primary beam can be approximated as flat.
 A time independent complex gain is derived for a coarse calibration.
 After applying the gain corrections an observation will be set to a flux scale relative to the flux of the calibration source.
-Each individual source is further calibrated in MeqTrees\citep{meqtrees} based on a local sky model taken from the 3C catalog.
+Each individual source is then self calibrated in MeqTrees\citep{meqtrees} based on a local sky model taken from the 3C catalog.
 This stage is calibrated on short time intervals to account for amplitude changes from the primary beam.
 
 %psf/dirty/clean
@@ -589,41 +589,88 @@ Calibration must therefore be applied in real time during the observation.
 Deriving the complex gain terms to be applied to the antennas can be achieved in any desired calibration method.
 But time dependent variations in complex gains introduce errors phase and amplitude errors into baselines.
 
-%images: 3c48 clean
+%images: compare images of FX and SFFT
 \begin{figure}
     \centering
 
     \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/3c48/corr.2455996.06793.3c48.s.cal.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
-    \label{fig:fx_3c48_clean}
+    \includegraphics[scale=0.3]{{graphics/3c10/corr.2455996.01891.10.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \label{fig:fx_3c10_dirty}
     }
     \hspace{10pt}
     \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/3c48/img.2455996.05169.48.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
-    \label{fig:sfft_3c48_clean}
+    \includegraphics[scale=0.3]{{graphics/3c10/img.2455996.00424.10.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \label{fig:sfft_3c10_dirty}
     }
+    \vspace{-10pt}
+
+    \subfloat[]{
+    \includegraphics[scale=0.3]{{graphics/3c48/corr.2455996.06793.3c48.s.cal.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \label{fig:fx_3c48_dirty}
+    }
+    \hspace{10pt}
+    \subfloat[]{
+    \includegraphics[scale=0.3]{{graphics/3c48/img.2455996.05169.48.s.ms.DATA.channel.1ch}.pdf}
+    \label{fig:sfft_3c48_dirty}
+    }
+    \vspace{-10pt}
     
-    \label{fig:3c48}
-    \caption{
+    \subfloat[]{
+    \includegraphics[scale=0.3]{{graphics/3c123/corr.2455996.19182.123.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \label{fig:fx_3c123_dirty}
+    }
+    \hspace{10pt}
+    \subfloat[]{
+    \includegraphics[scale=0.3]{{graphics/3c123/img.2455996.17741.123.s.ms.DATA.channel.1ch}.pdf}
+    \label{fig:sfft_3c123_dirty}
+    }
+
+    \label{fig:fx_sfft_set1}
+    \caption{Dirty images formed from simultaneous observation of various sources with the FX correlator and spatial FFT imager.
+    The left column is from FX correlator data, the right column is spatial FFT data.
+    Sources are 3c10 (fig. \ref{fig:fx_3c10_dirty},\ref{fig:sfft_3c10_dirty}), 3c48 (fig. \ref{fig:fx_3c48_dirty},\ref{fig:sfft_3c48_dirty}), 3c123 (fig. \ref{fig:fx_3c123_dirty},\ref{fig:sfft_3c123_dirty}).
     }
 \end{figure}
 
-%images: cas + sun
 \begin{figure}
     \centering
 
     \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/cas/corr.2455995.97200.cas.s.g.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
-    \label{fig:fx_cas_sun}
+    \includegraphics[scale=0.3]{{graphics/3c157/corr.2455994.26279.157.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \label{fig:fx_3c157_dirty}
     }
     \hspace{10pt}
     \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/cas/img.2455995.95763.cas.s.ms.DATA.channel.1ch.restored}.pdf}
-    \label{fig:sfft_cas_sun}
+    \includegraphics[scale=0.3]{{graphics/3c157/img.2455999.24137.157.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \label{fig:sfft_3c157_dirty}
     }
+    \vspace{-10pt}
     
-    \label{fig:cas_sun}
-    \caption{
+    \subfloat[]{
+    \includegraphics[scale=0.3]{{graphics/3c196/corr.2455994.34354.196.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \label{fig:fx_3c196_dirty}
+    }
+    \hspace{10pt}
+    \subfloat[]{
+    \includegraphics[scale=0.3]{{graphics/3c196/img.2455999.32370.196.s.ms.DATA.channel.1ch}.pdf}
+    \label{fig:sfft_3c196_dirty}
+    }
+    \vspace{-10pt}
+    
+    \subfloat[]{
+    \includegraphics[scale=0.3]{{graphics/cas/corr.2455995.97200.cas.s.g.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \label{fig:fx_cas_sun_dirty}
+    }
+    \hspace{10pt}
+    \subfloat[]{
+    \includegraphics[scale=0.3]{{graphics/cas/img.2455995.95763.cas.s.ms.DATA.channel.1ch}.pdf}
+    \label{fig:sfft_cas_sun_dirty}
+    }
+
+    \label{fig:fx_sfft_set2}
+    \caption{Dirty images formed from simultaneous observation of various sources with the FX correlator and spatial FFT imager.
+    The left column is from FX correlator data, the right column is spatial FFT data.
+    Sources are 3c157 (fig. \ref{fig:fx_3c157_dirty},\ref{fig:sfft_3c157_dirty}), 3c196 (fig. \ref{fig:fx_3c196_dirty},\ref{fig:sfft_3c196_dirty}), Cassiopeia A with the sun in a sidelobe (fig. \ref{fig:fx_cas_sun_dirty},\ref{fig:sfft_cas_sun_dirty}).
     }
 \end{figure}
 
