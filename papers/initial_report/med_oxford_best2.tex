@@ -46,7 +46,8 @@ The direct imaging system is being used to study the feasibility of such systems
 Since deployment, a number of sources with the correlator and imager have been successfully observed.
 Data has been reduced and calibrated using a combination of custom software and standard radio synthesis imaging packages.
 
-In the first section of this paper we give an overview of the BEST-2 Array, followed by a description of the channelization, correlation and image-domain processing systems in Sections \ref{channelization}, \ref{correlator} and \ref{s-engine}, respectively. Results from preliminary observations of bright radio sources from these systems are presented in Section \ref{results}, with a discussion of these in Section \ref{discussion}.
+In the first section of this paper we give an overview of the BEST-2 Array, followed by a description of the channelization, correlation and image-domain processing systems in Sections \ref{channelization}, \ref{correlator} and \ref{s-engine}, respectively.
+Results from preliminary observations of bright radio sources from these systems are presented in Sections \ref{fx_results} and \ref{sfft_results}, with a discussion of these in Section \ref{discussion}.
 
 \subsection{BEST-2 Array}
 \label{best-2 array}
@@ -264,10 +265,10 @@ QDR Memory 		& 2 / 2 	& Cornerturn\\
 
 An FX correlator design is a standard design for large bandwidth and many antenna arrays.
 The F component represents the frequency channelization, and the X is a complex multiply and accumulate (CMAC).
-An overview of the architecture is presented in \citep{}.
+An overview of the architecture is presented in \citep{casper}.
 Architecture efficiency goes as $O( M \textrm{log} M) + O( N^2)$ where $M$ is the number of FFT frequency channels and $N$ is the number of antenna-polarizations.
 The core component to the X stage of the FX correlator is the complex multiplication of all pairs of independent signals for each frequency channel.
-A pipelined x-engine, based on the general CASPER block originally designed by Lynn Urry\citep{}, is used for multiplier efficiency.
+A pipelined x-engine, based on the general CASPER block originally designed by Lynn Urry\citep{fxcorrelator}, is used for multiplier efficiency.
 The pipeline design is constructed out of $M/2$ 'taps' where the $i^{th}$ tap computes the correlation between antennas $A_j$ and $A_{j+i}$ for every antenna $A_j$ of $M$ total antennas.
 To maximize the multiplier usage a loopback is added to use every $i^{th}$ tap to compute the correlation of antennas $A_j$ and $A_{M/2+j+i}$, fig. \ref{fig:xeng_pipe}.
 Each tap accumulates for $N$ time samples to reduce the output data rate.
@@ -407,12 +408,12 @@ In initial observations the column ratio gain estimation method from \citep{gain
 %SFFT correlations of Tau/3c144 before and after calibration
 \begin{figure}
     \centering
-    \subfloat[Dirty image of Tau/3c144 formed before applying complex gain calibrations in the F-Engine for the spatial FFT.]{
+    \subfloat[Dirty image of Tau/3c144 formed before applying complex gain calibrations in the F-Engine for the spatial FFT. The uncalibrated phases spread the power through out the image.]{
     \includegraphics[scale=0.3]{{graphics/img.2455985.25525.tau.uncal.s.ms.DATA.channel.1ch}.pdf}
     \label{fig:uncal_sfft}
     }
     \hspace{10pt}
-    \subfloat[Dirty image of Tau/3c144 with complex gain calibrations applied. This image has a signal to noise ratio around 20, a standard CLEAN method can be used to improve the image dynamic range.]{
+    \subfloat[Dirty image of Tau/3c144 with complex gain calibrations applied. This image has a signal to noise ratio around 100, a standard CLEAN method can be used to improve the image dynamic range.]{
     \includegraphics[scale=0.3]{{graphics/img.2455999.21403.tau.cal.s.ms.DATA.channel.1ch}.pdf}
     \label{fig:cal_sfft}
     }
@@ -422,7 +423,7 @@ In initial observations the column ratio gain estimation method from \citep{gain
 \end{figure}
 
 \subsection{FX Correlator Imaging}
-\label{fx results}
+\label{fx_results}
 
 The East-West full width half max (FWHM) beam size of an individual element is $\approx11.25^{\circ}$ which translates to a 45 minute 'transit time' for an source as seen in the measured primary beam, figure \ref{fig:best2_pb}.
 For the the bright A class sources this time can be extended since they remain the dominating source well after crossing the FWHM.
@@ -435,7 +436,7 @@ During setup intial obseravtions were made of Cygnus A, Cassiopeia A, Taurus A a
 \begin{figure}
     \centering
     \includegraphics[scale=0.6]{{graphics/pb/best2_3_20_primary_beam}.pdf}
-    \caption{Measured east-west primary beam for antenna 1N-6-1, which is representitive of a typical antenna, based on a Cassiopeia A transit. The dashed lines indicate the FWHM points. The first sidelobes are -15 dB down from the peak.}
+    \caption{Measured east-west primary beam based on the correlation between antennas 1N-6-1 and 1N-1-3, which are representitive of typical antennas, based on a Cassiopeia A transit. The dashed lines indicate the FWHM points. The antennas should have a sinc response to a point source, as expected the first sidelobes are -15 dB down from the peak.}
     \label{fig:best2_pb}
 \end{figure}
 
@@ -451,39 +452,40 @@ Each individual source is then self calibrated in MeqTrees\citep{meqtrees} based
 This stage is calibrated on short time intervals to account for amplitude changes from the primary beam.
 
 %psf/dirty/clean
-%dynamic range/noise
+%dynamic range/noise/SEFD
 An effect of the density of the antenna layout is a low point spread function(PSF) to field of view ratio, or spatial fidelity, thus images tend to contain at most a few spatial seperate point sources.
 The grid layout of the BEST-2 array produces strong sidelobes and grating lobes in the PSF as seen in figure \ref{fig:fx_tau_psf}.
 Observations of bright point sources produces calibrated dirty images in which the PSF is clearly visible, fig. \ref{fig:fx_tau_dirty}.
+After cleaning the we measure the residual noise to be around 2 Jy over a number of two minute snapshot observations.
+Imaging using longer source transit times has shown the noise floor to decrease at the expected rate.
 
 %image: raw,psf,dirty,clean
 \begin{figure}
     \centering
 
-    \subfloat[Uncalibrated image of Taurus A, the units are raw correlator values.]{
+    \subfloat[Uncalibrated image of Taurus A.]{
     \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.DATA.channel.1ch}.pdf}
     \label{fig:fx_tau_data}
     }
     \hspace{10pt}
     \subfloat[Point spread function. The high, regular sidelobes are an effect of the regularly gridded array.]{
-    %\includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.psf.channel.1ch}.pdf}
     \includegraphics[scale=0.3]{{graphics/img.2455999.21403.tau.cal.s.ms.psf.channel.1ch.mod}.pdf}
     \label{fig:fx_tau_psf}
     }
     
-    \subfloat[Image formed, using natural weighting, after applying complex gain solutions. The flux scale(Jy) has been set by the flux of the calibration source.]{
+    \subfloat[Dirty image formed, using natural weighting, after applying complex gain solutions. The structure from the PSF is clearly visible. The dynamic range of this image is $\sim150$.]{
     \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
     \label{fig:fx_tau_dirty}
     }
     \hspace{10pt}
-    \subfloat[]{
+    \subfloat[Cleaned image of the field, Taurus A is the dominating point source with a peak of 730 Jy, the image have a dynamic range of $\sim350$.]{
     \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
     \label{fig:fx_tau_clean}
     }
     
-    \label{fig:fx_tau}
     \caption{Images and PSF formed from an FX correlator snapshot observation of Taurus A.
     }
+    \label{fig:fx_tau}
 \end{figure}
 
 %solar observation
@@ -499,12 +501,12 @@ The sun is approximately a half a degree in size, since the longest north-south 
 \begin{figure}
     \centering
 
-    \subfloat[Observation of the Cassiopeia A field on Julian Date 2455985, scale is in Janskys.]{
+    \subfloat[Observation of the Cassiopeia A field on Julian Date 2455985, the flux has been fixed to 5600 Jy with a dynamic range of $\sim900$. The structure on the edge of the image are likely from the sun begining to come into the field of view.]{
     \includegraphics[scale=0.3]{{graphics/fx/corr.2455985.00383.cas.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
     \label{fig:fx_cas_nosun}
     }
     \hspace{10pt}
-    \subfloat[Observation of the same field ten days later on Julian Date 2455996. The Sun is slightly resolved in the North-South direction. The sun is at declination $-4^{\circ}$, about $62^{\circ}$ from the field of view but is within one of the primary beam sidelobes and has an apparent declination position at $58^{\circ}$.]{
+    \subfloat[Observation of the same field ten days later on Julian Date 2455996. The Sun is slightly resolved in the North-South direction. The sun is at declination $-4^{\circ}$, about $62^{\circ}$ from the field of view but is within one of the primary beam sidelobes and has an apparent declination position at $58^{\circ}$. Using the same flux scale from the previous Cassiopeia A observation the Sun is measured to have a flux of 6000 Jy. Though, since the sun is being observed through a sidelobe this value is attenuated compared to the actual value.]{
     \includegraphics[scale=0.3]{{graphics/fx/corr.2455995.97200.cas.s.g.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
     \label{fig:fx_cas_sun}
     }
@@ -539,13 +541,13 @@ To change the weighting of the spatial FFT baselines reweighting factors must be
     \label{fig:fx_tau_uniform}
     }
     
-    \label{fig:fx_weighting}
     \caption{
     }
+    \label{fig:fx_weighting}
 \end{figure}
 
-\subsection{Spatial FFT Results}
-\label{sfft results}
+\subsection{Spatial FFT Results and Comparison to the FX Correlator}
+\label{sfft_results}
 
 %beam crossing/imaging/beamformer
 
@@ -561,16 +563,21 @@ Antenna gain calibration can not be performed on the spatial FFT correlations si
 Thus no calibration is applied to the output data.
 The flux scale is set by using the flux scale from the FX images.
 This scale can be set during the observation or in post processing since it is a baseline independent amplitude scaling.
+The figures \ref{fig:sfft_tau_dirty} and \ref{fig:sfft_tau_clean} show the dirty and clean images of Taurus A during a properly calibrated observation.
+The signal to noise of the images are comparable to that of the images formed with the FX correlator during the same observation, fig. \ref{fig:fx_tau}.
+We expect both instruments to produce comparable results, though there has been an open question as to how 'good' the real time calibration must be and how often this calibration must change.
+In the following section we look at the results of observations from both instrument to understand to the quality of images produced by the spatial FFT relative to that of the FX correlator.
 
 \begin{figure}
     \centering
 
-    \subfloat[Dirty image of Taurus formed from the spatial FFT imagers, the flux scale(Jy) has been fixed to the scale based on the same image from the FX correlator.]{
+    \subfloat[Dirty image of Taurus formed from the spatial FFT imager, the flux scale has been fixed to the scale based on the same image from the FX correlator. The dynamic range,$\sim100$, is less than that of the FX correlator image, $\sim150$.]{
     \includegraphics[scale=0.3]{{graphics/sfft/img.2455996.22807.tau.s.ms.DATA.channel.1ch}.pdf}
     \label{fig:sfft_tau_dirty}
     }
     \hspace{10pt}
-    \subfloat[Cleaned image of the Taurus field.]{
+    \subfloat[Cleaned image of the Taurus field. The cleaning process brings the dyanmic range up to around 300, similar to the value from the FX correlator image in fig. \ref{fig:fx_tau_clean}.
+    A notable feature about the the cleaned images from the spatial FFT is the apparent low level skewing of the image, particularly in the east-west direction.]{
     \includegraphics[scale=0.3]{{graphics/sfft/img.2455996.22807.tau.s.ms.DATA.channel.1ch.restored}.pdf}
     \label{fig:sfft_tau_clean}
     }
@@ -580,13 +587,11 @@ This scale can be set during the observation or in post processing since it is a
     }
 \end{figure}
 
-\subsection{Comparison of FX Correlator and Spatial FFT}
-
 %calibration variation
 In the ideal case, observations using the spatial FFT will be identical to observations using an FX correlator.
 The ability to solve for independent complex gain terms post observation is not possible with the spatial FFT.
 Calibration must therefore be applied in real time during the observation.
-Deriving the complex gain terms to be applied to the antennas can be achieved in any desired calibration method.
+Deriving the complex gain terms to be applied to the antennas can be achieved with any desired calibration method.
 But time dependent variations in complex gains introduce errors phase and amplitude errors into baselines.
 
 %images: compare images of FX and SFFT
@@ -594,89 +599,155 @@ But time dependent variations in complex gains introduce errors phase and amplit
     \centering
 
     \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/3c10/corr.2455996.01891.10.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    %\includegraphics[scale=0.3]{{graphics/3c10/corr.2455996.01891.10.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \includegraphics[scale=0.3]{{graphics/3c10/corr.2455996.01891.10.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
     \label{fig:fx_3c10_dirty}
     }
     \hspace{10pt}
     \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/3c10/img.2455996.00424.10.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    %\includegraphics[scale=0.3]{{graphics/3c10/img.2455996.00424.10.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \includegraphics[scale=0.3]{{graphics/3c10/img.2455996.00424.10.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
     \label{fig:sfft_3c10_dirty}
     }
     \vspace{-10pt}
 
     \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/3c48/corr.2455996.06793.3c48.s.cal.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    %\includegraphics[scale=0.3]{{graphics/3c48/corr.2455996.06793.3c48.s.cal.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \includegraphics[scale=0.3]{{graphics/3c48/corr.2455996.06793.3c48.s.cal.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
     \label{fig:fx_3c48_dirty}
     }
     \hspace{10pt}
     \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/3c48/img.2455996.05169.48.s.ms.DATA.channel.1ch}.pdf}
+    %\includegraphics[scale=0.3]{{graphics/3c48/img.2455996.05169.48.s.ms.DATA.channel.1ch}.pdf}
+    \includegraphics[scale=0.3]{{graphics/3c48/img.2455996.05169.48.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
     \label{fig:sfft_3c48_dirty}
     }
     \vspace{-10pt}
     
     \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/3c123/corr.2455996.19182.123.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    %\includegraphics[scale=0.3]{{graphics/3c123/corr.2455996.19182.123.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \includegraphics[scale=0.3]{{graphics/3c123/corr.2455996.19182.123.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
     \label{fig:fx_3c123_dirty}
     }
     \hspace{10pt}
     \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/3c123/img.2455996.17741.123.s.ms.DATA.channel.1ch}.pdf}
+    \includegraphics[scale=0.3]{{graphics/3c123/img.2455996.17741.123.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
+    %\includegraphics[scale=0.3]{{graphics/3c123/img.2455996.17741.123.s.ms.DATA.channel.1ch}.pdf}
     \label{fig:sfft_3c123_dirty}
     }
 
-    \label{fig:fx_sfft_set1}
     \caption{Dirty images formed from simultaneous observation of various sources with the FX correlator and spatial FFT imager.
     The left column is from FX correlator data, the right column is spatial FFT data.
     Sources are 3c10 (fig. \ref{fig:fx_3c10_dirty},\ref{fig:sfft_3c10_dirty}), 3c48 (fig. \ref{fig:fx_3c48_dirty},\ref{fig:sfft_3c48_dirty}), 3c123 (fig. \ref{fig:fx_3c123_dirty},\ref{fig:sfft_3c123_dirty}).
+    The FX correlator and spatial FFT images have comparable noise floors of about 2 Jy in all images and difference in dynamic range varying from a few percent to 10 percent depending on the source.
     }
+    \label{fig:fx_sfft_set1}
 \end{figure}
 
 \begin{figure}
     \centering
 
     \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/3c157/corr.2455994.26279.157.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \includegraphics[scale=0.3]{{graphics/3c157/corr.2455994.26279.157.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
+    %\includegraphics[scale=0.3]{{graphics/3c157/corr.2455994.26279.157.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
     \label{fig:fx_3c157_dirty}
     }
     \hspace{10pt}
     \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/3c157/img.2455999.24137.157.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    %\includegraphics[scale=0.3]{{graphics/3c157/img.2455999.24137.157.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \includegraphics[scale=0.3]{{graphics/3c157/img.2455999.24137.157.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
     \label{fig:sfft_3c157_dirty}
     }
     \vspace{-10pt}
     
     \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/3c196/corr.2455994.34354.196.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    %\includegraphics[scale=0.3]{{graphics/3c196/corr.2455994.34354.196.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \includegraphics[scale=0.3]{{graphics/3c196/corr.2455994.34354.196.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
     \label{fig:fx_3c196_dirty}
     }
     \hspace{10pt}
     \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/3c196/img.2455999.32370.196.s.ms.DATA.channel.1ch}.pdf}
+    %\includegraphics[scale=0.3]{{graphics/3c196/img.2455999.32370.196.s.ms.DATA.channel.1ch}.pdf}
+    \includegraphics[scale=0.3]{{graphics/3c196/img.2455999.32370.196.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
     \label{fig:sfft_3c196_dirty}
     }
     \vspace{-10pt}
     
     \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/cas/corr.2455995.97200.cas.s.g.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    %\includegraphics[scale=0.3]{{graphics/cas/corr.2455995.97200.cas.s.g.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \includegraphics[scale=0.3]{{graphics/cas/corr.2455995.97200.cas.s.g.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
     \label{fig:fx_cas_sun_dirty}
     }
     \hspace{10pt}
     \subfloat[]{
-    \includegraphics[scale=0.3]{{graphics/cas/img.2455995.95763.cas.s.ms.DATA.channel.1ch}.pdf}
+    %\includegraphics[scale=0.3]{{graphics/cas/img.2455995.95763.cas.s.ms.DATA.channel.1ch}.pdf}
+    \includegraphics[scale=0.3]{{graphics/cas/img.2455995.95763.cas.s.ms.DATA.channel.1ch.restored}.pdf}
     \label{fig:sfft_cas_sun_dirty}
     }
 
-    \label{fig:fx_sfft_set2}
     \caption{Dirty images formed from simultaneous observation of various sources with the FX correlator and spatial FFT imager.
     The left column is from FX correlator data, the right column is spatial FFT data.
     Sources are 3c157 (fig. \ref{fig:fx_3c157_dirty},\ref{fig:sfft_3c157_dirty}), 3c196 (fig. \ref{fig:fx_3c196_dirty},\ref{fig:sfft_3c196_dirty}), Cassiopeia A with the sun in a sidelobe (fig. \ref{fig:fx_cas_sun_dirty},\ref{fig:sfft_cas_sun_dirty}).
+    The FX correlator and spatial FFT images have comparable noise floors of about 2 Jy in all images and difference in dynamic range varying from a few percent to 10 percent depending on the source.
     }
+    \label{fig:fx_sfft_set2}
 \end{figure}
 
-%images: 3c fields
+In the spatial FFT images there is a noticable distortion of point sources. The cleaned image of Taurus, fig. \ref{fig:sfft_tau_clean}, begins to form points at the low levels, primarily in the east-west direction.
+This effect can also be seen in a number of the 3C images in figures \ref{fig:fx_sfft_set1} and \ref{fig:fx_sfft_set2}.
+This effect is not noticable until the image has been cleaned.
+The variation in antenna phases is probably the primary factor causing the distortion.
+
+To make a comparison between images we define the dynamic range of each image to the peak flux divided by the standard deviation of the noise in a empty region of the image.
+Selecting an empty region of an image can greatly influence the dynamic range if there is low level structure, we took care to select a few regions per image to select a representive region.
+The same region would then be used for images from both the FX correlator and the spatial FFT imager as to avoid bias.
+Though this is a simple way to define an determine the noise level and dynamic range we are not interested in the absolute flux of the images.
+We are interested in the difference in image quality between the two sets of results.
+In table \ref{tbl:src_flux} we list a number of 3C sources along with their measured flux and noise levels.
+For these snapshot images the spatial FFT produces essentially the same results as the FX correlator.
+%noise level error
+
+\begin{table}
+\begin{center}
+\begin{tabular}{|c||c|c|c|c|}
+\multicolumn{5}{|c|}{Measured Source Flux and Noise Levels}\\
+\hline
+Source & 3C Flux (Jy) & Peak Flux (Jy) & FX Noise Level (Jy) & SFFT Noise Level (Jy) \\ \hline
+    3C10  &   134 &  67.2 & 1.1 & 1.3 \\
+    3C48  &    47 &  27.3 & 0.9 & 0.8 \\
+    3C123 &   175 &  91.1 & 2.1 & 1.9 \\
+    3C144 &  1420 & 729.5 & 2.0 & 2.5 \\
+    3C157 &   210 & 116.5 & 1.6 & 2.3 \\
+    3C196 &    59 &  34.6 & 0.9 & 1.7 \\ \hline
+\end{tabular}
+\caption{Noise level for various 3C sources calculated for images formed with data from the FX correlator and the spatial FFT imager.}
+\label{tbl:src_flux}
+\end{center}
+\end{table}
+
+The dynamic range of the spatial FFT appears to be approximately the same as the FX correlator but there is a low level distortion in the spatial FFT images in a few of the sources.
+To understand this we can look at the baseline data to see how that varies between the two measurements.
+
 %baselines: fx,avg,mdl,sfft
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.6]{{graphics/bls/phase_plot_0_4_tau}.png}
+    \caption{Phase comparison of the FX correlator baselines which are redundant with the (0,4) antenna spacing and the corresponding spatial FFT baseline.
+    The lines are: redundant FX correlator baselines(dotted), spatial FFT combined baseline (solid), all the FX baselines averaged together(dashed).
+    For this baseline, the spatial FFT baseline fits the averaged FX baseline well but has $\sim35\%$ more noise.
+    }
+    \label{fig:bl_phase}
+\end{figure}
+
 %error analysis
+With an FX correlator a 'bad' baseline or antenna can be flagged in the data during post processing.
+If each baseline has an nominal phase noise of $\sigma_{nom}$ then a 'bad' baseline can be defined as having a noise level of $N$ times higher than the nominal noise level, $N\sigma_{nom}$.
+For a spacing with $m$ redundant baselines the combined noise is $\sigma_{bl}=\sigma_{nom}\sqrt{m}$.
+If there are $B$ bad baselines which are flagged the noise becomes $\sigma_{bl}=\sigma_{nom}\sqrt{(m-B)}$.
+In the case of the spatial FFT all the baselines are summed together before a baseline can be flagged.
+Then the baseline noise is $\sigma_{bl}=\sqrt{m-B}\sigma_{nom}+\sqrt{B}N\sigma_{nom}$.
+If a subset of the antennas are malfunctioning during an observation they corrupt any spatial FFT baseline they are part of.
+It should be noted that in the case of a known bad antenna, that antenna can be flagged during an observation and dropped.
 
 \section{Discussion}
 \label{discussion}
