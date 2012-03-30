@@ -1,4 +1,5 @@
 \documentclass[useAMS,macros,usenatbib,onecolumn]{mn2e}
+%\documentclass[useAMS,macros,usenatbib,onecolumn,referee]{mn2e}
 \usepackage{multirow}
 \usepackage{graphicx}
 \usepackage{subfig}
@@ -636,7 +637,7 @@ But time dependent variations in complex gains introduce errors phase and amplit
     \label{fig:sfft_3c123_dirty}
     }
 
-    \caption{Dirty images formed from simultaneous observation of various sources with the FX correlator and spatial FFT imager.
+    \caption{Cleaned images formed from simultaneous observation of various sources with the FX correlator and spatial FFT imager.
     The left column is from FX correlator data, the right column is spatial FFT data.
     Sources are 3c10 (fig. \ref{fig:fx_3c10_dirty},\ref{fig:sfft_3c10_dirty}), 3c48 (fig. \ref{fig:fx_3c48_dirty},\ref{fig:sfft_3c48_dirty}), 3c123 (fig. \ref{fig:fx_3c123_dirty},\ref{fig:sfft_3c123_dirty}).
     The FX correlator and spatial FFT images have comparable noise floors of about 2 Jy in all images and difference in dynamic range varying from a few percent to 10 percent depending on the source.
@@ -685,7 +686,7 @@ But time dependent variations in complex gains introduce errors phase and amplit
     \label{fig:sfft_cas_sun_dirty}
     }
 
-    \caption{Dirty images formed from simultaneous observation of various sources with the FX correlator and spatial FFT imager.
+    \caption{Cleaned images formed from simultaneous observation of various sources with the FX correlator and spatial FFT imager.
     The left column is from FX correlator data, the right column is spatial FFT data.
     Sources are 3c157 (fig. \ref{fig:fx_3c157_dirty},\ref{fig:sfft_3c157_dirty}), 3c196 (fig. \ref{fig:fx_3c196_dirty},\ref{fig:sfft_3c196_dirty}), Cassiopeia A with the sun in a sidelobe (fig. \ref{fig:fx_cas_sun_dirty},\ref{fig:sfft_cas_sun_dirty}).
     The FX correlator and spatial FFT images have comparable noise floors of about 2 Jy in all images and difference in dynamic range varying from a few percent to 10 percent depending on the source.
@@ -736,7 +737,31 @@ To understand this we can look at the baseline data to see how that varies betwe
     The lines are: redundant FX correlator baselines(dotted), spatial FFT combined baseline (solid), all the FX baselines averaged together(dashed).
     For this baseline, the spatial FFT baseline fits the averaged FX baseline well but has $\sim35\%$ more noise.
     }
-    \label{fig:bl_phase}
+    \label{fig:bl_phase_0}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.6]{{graphics/bls/phase_plot_0_31_3c48}.png}
+    \caption{The (0,31) baseline is the one of the non-redundant baselines in the array.
+    Both instruments should produce a baseline with similar noise characteristics.
+    But the standard deviation of the noise from the spatial FFT observation is $48\%$ higher than the FX correlator.
+    }
+    \label{fig:bl_phase_1}
+\end{figure}
+
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.6]{{graphics/bls/tau_bls}.png}
+    \caption{Phase noise for each baseline during observation plotted against the the number of redundant baselines.
+    Red dots are for the FX correlator.
+    Black circles are the phase noise after averaging together a set of redundant baselines.
+    This expectedly decreases as $\frac{1}{\sqrt{n}}$ on the more redundant spacings.
+    Green squares are the spatial FFT baselines, which are effectively an average of all the redundant spacing baselines.
+    The spatial FFT baseline noise also decreased at a rate similar to the averaged FX correlator baselines.
+    Though the spatial FFT phase noise is $.48\pm.26$ higher than the FX averaged baselines in this data set.
+    }
+    \label{fig:bl_phase_noise}
 \end{figure}
 
 %error analysis
@@ -752,8 +777,8 @@ It should be noted that in the case of a known bad antenna, that antenna can be 
 \section{Discussion}
 \label{discussion}
 
-%what has been accomplished
-%further work on SFFT calibration
+%what has been accomplished: sfft has proven to work at a similar level of quality to the fx correlator but with additional noise
+%further work on SFFT calibration: understanding increased phase noise, image quality
 %uses: space debris, transient detection/pulsars
 
 \bibliography{refs}{}
