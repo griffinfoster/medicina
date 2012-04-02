@@ -568,11 +568,12 @@ We start this section by discussing the calibration methods used and how the der
 \subsection{Calibration Methods}
 \label{calibration}
 
-The operation of the spatial FFT imager turns all redundant baselines into a single unique baseline which makes pre-measurement calibration essential to producing a good observable.
-To derive gain coefficients a calibration method is applied to the FX correlator data for an observation of a bright point source.
-Deriving the complex gain terms to be applied to the antennas can be achieved with any desired calibration method.
-In initial observations the column ratio gain estimation method from \citep{gaindecomp} was used to compute a per channel, per antenna complex gain terms.
-The figure \ref{fig:sfft_calibration} shows an observation of Taurus A with and without gains applied during observation.
+As with interferometric telescope, variations in the complex gains of each receiver must be compensated for before forming images with the correlation matrices. In the case of the FX correlator, such gains, once known,  can be applied after data is obtained. Conversely, in the case of the spatial FFT correlator, gain corrections must be applied before the spatial FFT is performed, as this operation effectively averages together redundant baselines.
+To illustrate the effect of gain calibration on spatial FFT images, Figure \ref{fig:sfft_calibration} shows an observation of Taurus A with and without gains applied during observation.
+
+Deriving the complex gain terms to be applied to the antennas can be achieved with any desired calibration method, and may or may not require knowledge of the array topology or sky model \citep(cal_strategies).
+For simplicity, in the initial observations presented in this paper, per channel, per antenna gain corrections were computed using an implementation of the column ratio gain estimation method \citep{gaindecomp}. This method computes gain corrections based on the simple sky model of a bright calibrator in the array phase center.
+
 
 %SFFT correlations of Tau/3c144 before and after calibration
 \begin{figure}
