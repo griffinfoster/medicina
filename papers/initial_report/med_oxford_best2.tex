@@ -571,9 +571,32 @@ We start this section by discussing the calibration methods used and how the der
 As with interferometric telescope, variations in the complex gains of each receiver must be compensated for before forming images with the correlation matrices. In the case of the FX correlator, such gains, once known,  can be applied after data is obtained. Conversely, in the case of the spatial FFT correlator, gain corrections must be applied before the spatial FFT is performed, as this operation effectively averages together redundant baselines.
 To illustrate the effect of gain calibration on spatial FFT images, Figure \ref{fig:sfft_calibration} shows an observation of Taurus A with and without gains applied during observation.
 
-Deriving the complex gain terms to be applied to the antennas can be achieved with any desired calibration method, and may or may not require knowledge of the array topology or sky model \citep(cal_strategies).
+Deriving the complex gain terms to be applied to the antennas can be achieved with a wide variety of calibration methods, and may or may not require knowledge of the array topology or sky model \citep{cal_strategies}.
 For simplicity, in the initial observations presented in this paper, per channel, per antenna gain corrections were computed using an implementation of the column ratio gain estimation method \citep{gaindecomp}. This method computes gain corrections based on the simple sky model of a bright calibrator in the array phase center.
 
+The observations with the spatial FFT images in this paper have been calibrated using previous transits of Cassiopeia A, Taurus A and Cygnus A.
+With a transiting array and a limited field of view these observations can only be made at a set time of day.
+Thus gains for a spatial FFT can often only be derived many hours before an observation.
+If an array is sufficiently stable over that time period then this does not pose a serious problem.
+Gain coefficients obtained from several transits of these sources are shown in Figure \ref{fig:gain_variation}. It is clear that the stability of a calibration over several days can only be relied upon to an accuracy of several degrees and $O(0.1\mathrm{dB})$. We note that, unsurprisingly, these variations are greatest when comparing the transits of different sources. This effect that is likely to be temperature dependent, but may also depend on the pointing angle of the array.
+
+\begin{figure}
+    \centering
+
+    \subfloat[Gain phase variation over different observations]{
+    \includegraphics[scale=0.3]{{graphics/gain_phs_var_deplane_crop}.pdf}
+    \label{fig:gain_variation_phase}
+    }
+    \hspace{10pt}
+    \subfloat[Gain amplitude variation over different observations]{
+    \includegraphics[scale=0.3]{{graphics/gain_amp_var_crop}.pdf}
+    \label{fig:gain_variation_amp}
+    }
+    
+    \label{fig:gain_variation}
+    \caption{Gain variation over different observartions. Gains are plotted relative to mean. Over the period of observations shown Cassiopeia A, Taurus A and Cygnus A transited at approximately 13:30, 18:30 and 09:00 local time, respectively.
+    }
+\end{figure}
 
 %SFFT correlations of Tau/3c144 before and after calibration
 \begin{figure}
@@ -592,34 +615,42 @@ For simplicity, in the initial observations presented in this paper, per channel
     }
 \end{figure}
 
-The bright sources Cygnus A and Taurus A were used as calibration sources.
-With transiting array and a limited field of view these observations can only be made at a set time of day.
-Thus gains for a spatial FFT can often only be derived many hours before an observation.
-If an array is sufficiently stable over that time period then this does not pose a serious problem.
 %what is 'sufficiently stable'?
 %variability: source, temp, time of day
-%fig: gain variation
 
 %post integration methods: baseline cal for overall amp and phase correction, but can not be used for individual antennas
 
 \subsection{Spatial FFT as a Beamformer}
 \label{sfft_beamformer}
 
+The raw output of the spatial FFT engine is 128 complex beams regularly (in $\sin{\theta}$ space) oversampling by two times the primary field of view of the BEST-2 array.
+This sampling of the primary field of view is emphasized in Figure \ref{fig:casa_beams}, which shows the response of a row of beams during a transit of Cassiopeia A.
+This set of beams may itself be interpreted as an image of the sky, but each beam can also be independently processed by downstream computing resources.
+In the current BEST-2 system, an observer is free to send up to 8 complex valued beams at full bandwidth over 10GbE to be further processed. The choice of beams can be dynamically changed during an observation, allowing a source to be tracked as it transits the instument's field of view.
+Ongoing work is currently in progress to allow more than 8 beams to be processed at a reduced bandwidth, for applications where field of view is preferable to frequency coverage.
+
 %use as a beamformer
 %fig:sfft beams on the sky
+\begin{figure}
+    \centering
+    \includegraphics[scale=0.6]{{graphics/cas_transit_beams_6jun2011_crop}.pdf}
+    \caption{The power, as a function of time, of a row of 8 beams at approximately constant declination during a transit of Cassiopeia A.}
+    \label{fig:casa_beams}
+\end{figure}
 %fig:beam crossing
 %pulsar machine
 
 \subsection{Spatial FFT as a Correlator}
 \label{sfft_correlator}
 
-The output of the spatial FFT is a set of 128 complex beams which can be converted to uv sampled baselines by performing an inverse FFT.
+The output of the spatial FFT is a set of 128 beam powers which can be converted to uv sampled baselines by performing an inverse FFT.
 In total 52 unique baselines are produced along with the auto correlation.
-Each spatial FFT baseline is a linear combination of antenna pair baselines at the same antenna spacing, for a given frequency channel.
+Each spatial FFT baseline is the sum of antenna pair baselines at the same antenna spacing, for a given frequency channel.
 For the case of the spatial FFT we will call them effective baselines.
 Once in the effective baseline correlation format the same pipeline that is used for the FX correlator is used to convert the data into measurement sets.
 
 Due to the calibration limitation of the data no post observation calibration is applied.
+%Though there is a subset of calibration which can be performed...
 The flux scale is set by using the flux scale from the FX images.
 This scale can be set during the observation or in post processing since it is a baseline independent amplitude scaling.
 Figures \ref{fig:sfft_tau_dirty} and \ref{fig:sfft_tau_clean} show the dirty and clean images of Taurus A during a properly calibrated observation.
