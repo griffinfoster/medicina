@@ -19,7 +19,8 @@ $^{1}$Oxford University, Department of Physics}
 \begin{abstract}
 A spatial FFT imager and FX correlator has been developed using CASPER FPGA hardware for the BEST-2 array at the Radiotelescopi di Medicina in Italy.
 %Both instruments use the same digitizing/channelizing front end.
-The spatial FFT imager takes advantage of BEST-2 as a regularly gridded array to produce a complete of correlations for all unique baseline spacings by perform a 2D spatial FFT using $O(n \log n)$ operations.
+The spatial FFT imager takes advantage of BEST-2 as a regularly gridded array to produce a complete set of correlations for all unique baseline spacings by perform a 2D spatial FFT using $O(n \log n)$ operations.
+This is the first time a spatial FFT instrument has been used as a correlator on a radio telescope array.
 The FX correlator has been used to solve complex gain calibrations which are applied in the spatial FFT during observation.
 During the initial deployment of the instruments several bright radio sources were observed over multiple epochs.
 An analysis of the spatial FFT imager baseline and image quality is performed and compared to that of the FX correlator.
@@ -51,7 +52,7 @@ Since deployment, a number of sources with the correlator and imager have been s
 Data has been reduced and calibrated using a combination of custom software and standard radio synthesis imaging packages.
 
 In the first section of this paper we give an overview of the BEST-2 Array, sections \ref{channelization}, \ref{correlator} and \ref{s-engine} cover a description of the channelization, correlation and image-domain processing system.
-Results from preliminary observations of bright radio sources from these systems are presented in section \ref{fx_results} and a comparison of data quality between the two instruments is presented in section \ref{sfft_results}, with a discussion in section \ref{discussion}.
+Results from preliminary observations of bright radio sources from these systems are presented in section \ref{fx_results} and a comparison of data quality between the two instruments is presented in section \ref{sfft_results}, with a discussion of results in section \ref{conclusion}.
 
 \subsection{BEST-2 Array}
 \label{best-2 array}
@@ -470,7 +471,8 @@ Further images and analysis of the data quality are followed in section \ref{sff
     }
     \hspace{10pt}
     \subfloat[Point spread function. The high, regular sidelobes are an effect of the regularly gridded array.]{
-    \includegraphics[scale=0.3]{{graphics/img.2455999.21403.tau.cal.s.ms.psf.channel.1ch.mod.crop}.pdf}
+    %\includegraphics[scale=0.3]{{graphics/img.2455999.21403.tau.cal.s.ms.psf.channel.1ch.mod.crop}.pdf}
+    \includegraphics[scale=0.3]{{graphics/img.2455999.21403.tau.cal.s.ms.psf.channel.1ch.mod}.pdf}
     \label{fig:fx_tau_psf}
     }
     
@@ -732,18 +734,24 @@ We must look at the individual baselines to further compare the data.
 \label{fx_sfft_bl_comp}
 
 %The distortions in the spatial FFT images should appear as a higher phase noise in the effective baselines compared to the FX correlator baselines.
-An initial check of the baseline data quality between the two instruments is to look at the baselines which have no redundancy.
-There are two baselines in the array, (0,31) and (3,28), which are unique.
+The major difference in data quality between the spatial FFT imager and the FX correlator is the use of self calibration with the FX correlator data.
+This can be seen by looking at the phase data before and after self calibration.
+%An initial check of the baseline data quality between the two instruments is to look at the baselines which have no redundancy.
+There are two baselines in the array, (1N-1-1,1N-8-4) and (1N-1-4,1N-8-1), which are unique.
 The spatial FFT and the FX correlator should produce the same result for these baselines.
-Figure \ref{fig:bl_phase_1} shows the phase for the (0,31) baseline as calculated from both instruments.
-Both are similar but the spatial FFT has a higher noise standard deviation.
+Figure \ref{fig:bl_phase_1} shows the phase for the (1N-1-1,1N-8-4) baseline as calculated from both instruments.
+The output data from both instruments are nearly identical.
+After self calibration the FX correlator noise is further reduced and the slope is flattened.
 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.6]{{graphics/bls/phase_plot_0_31_3c48}.png}
-    \caption{The (0,31) baseline is the one of the non-redundant baselines in the array.
-    Both instruments should produce a baseline with similar noise characteristics.
-    But the standard deviation of the noise from the spatial FFT observation is $48\%$ higher than the FX correlator.
+    \includegraphics[scale=0.6]{{graphics/bls/phase_plot_0_31_cyg}.png}
+    \caption{The (1N-1-1,1N-8-4) baseline is the one of the non-redundant baselines in the array.
+    The solid line is the phase from the spatial FFT imager during a calibrated observation of Cygnus A.
+    FX correlator phase data, dashed line, from the same observation has the same noise level, within $20\%$, of the spatial FFT data.
+    Once self calibration is performed the FX correlator phase data, dotted line, flattens out and the noise level has decreased a factor of two.
+    %Both instruments should produce a baseline with similar noise characteristics.
+    %But the standard deviation of the noise from the spatial FFT observation is $48\%$ higher than the FX correlator.
     }
     \label{fig:bl_phase_1}
 \end{figure}
@@ -755,7 +763,8 @@ This is shown to be correct, but again the spatial FFT effective baseline has a 
 \begin{figure}
     \centering
     \includegraphics[scale=0.6]{{graphics/bls/phase_plot_0_4_tau}.png}
-    \caption{Phase comparison of the FX correlator baselines which are redundant with the (0,4) antenna spacing and the corresponding spatial FFT baseline.
+    \caption{Phase plot of an observation of Taurus A.
+    Comparison of the FX correlator baselines which are redundant with the (0,4) antenna spacing and the corresponding spatial FFT baseline.
     The lines are: redundant FX correlator baselines(dotted), spatial FFT combined baseline (solid), all the FX baselines averaged together(dashed).
     For this baseline, the spatial FFT baseline fits the averaged FX baseline well but has $\sim35\%$ more noise.
     }
@@ -769,11 +778,13 @@ Yet, the noise standard deviation is higher on every baseline compared to the av
 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.6]{{graphics/bls/tau_bls}.png}
+    \includegraphics[scale=0.6]{{graphics/bls/tau_bls_v2}.png}
     \caption{Phase noise for each baseline during an observation plotted against the the number of redundant baselines.
     Small dots are the 496 FX correlator baselines.
-    Circles are the FX correlator baselines after averaging together sets of equal spacing baselines.
-    This expectedly decreases as $\frac{1}{\sqrt{n}}$ on the more redundant spacings.
+    %Closed circles with error bars are the average phase noise for FX correlator baselines based on baseline redundancy.
+    %All the FX baselines have the same noise.
+    Open circles are the FX correlator baselines after averaging together sets of equal spacing baselines.
+    This decreases as $\frac{1}{\sqrt{n}}$ on the more redundant spacings as shown with the best fit dashed lines.
     Squares are the spatial FFT baselines, which are effectively an average of all the redundant spacing baselines.
     The spatial FFT baseline noise also decreased at a rate similar to the averaged FX correlator baselines.
     Though the spatial FFT phase noise is $.48\pm.26$ higher than the FX averaged baselines in this data set.
@@ -801,21 +812,25 @@ By combining them we can not use self calibration to apply per antenna calibrati
 The initial phase calibration from a bright source is the same for the both instruments, though the gains are applied during the observation in the spatial FFT case and in post processing for the FX correlator.
 The additional calibration on the FX data by solving for a sky model solution further improves the image quality.
 
-\section{Discussion}
-\label{discussion}
+\section{Conclusion}
+\label{conclusion}
 
-%further calibration methods
-%further observations to verify data quality
-%use in widefield arrays/EoR
+An FX correlator and spatial FFT imager have been successfully installed on the BEST-2 array at Medicina Observatory.
+The digital firmware was developed using the open source CASPER libraries and their generic ROACH hardware.
+This is the first time a spatial FFT imager has been used to produce complex baseline correlations.
+Both instruments can operate simulatenously which has allowed us to compare the respective data quality.
 
 We have shown that the spatial FFT imager produces correlations similar to that of a traditional FX correlator.
-Though with an increase in noise which we attribute to the accuracy of the gain calibration.
-The BEST-2 array is limiting in our ability to improve the calibration.
+Complex gains are derived from calibration sources and applied during observations.
+The FX correlator data can be improved with further self calibration.
+Self calibration can not be performed on the spatial FFT imager since the effective baseline is a linear combination of redundant spacing baselines.
+The BEST-2 array is limiting our ability to improve the calibration.
 Bright sources are needed in the field of view to derive calibrations.
 A more advanced calibration method which can take into account multiple sources would allow more fields to be used for calibration and improve the time difference between calibration observation and science observation.
 
-For low frequency dipole arrays which have a very large field of view then there will always be bright sources in the field to calibrate off.
+For low frequency dipole arrays which have a very large field of view there will always be bright sources in the field to calibrate against.
 With a fast enough calibration algorithm a small correlator can be used to derive gains on short timescales $O(seconds)$ and apply them to the spatial FFT imager.
+A good sky model and close time proximity between calibration observations and science observations will bring the spatial FFT calibration closer quality to a FX self calibration result.
 
 With the successful installation and testing with the spatial FFT imager on the BEST-2 array we are working on developing the system further for science observations.
 Medicina Observatory is involved with space debris tracking using BEST-2 in a beamformer mode.
