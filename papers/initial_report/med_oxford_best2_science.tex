@@ -31,7 +31,7 @@ Further methods can be implemented in the real time calibration to improve the s
 \section{Introduction}
 
 The Basic Element for SKA Training II (BEST-2) array is a subset of the Northern Cross cylindrical array, at the Radiotelescopi di Medicina in Italy.
-In this paper we describe a new digital backend designed for this array, implemented on Field Programable Gate Array (FPGA) based hardware from the Collaboration for Astronomy Signal Processing and Electronics Research (CASPER\footnote{https://casper.berkeley.edu/}; \cite{casper}). The system developed provides fast-dump correlation, direct imaging, beamforming, and transient processing capabilities.
+In this paper we present results from a new digital backend designed for this array, implemented on Field Programable Gate Array (FPGA) based hardware from the Collaboration for Astronomy Signal Processing and Electronics Research (CASPER\footnote{https://casper.berkeley.edu/}; \cite{casper}). The system developed provides fast-dump correlation, direct imaging, beamforming, and transient processing capabilities.
 
 This digital backend presented in this paper comprises a 32 element digitizer and channeliser, a correlator, spatial Fast Fourier Transform (FFT) imager, and beamformer, implemented on ROACH\footnote{Reconfigurable Open Architecture Computing Hardware -- https://casper.berkeley.edu/wiki/ROACH} FPGA boards.
 Of particular interest is the spatial FFT imager which can produce a complete set of unique baselines using $O(n \log n)$ operations by taking advantage of the regularly gridded array geometry.
@@ -75,29 +75,29 @@ An upgraded digital backend has been developed using the ROACH board, also devel
 \begin{tabular}{| l | l | l |}
 \hline
 \multicolumn{3}{|c|}{BEST-2 Array Specifications}\\
-\hline
-Cylinder \& Element Properties & &\\
-\hline
-Number of receivers per Cylinder 	&          4 &            	\\
-Cylinder Diameter 		&        7.5 &          m 	\\
-Cylinder Length 		&       23.5 &          m 	\\
-Element Diameter 		&        7.5 &          m 	\\
-Element Length 			&       5.88 &          m 	\\
-Element Collecting Area 	&       44.1 &        $m^2$ 	\\
-Aperture Efficiency 		&       0.71 &            	\\
-Element Effective Area 		&       31.3 &        $m^2$ 	\\
-				&            &            	\\
+%\hline
+%Cylinder \& Element Properties & &\\
+%\hline
+%Number of receivers per Cylinder 	&          4 &            	\\
+%Cylinder Diameter 		&        7.5 &          m 	\\
+%Cylinder Length 		&       23.5 &          m 	\\
+%Element Diameter 		&        7.5 &          m 	\\
+%Element Length 			&       5.88 &          m 	\\
+%Element Collecting Area 	&       44.1 &        $m^2$ 	\\
+%Aperture Efficiency 		&       0.71 &            	\\
+%Element Effective Area 		&       31.3 &        $m^2$ 	\\
+%				&            &            	\\
 \hline
 BEST-2 Array Properties		&            &            	\\
 \hline
 Number of Cylinders 		&          8 &            	\\
 Total Number of receivers 		&         32 &            	\\
 Total Collecting Area 		&     1411.2 &        $m^2$ 	\\
-Total Effective Area 		&    1001.95 &        $m^2$ 	\\
-Sensitivity / Ant. gain 	&       0.36 &       K/Jy 	\\
-Antenna Temperature 		&         35 &          K 	\\
-Receiver Temperature 		&         51 &          K 	\\
-System Temperature  		&         86 &          K 	\\
+%Total Effective Area 		&    1001.95 &        $m^2$ 	\\
+%Sensitivity / Ant. gain 	&       0.36 &       K/Jy 	\\
+%Antenna Temperature 		&         35 &          K 	\\
+%Receiver Temperature 		&         51 &          K 	\\
+%System Temperature  		&         86 &          K 	\\
 $A_{eff}/T_{sys}$ 		&      11.65 &      $m^2/K$ 	\\
 				&            &            	\\
 \hline
@@ -112,12 +112,12 @@ Bandpass        		&            &       		\\
 Central Frequency 		&        408 &        MHz 	\\
 Analogue Bandwidth 		&         16 &        MHz 	\\
 				&            &            	\\
-\hline
-Pointing Limits 		&            &            	\\
-\hline
-Declination 			&    (0,+90) &        deg 	\\
-Right Ascension 		&    Local Meridian &  		\\
-				&            &            	\\
+%\hline
+%Pointing Limits 		&            &            	\\
+%\hline
+%Declination 			&    (0,+90) &        deg 	\\
+%Right Ascension 		&    Local Meridian &  		\\
+				%&            &            	\\
 \hline
 Primary Beam 			&            &           	\\
 \hline
@@ -157,91 +157,91 @@ Right ascension 		&       1.73 &     deg 		\\
 \section{Instrument Design}
 \label{instrument design}
 
-An FX correlator and spatial FFT imager have been implemented in digital hardware for use with the BEST-2 array.
-Both instruments use the same digitization and channelization frontend.
-The hybrid design of the digital instruments make it possible to use both the correlator and imager concurrently.
-This allows a streamlined process for calibrating the spatial FFT imager, reduces the amount of hardware and allows for simultaneous observation with both instruments.
-The instruments have been implemented on ROACH boards which are a generic field programmable gate array (FPGA) board designed by CASPER for radio astronomy applications.
-The ROACH platform is based on a XILINX Virtex 5 SX95T\footnote{http://www.xilinx.com/support/documentation/virtex-5.htm} FPGA with interfaces to DRAM and QDR memory, high speed CX-4 connectors and a generic Z-DOK interface for connecting ADCs and various daughter boards, Figure \ref{fig:roach}.
-Additionally, the board has a PowerPC running BORPH, a variant of Debian Linux, which allows access to software registers and shared memory on the FPGA.
-Firmware is designed using MATLAB Simulink which is extended with XILINX DSP blocks and CASPER's open source DSP blocks\footnote{https://casper.berkeley.edu/}.
-Design specific DSP blocks and hardware interfaces have also created.
-Design models and control software are available from our project repository\footnote{https://github.com/griffinfoster/medicina}.
-Instrument design specifications are presented in Table \ref{tbl:digital_specs}, further design detail is described in Sections \ref{channelization}, \ref{correlator} and \ref{s-engine}.
+% An FX correlator and spatial FFT imager have been implemented in digital hardware for use with the BEST-2 array.
+% Both instruments use the same digitization and channelization frontend.
+% The hybrid design of the digital instruments make it possible to use both the correlator and imager concurrently.
+% This allows a streamlined process for calibrating the spatial FFT imager, reduces the amount of hardware and allows for simultaneous observation with both instruments.
+% The instruments have been implemented on ROACH boards which are a generic field programmable gate array (FPGA) board designed by CASPER for radio astronomy applications.
+% The ROACH platform is based on a XILINX Virtex 5 SX95T\footnote{http://www.xilinx.com/support/documentation/virtex-5.htm} FPGA with interfaces to DRAM and QDR memory, high speed CX-4 connectors and a generic Z-DOK interface for connecting ADCs and various daughter boards, Figure \ref{fig:roach}.
+% Additionally, the board has a PowerPC running BORPH, a variant of Debian Linux, which allows access to software registers and shared memory on the FPGA.
+% Firmware is designed using MATLAB Simulink which is extended with XILINX DSP blocks and CASPER's open source DSP blocks\footnote{https://casper.berkeley.edu/}.
+% Design specific DSP blocks and hardware interfaces have also created.
+% Design models and control software are available from our project repository\footnote{https://github.com/griffinfoster/medicina}.
+% Instrument design specifications are presented in Table \ref{tbl:digital_specs}, further design detail is described in Sections \ref{channelization}, \ref{correlator} and \ref{s-engine}.
 
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.4]{graphics/roach_feng.png}
-    \caption{The 'F-engine' ROACH board, a Virtex 5 SX95T FPGA board, with the 64 input ADC connected via two Z-DOK connectors.}
-    \label{fig:roach}
-\end{figure}
+%\begin{figure}
+%    \centering
+%    \includegraphics[scale=0.4]{graphics/roach_feng.png}
+%    \caption{The 'F-engine' ROACH board, a Virtex 5 SX95T FPGA board, with the 64 input ADC connected via two Z-DOK connectors.}
+%    \label{fig:roach}
+%\end{figure}
+%
+%\begin{table}
+%\begin{center}
+%\begin{tabular}{| l | l | l |}
+%\hline
+%\multicolumn{3}{|c|}{Digital Backend Specifications}\\
+%\hline
+%Digitizer/Channelizer (F-Engine) & &\\
+%\hline
+%ADC Sampling Rate	& 40 			& Msps\\
+%ADC Sampling Precision	& 12 			& bit \\
+%Antenna-polarizations 	& 32 			& single pol \\
+%PFB 			& 4 tap FIR + 2048 point FFT	& Radix-2 Biplex Real FFT\\
+%Quantization 		& 4 			& bit\\
+%& & \\
+%\hline
+%FX Correlator (X-Engine) & &\\
+%\hline
+%Auto Correlations 	& 32 			& \\
+%Cross Correlations 	& 496 			& \\
+%Minimum Integration Length & 6.55 		& ms\\
+%Output 			& 10 GbE 		& SPEAD protocol\\
+%& & \\
+%\hline
+%Spatial FFT Imager (S-Engine) & &\\
+%\hline
+%2D FFT 			& 8 x 16 		& \\
+%Beams 			& 128 			& \\
+%Minimum Integration Length & 1 			& s\\
+%Output 			& 1 GbE 		& SPEAD protocol\\
+%Beamformer Output 	& 10 GbE 		& Up to 8 Beams\\
+%& & \\
+%\hline
+%\end{tabular}
+%\caption{A three ROACH design where the correlator and spatial FFT imager use the same digitizer/channelizer frontend.}
+%\label{tbl:digital_specs}
+%\end{center}
+%\end{table}
 
-\begin{table}
-\begin{center}
-\begin{tabular}{| l | l | l |}
-\hline
-\multicolumn{3}{|c|}{Digital Backend Specifications}\\
-\hline
-Digitizer/Channelizer (F-Engine) & &\\
-\hline
-ADC Sampling Rate	& 40 			& Msps\\
-ADC Sampling Precision	& 12 			& bit \\
-Antenna-polarizations 	& 32 			& single pol \\
-PFB 			& 4 tap FIR + 2048 point FFT	& Radix-2 Biplex Real FFT\\
-Quantization 		& 4 			& bit\\
-& & \\
-\hline
-FX Correlator (X-Engine) & &\\
-\hline
-Auto Correlations 	& 32 			& \\
-Cross Correlations 	& 496 			& \\
-Minimum Integration Length & 6.55 		& ms\\
-Output 			& 10 GbE 		& SPEAD protocol\\
-& & \\
-\hline
-Spatial FFT Imager (S-Engine) & &\\
-\hline
-2D FFT 			& 8 x 16 		& \\
-Beams 			& 128 			& \\
-Minimum Integration Length & 1 			& s\\
-Output 			& 1 GbE 		& SPEAD protocol\\
-Beamformer Output 	& 10 GbE 		& Up to 8 Beams\\
-& & \\
-\hline
-\end{tabular}
-\caption{A three ROACH design where the correlator and spatial FFT imager use the same digitizer/channelizer frontend.}
-\label{tbl:digital_specs}
-\end{center}
-\end{table}
-
-\subsection{Digitization and Channelization}
-\label{channelization}
-
-Signal digitization is performed using the Texas Instruments ADS5272 8 channel, 12 bit ADC.
-The ADC board, developed by Rick Raffanti\footnote{https://casper.berkeley.edu/wiki/64ADCx64-12}, uses eight ADCs to channelize 64 streams at up to 65 Msps.
-In our design only 32 signal streams are digitized at 40 Msps which covers the 16 MHz analogue band.
-The ADC is clocked with a 160 MHz clock which is locked to a local maser source.
-During the analogue stage the radio frequency (RF) signal, centred at 408 MHz, is mixed down to baseband.
-Prior to digitization the last amplifier stage of the analogue chain has per signal adjustable gain useful for setting levels for optimum ADC quantization.
-This ADC is connected via a dual Z-DOK interface to an `F-Engine' ROACH which performs the channelization.
-A block diagram of the design layout is shown in figure \ref{fig:feng_block}.
-
-The ROACH board is clocked at four times the sample rate such that four signals are time division multiplexed onto a single stream.
-Channelization is performed with a four tap Hann filter, 2048 point polyphase filterbank (PFB) to produce 1024 samples per real antenna stream.
-The CASPER PFB has been modified to account for the signal multiplexing.
-Each channel has a width of 19.5 kHz and the output of the FFT stage is a 36 bit complex number.
-The narrow channel widths and PFB windowing allow for good frequency separation in the high RFI environment at the observatory.
-After channelization the samples are quantized down to 8 bit complex.
-An adjustable, per channel complex gain equalizer is used for amplitude and phase corrections before quantization.
-Complex gain calibration is essential to proper spatial FFT imaging and must be applied before the spatial FFT.
-The FX correlator is used to generate calibration coefficients which are applied back into the equalizers.
-A selectable mux is available to skip the phase coefficients on the FX correlator data stream.
-Post equalization, the data stream is split in two for specific reordering for the correlator and imager.
-The correlator data stream is reordered to 128 time samples for a single antenna for a single frequency channelr, followed by the next antenna and cycles back onto the next frequency channel.
-The imager takes in one time sample of each antenna for a given frequency channel and cycles through 128 time samples before stepping to the next frequency channel.
-After data reordering each stream is sent over high speed XAUI at a rate of 5.12 Gbps to the correlator and imaging boards.
-The FPGA resource usage is listed in Table \ref{tbl:feng_resource}.
-There are sufficient resources to include additional features in the `F-Engine', including, for example, finer channelization, an increase in antennas or an increase in bandwidth.
+%\subsection{Digitization and Channelization}
+%\label{channelization}
+%
+%Signal digitization is performed using the Texas Instruments ADS5272 8 channel, 12 bit ADC.
+%The ADC board, developed by Rick Raffanti\footnote{https://casper.berkeley.edu/wiki/64ADCx64-12}, uses eight ADCs to channelize 64 streams at up to 65 Msps.
+%In our design only 32 signal streams are digitized at 40 Msps which covers the 16 MHz analogue band.
+%The ADC is clocked with a 160 MHz clock which is locked to a local maser source.
+%During the analogue stage the radio frequency (RF) signal, centred at 408 MHz, is mixed down to baseband.
+%Prior to digitization the last amplifier stage of the analogue chain has per signal adjustable gain useful for setting levels for optimum ADC quantization.
+%This ADC is connected via a dual Z-DOK interface to an `F-Engine' ROACH which performs the channelization.
+%A block diagram of the design layout is shown in figure \ref{fig:feng_block}.
+%
+%The ROACH board is clocked at four times the sample rate such that four signals are time division multiplexed onto a single stream.
+%Channelization is performed with a four tap Hann filter, 2048 point polyphase filterbank (PFB) to produce 1024 samples per real antenna stream.
+%The CASPER PFB has been modified to account for the signal multiplexing.
+%Each channel has a width of 19.5 kHz and the output of the FFT stage is a 36 bit complex number.
+%The narrow channel widths and PFB windowing allow for good frequency separation in the high RFI environment at the observatory.
+%After channelization the samples are quantized down to 8 bit complex.
+%An adjustable, per channel complex gain equalizer is used for amplitude and phase corrections before quantization.
+%Complex gain calibration is essential to proper spatial FFT imaging and must be applied before the spatial FFT.
+%The FX correlator is used to generate calibration coefficients which are applied back into the equalizers.
+%A selectable mux is available to skip the phase coefficients on the FX correlator data stream.
+%Post equalization, the data stream is split in two for specific reordering for the correlator and imager.
+%The correlator data stream is reordered to 128 time samples for a single antenna for a single frequency channelr, followed by the next antenna and cycles back onto the next frequency channel.
+%The imager takes in one time sample of each antenna for a given frequency channel and cycles through 128 time samples before stepping to the next frequency channel.
+%After data reordering each stream is sent over high speed XAUI at a rate of 5.12 Gbps to the correlator and imaging boards.
+%The FPGA resource usage is listed in Table \ref{tbl:feng_resource}.
+%There are sufficient resources to include additional features in the `F-Engine', including, for example, finer channelization, an increase in antennas or an increase in bandwidth.
 
 %\begin{table}
 %\begin{center}
@@ -264,85 +264,85 @@ There are sufficient resources to include additional features in the `F-Engine',
 %\end{center}
 %\end{table}
 
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.6]{graphics/crop_fengine_block.pdf}
-    \caption{During observations amplitude and phase coefficients are applied to scale the power for the 4 bit correlation and apply phase corrections for the spatial FFT.}
-    \label{fig:feng_block}
-\end{figure}
+%\begin{figure}
+%    \centering
+%    \includegraphics[scale=0.6]{graphics/crop_fengine_block.pdf}
+%    \caption{During observations amplitude and phase coefficients are applied to scale the power for the 4 bit correlation and apply phase corrections for the spatial FFT.}
+%    \label{fig:feng_block}
+%\end{figure}
 
 \subsection{FX Correlator}
 \label{correlator}
 
 An FX correlator design is a standard design for large bandwidth and many antenna arrays.
 The F component represents the frequency channelization, and the X is a complex multiply and accumulate (CMAC).
-An overview of the architecture is presented in \cite{romney_white_book}.
+% An overview of the architecture is presented in \cite{romney_white_book}.
 Architecture efficiency goes as $O( M \textrm{log} M) + O( N^2)$ where $M$ is the number of FFT frequency channels and $N$ is the number of antenna-polarizations.
 The core component to the X stage of the FX correlator is the complex multiplication of all pairs of independent signals for each frequency channel.
-A pipelined x-engine, based on the general CASPER block originally designed by Lynn Urry\citep{fxcorrelator}, is used for multiplier efficiency.
-The pipeline design is constructed out of $M/2$ `taps' where the $i^{th}$ tap computes the correlation between antennas $A_j$ and $A_{j+i}$ for every antenna $A_j$ of $M$ total antennas.
-To maximize the multiplier usage a loopback is added to use every $i^{th}$ tap to compute the correlation of antennas $A_j$ and $A_{M/2+j+i}$, fig. \ref{fig:xeng_pipe}.
-Each tap accumulates for $t$ time samples to reduce the output data rate.
+% A pipelined x-engine, based on the general CASPER block originally designed by Lynn Urry\citep{fxcorrelator}, is used for multiplier efficiency.
+% The pipeline design is constructed out of $M/2$ `taps' where the $i^{th}$ tap computes the correlation between antennas $A_j$ and $A_{j+i}$ for every antenna $A_j$ of $M$ total antennas.
+% To maximize the multiplier usage a loopback is added to use every $i^{th}$ tap to compute the correlation of antennas $A_j$ and $A_{M/2+j+i}$, fig. \ref{fig:xeng_pipe}.
+% Each tap accumulates for $t$ time samples to reduce the output data rate.
 
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.6]{graphics/crop_pipelined_xeng.pdf}
-    \caption{The input is ordered as $M$ time samples per antenna per frequency channel. An accumulation stage after the complex multiply reduces the data rate of each tap. Outputs are multiplexed onto the same output using a valid signal.}
-    \label{fig:xeng_pipe}
-\end{figure}
+% \begin{figure}
+%     \centering
+%     \includegraphics[scale=0.6]{graphics/crop_pipelined_xeng.pdf}
+%     \caption{The input is ordered as $M$ time samples per antenna per frequency channel. An accumulation stage after the complex multiply reduces the data rate of each tap. Outputs are multiplexed onto the same output using a valid signal.}
+%     \label{fig:xeng_pipe}
+% \end{figure}
 
-An asynchronous architecture is used between the f-enigne and x-engine boards.
-The x-engine board has been clocked to 200 MHz, well above the 160 MHz f-engine board, this assures the x-engine board will never have input buffer overflows during the windowing stage.
-The XAUI interboard connection is a streaming interface which guarantees the same output order as input order but with variable latency.
-In rare cases the XAUI interface can drop 64 bit words during the streaming, this requires an initial stage to track the number of words received between headers.
-In case of missing words the entire payload is dropped and counters reset for the next header.
-A correlation is only performed on a per channel basis.
-The channelized band can be split up into portions and processed in parallel across multiple x-engines.
-This allows a larger bandwidth to be processed at the cost of increased logic and multiplier resource utilization.
-We currently under utilize the available resources on the FPGA, table \ref{tbl:xeng_resource}.
-For this design two pipelined x-engines are used which each processes half of the band, figure \ref{fig:xeng_block}.
-
-The x-engine design requires a continuous stream of data for 128 samples of all antennas for a single frequency channel.
-Prior to the x-engine, samples are buffered up into windows to guarantee valid data during a cycle of the x-engine.
-For reasons related to the design the 32 single polarization signals are treated as 16 dual polarization signals.
-This causes a small number of redundant baseline correlations and a conjugation effect which is corrected in post processing.
-During the x-engine stage an initial accumulation of 128 sample is performed after the complex multiply to reduce the output rate to roughly the input rate.
-This limits the minimum integration time to 6.55 ms.
-In addition to the standard CASPER pipelined x-engine design an optimized version has been tested.
-This new optimized design efficiently uses the full bit width of the Xilinx DSP48 multipliers to reduce the total multiplier usage by a 75\%.
-A description of this optimized design is in preparation.
-
-A vector accumulator using the on board QDR memory is used for longer integration lengths.
-This second accumulator is software controlled with integration lengths ranging from milliseconds to minutes.
-A completed integration is sent to a receive computer over a 10 GbE connection.
-Integrations are packetized using the SPEAD protocol\footnote{https://github.com/ska-sa/PySPEAD} and transmitted over UDP.
-
-\begin{table}
-\begin{center}
-\begin{tabular}{| l | l | l |}
-\hline
-\multicolumn{3}{|c|}{X-Engine ROACH Resource Utilization (Virtex 5 SX95T)}\\
-\hline
-System Clock & 200 MHz \\
-Slice Registers & 28494 / 58880 & $48\%$\\
-Look Up Tables & 25349 / 58880 & $43\%$\\
-BRAM (36kb) & 88 / 244 & $36\%$\\
-DSP48e (Multipliers) & 288 / 640 & $45\%$\\
-CX-4 Interface & 1 / 4 & 5.12 Gbps XAUI\\
-QDR Memory & 2 / 2 & Vector Accumulator\\
-\hline
-\end{tabular}
-\caption{DSP implementation of the x-engine ROACH board.}
-\label{tbl:xeng_resource}
-\end{center}
-\end{table}
-
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.6]{graphics/crop_xengine_block.pdf}
-    \caption{Two parallel pipelined x-engines are used, each processes half of the band.}
-    \label{fig:xeng_block}
-\end{figure}
+%An asynchronous architecture is used between the f-enigne and x-engine boards.
+%The x-engine board has been clocked to 200 MHz, well above the 160 MHz f-engine board, this assures the x-engine board will never have input buffer overflows during the windowing stage.
+%The XAUI interboard connection is a streaming interface which guarantees the same output order as input order but with variable latency.
+%In rare cases the XAUI interface can drop 64 bit words during the streaming, this requires an initial stage to track the number of words received between headers.
+%In case of missing words the entire payload is dropped and counters reset for the next header.
+%A correlation is only performed on a per channel basis.
+%The channelized band can be split up into portions and processed in parallel across multiple x-engines.
+%This allows a larger bandwidth to be processed at the cost of increased logic and multiplier resource utilization.
+%We currently under utilize the available resources on the FPGA, table \ref{tbl:xeng_resource}.
+%For this design two pipelined x-engines are used which each processes half of the band, figure \ref{fig:xeng_block}.
+%
+%The x-engine design requires a continuous stream of data for 128 samples of all antennas for a single frequency channel.
+%Prior to the x-engine, samples are buffered up into windows to guarantee valid data during a cycle of the x-engine.
+%For reasons related to the design the 32 single polarization signals are treated as 16 dual polarization signals.
+%This causes a small number of redundant baseline correlations and a conjugation effect which is corrected in post processing.
+%During the x-engine stage an initial accumulation of 128 sample is performed after the complex multiply to reduce the output rate to roughly the input rate.
+%This limits the minimum integration time to 6.55 ms.
+%In addition to the standard CASPER pipelined x-engine design an optimized version has been tested.
+%This new optimized design efficiently uses the full bit width of the Xilinx DSP48 multipliers to reduce the total multiplier usage by a 75\%.
+%A description of this optimized design is in preparation.
+%
+%A vector accumulator using the on board QDR memory is used for longer integration lengths.
+%This second accumulator is software controlled with integration lengths ranging from milliseconds to minutes.
+%A completed integration is sent to a receive computer over a 10 GbE connection.
+%Integrations are packetized using the SPEAD protocol\footnote{https://github.com/ska-sa/PySPEAD} and transmitted over UDP.
+%
+%\begin{table}
+%\begin{center}
+%\begin{tabular}{| l | l | l |}
+%\hline
+%\multicolumn{3}{|c|}{X-Engine ROACH Resource Utilization (Virtex 5 SX95T)}\\
+%\hline
+%System Clock & 200 MHz \\
+%Slice Registers & 28494 / 58880 & $48\%$\\
+%Look Up Tables & 25349 / 58880 & $43\%$\\
+%BRAM (36kb) & 88 / 244 & $36\%$\\
+%DSP48e (Multipliers) & 288 / 640 & $45\%$\\
+%CX-4 Interface & 1 / 4 & 5.12 Gbps XAUI\\
+%QDR Memory & 2 / 2 & Vector Accumulator\\
+%\hline
+%\end{tabular}
+%\caption{DSP implementation of the x-engine ROACH board.}
+%\label{tbl:xeng_resource}
+%\end{center}
+%\end{table}
+%
+%\begin{figure}
+%    \centering
+%    \includegraphics[scale=0.6]{graphics/crop_xengine_block.pdf}
+%    \caption{Two parallel pipelined x-engines are used, each processes half of the band.}
+%    \label{fig:xeng_block}
+%\end{figure}
 
 \subsection{Spatial FFT}
 \label{s-engine}
@@ -362,7 +362,7 @@ In the BEST-2 backend described here, the requirements on the spatial FFT proces
 Firstly, the system should be capable of generating images on an $O(\mathrm{second})$ timescale, by the method described by \citep{fftt}.
 Further, the system should be capable of passing formed beams at full bandwidth, i.e. without any accumulation, to downstream time domain processing systems such as the real-time pulsar dedispersion engine \citep{dedispersion}. 
 
-This redundancy for the BEST-2 array is show in figure \ref{fig:redbl}.
+This redundancy for the BEST-2 array is show in Figure \ref{fig:redbl}.
 Instead of making individual correlations of the same baseline as in an FX correlator the correlation of the average of each baseline can be computed.
 This optimization relies on the assumption that each redundant baseline measurement is indeed identical.
 Thus any calibration to the complex gains must be applied before the spatial FFT.
@@ -374,53 +374,51 @@ Thus any calibration to the complex gains must be applied before the spatial FFT
     \label{fig:redbl}
 \end{figure}
 
-Though the X-Engine and S-Engine use the same F-Engine each requires a unique data windowing order.
-For the S-Engine a window is made up of N antennas by M time samples for a given frequency channel.
-A similar XAUI interface and windowing scheme is used as in the X-Engine which buffers up windows of valid data to stream into the spatial transform.
-The 2D spatial transform is performed using an 8 point FFT followed by a cornerturn and 16 point FFT.
-A block diagram of the design layout is shown in figure \ref{fig:seng_block}.
-The BEST-2 array is a grid of 4 by 8 antennas, the data is zero padded before input into the 8 by 16 point spatial transform.
-A 4 by 8 point spatial transform will only produce gain information for each spatial position, which can be interpreted as an array of beamformers covering the field of view.
-This zero padding is necessary to produce both the gain and phase information of each spatial position which is an effective baseline.
-Each effective baseline is an average of all possible baselines with the same spatial dimensions.
-The four fold increase is the number of outputs from the spatial transform by double padding introduces a number of redundant calculations.
-The spatial transform produces 128 outputs.
-There are only 53 unique baselines in a 4 by 8 grid.
-The datarate out of the S-Engine is reduced by a two stage vector accumulator.
-A fixed 128 sample vector accumulator reduces the output of the second stage FFT so that the 1024 channels of the 128 computed spatial components can be multiplexed onto one line and accumulated in a software controllable QDR vector accumulator.
-Accumulations are sent out over the 1 GbE PowerPC interface using the a SPEAD UDP packet format.
-Individual beams can be selected out before accumulation and sent over 10 GbE in a LOFAR beam packet format which is used for pulsar processing.
-
-\begin{figure}
-    \centering
-    \includegraphics[scale=0.6]{graphics/crop_sengine_block.pdf}
-    \caption{During the two stage spatial FFT the streams are zero padded to provide phase information of each baseline.}
-    \label{fig:seng_block}
-\end{figure}
+%Though the X-Engine and S-Engine use the same F-Engine each requires a unique data windowing order.
+%For the S-Engine a window is made up of N antennas by M time samples for a given frequency channel.
+%A similar XAUI interface and windowing scheme is used as in the X-Engine which buffers up windows of valid data to stream into the spatial transform.
+%The 2D spatial transform is performed using an 8 point FFT followed by a cornerturn and 16 point FFT.
+%A block diagram of the design layout is shown in figure \ref{fig:seng_block}.
+%The BEST-2 array is a grid of 4 by 8 antennas, the data is zero padded before input into the 8 by 16 point spatial transform.
+%A 4 by 8 point spatial transform will only produce gain information for each spatial position, which can be interpreted as an array of beamformers covering the field of view.
+%This zero padding is necessary to produce both the gain and phase information of each spatial position which is an effective baseline.
+%Each effective baseline is an average of all possible baselines with the same spatial dimensions.
+%The four fold increase is the number of outputs from the spatial transform by double padding introduces a number of redundant calculations.
+%The spatial transform produces 128 outputs.
+%There are only 53 unique baselines in a 4 by 8 grid.
+%The datarate out of the S-Engine is reduced by a two stage vector accumulator.
+%A fixed 128 sample vector accumulator reduces the output of the second stage FFT so that the 1024 channels of the 128 computed spatial components can be multiplexed onto one line and accumulated in a software controllable QDR vector accumulator.
+%Accumulations are sent out over the 1 GbE PowerPC interface using the a SPEAD UDP packet format.
+%Individual beams can be selected out before accumulation and sent over 10 GbE in a LOFAR beam packet format which is used for pulsar processing.
+%
+%\begin{figure}
+%    \centering
+%    \includegraphics[scale=0.6]{graphics/crop_sengine_block.pdf}
+%    \caption{During the two stage spatial FFT the streams are zero padded to provide phase information of each baseline.}
+%    \label{fig:seng_block}
+%\end{figure}
 
 \section{Deployment and Initial Observations}
 \label{observations}
 
-Instrumentation was installed and tested during March 2012.
-During that time a number of test signals were used to check the system status.
-Various bright radio sources were observed once the analogue and digital systems were checked out.
+Instrumentation was installed and tested during March 2012, during which time various bright radio sources were observed.
 Since the Northern Cross is a transiting array there is a limited period of time each day in which a source is in the primary beam.
 Bright sources such as Cygnus A, Cassiopeia A and Taurus A along with a number of 3C sources were observed along with multiple constant declination 24 hour cycles.
 
-Raw data from the correlator and imager is recorded to HDF5 files using a SPEAD protocol receive script.
-A suite of python scripts have been written to interface and manipulate the data in this pre-calibration stage.
-A python FITS-IDI package has been written to convert HDF5 files into the standard FITS format which can be read by AIPS and CASA\footnote{https://github.com/telegraphic/pyfitsidi}.
-This allows for conversion to the Measurement Set format which most packages can interface with.
+% Raw data from the correlator and imager is recorded to HDF5 files using a SPEAD protocol receive script.
+% A suite of python scripts have been written to interface and manipulate the data in this pre-calibration stage.
+% A python FITS-IDI package has been written to convert HDF5 files into the standard FITS format which can be read by AIPS and CASA\footnote{https://github.com/telegraphic/pyfitsidi}.
+% This allows for conversion to the Measurement Set format which most packages can interface with.
 
 \subsection{FX Correlator Imaging}
 \label{fx_results}
 
-During observations no phase tracking is applied to the antenna signals.
-The integration time is sufficiently short $O(1s)$ that this does not effect the phase.
-This allows the array phase center to be tracked to any position in post processing.
-Before conversion to measurement sets a phase correction is added to each integration.
-We are limited to a fixed observation length per day for a given source.
-The UV coverage is essentially the same for any observation, with some variation due to pointing declination. 
+% During observations no phase tracking is applied to the antenna signals.
+% The integration time is sufficiently short $O(1s)$ that this does not effect the phase.
+% This allows the array phase center to be tracked to any position in post processing.
+% Before conversion to measurement sets a phase correction is added to each integration.
+% We are limited to a fixed observation length per day for a given source.
+% The UV coverage is essentially the same for any observation, with some variation due to pointing declination. 
 
 The East-West full width half max (FWHM) beam size of an individual element is $\approx11.25^{\circ}$ which translates to a 45 minute `observation time' for a source, as seen in the measured primary beam, figure \ref{fig:best2_pb}.
 For the the bright A class sources this time can be extended since they remain the dominating source well after crossing the FWHM.
@@ -452,9 +450,9 @@ This stage is calibrated on short time intervals to account for amplitude change
 
 %psf/dirty/clean
 %dynamic range/noise/SEFD
-An effect of the density of the antenna layout is a low point spread function(PSF) to field of view ratio (spatial fidelity), thus images tend to contain at most a few spatial separate point sources.
-The grid layout of the BEST-2 array produces strong sidelobes and grating lobes in the PSF as seen in figure \ref{fig:fx_tau_psf}.
-Observations of bright point sources produces calibrated dirty images in which the PSF is clearly visible, fig. \ref{fig:fx_tau_dirty}.
+An effect of the density of the antenna layout is a low point spread function (PSF) to field of view ratio (spatial fidelity), thus images tend to contain at most a few spatially separated point sources.
+The grid layout of the BEST-2 array produces strong sidelobes and grating lobes in the PSF as seen in Figure \ref{fig:fx_tau_psf}.
+Observations of bright point sources produces calibrated dirty images in which the PSF is clearly visible, Figure \ref{fig:fx_tau_dirty}.
 After cleaning we measure the residual noise to be around 2 Jy over a number of two minute snapshot observations, table \ref{tbl:src_flux}.
 Imaging using longer source transit times has shown the noise floor to decrease at the expected rate of $\frac{1}{\sqrt{\tau}}$.
 The various stages of imaging and calibration for the source Taurus A is shown in figure \ref{fig:fx_tau}.
