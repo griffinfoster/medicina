@@ -31,9 +31,10 @@ Further methods can be implemented in the real time calibration to improve the s
 \section{Introduction}
 
 The Basic Element for SKA Training II (BEST-2) array is a subset of the Northern Cross cylindrical array, at the Radiotelescopi di Medicina in Italy.
-In this paper we present results from a new digital backend designed for this array, implemented on Field Programable Gate Array (FPGA) based hardware from the Collaboration for Astronomy Signal Processing and Electronics Research (CASPER\footnote{https://casper.berkeley.edu/}; \cite{casper}). The system developed provides fast-dump correlation, direct imaging, beamforming, and transient processing capabilities.
+In this paper we present results from a new digital backend designed for this array, implemented on Field Programable Gate Array (FPGA) based hardware from the Collaboration for Astronomy Signal Processing and Electronics Research (CASPER\footnote{https://casper.berkeley.edu/}; \cite{casper}).
+The system developed provides fast-dump correlation, direct imaging, and beamforming capabilities.
 
-This digital backend presented in this paper comprises a 32 element digitizer and channeliser, a correlator, spatial Fast Fourier Transform (FFT) imager, and beamformer, implemented on ROACH\footnote{Reconfigurable Open Architecture Computing Hardware -- https://casper.berkeley.edu/wiki/ROACH} FPGA boards.
+The digital backend developed for BEST-2 comprises a 32 element digitizer and channeliser, a correlator, spatial Fast Fourier Transform (FFT) imager, and beamformer, implemented on ROACH\footnote{Reconfigurable Open Architecture Computing Hardware -- https://casper.berkeley.edu/wiki/ROACH} FPGA boards.
 Of particular interest is the spatial FFT imager which can produce a complete set of unique baselines using $O(n \log n)$ operations by taking advantage of the regularly gridded array geometry.
 The FX correlator computes all possible baseline pairs which scales as $O(n^2)$.
 Along with producing correlation data the spatial FFT functions as a gridded beamformer which has been used for pulsar observations.
@@ -54,7 +55,7 @@ Data have been reduced and calibrated using a combination of custom software and
 In the first section of this paper we give an overview of the BEST-2 Array, Sections \ref{channelization}, \ref{correlator} and \ref{s-engine} cover a description of the channelization, correlation and image-domain processing system.
 Results from preliminary observations of bright radio sources from these systems are presented in section \ref{fx_results} and a comparison of data quality between the two instruments is presented in section \ref{sfft_results}, with a discussion of results in section \ref{conclusion}.
 
-\section{BEST-2 Array}
+\subsection{BEST-2 Array}
 \label{best-2 array}
 
 The BEST-2 testbed at the Radiotelescopi di Medicina consists of 8 East-West oriented cylindrical concentrators, each with 64 dipole receivers critically sampling a focal line at 408MHz.
@@ -69,94 +70,191 @@ Extensive documentation of the development of the analogue chain developed for B
 
 In 2008 the initial digital correlator backend of the array was based on iBOB and BEE2 FPGA boards from the CASPER group \citep{best2-casper}.
 An upgraded digital backend has been developed using the ROACH board, also developed by CASPER, which includes an FX correlator, spatial FFT imager and beamformer.
+% \begin{table}
+%     \centering
+%     \subfloat[The 32 effective receiving elements of BEST-2, indicated by crosses, lie on a regular 4x8 grid. Each receiver is the analogue sum of 16 dipoles, critically spaced at 408 MHz in the East-West direction.]{
+%     \includegraphics[scale=0.6]{graphics/layout.png}
+%     \label{fig:ant_layout}
+%     }
+%     \subtable{%[The top level specifications of the BEST-2 Array, a subset of the collecting area of the Northern Cross, located in Medicina, Italy.]{
+%     %\begin{table}
+%     %\begin{center}
+%     \begin{tabular}{| l | l | l |}
+%     \hline
+%     \multicolumn{3}{|c|}{BEST-2 Array Specifications}\\
+%     %\hline
+%     %Cylinder \& Element Properties & &\\
+%     %\hline
+%     %Number of receivers per Cylinder 	&          4 &            	\\
+%     %Cylinder Diameter 		&        7.5 &          m 	\\
+%     %Cylinder Length 		&       23.5 &          m 	\\
+%     %Element Diameter 		&        7.5 &          m 	\\
+%     %Element Length 			&       5.88 &          m 	\\
+%     %Element Collecting Area 	&       44.1 &        $m^2$ 	\\
+%     %Aperture Efficiency 		&       0.71 &            	\\
+%     %Element Effective Area 		&       31.3 &        $m^2$ 	\\
+%     %				&            &            	\\
+%     \hline
+%     Array Properties		&            &            	\\
+%     \hline
+%     Number of Cylinders 		&          8 &            	\\
+%     Total Number of receivers 		&         32 &            	\\
+%     Total Collecting Area 		&     1411.2 &        $m^2$ 	\\
+%     %Total Effective Area 		&    1001.95 &        $m^2$ 	\\
+%     %Sensitivity / Ant. gain 	&       0.36 &       K/Jy 	\\
+%     %Antenna Temperature 		&         35 &          K 	\\
+%     %Receiver Temperature 		&         51 &          K 	\\
+%     %System Temperature  		&         86 &          K 	\\
+%     $A_{eff}/T_{sys}$ 		&      11.65 &      $m^2/K$ 	\\
+% 				    &            &            	\\
+%     \hline
+%     Longest Baseline 		&            &            	\\
+%     \hline
+%     E-W 				&      17.04 &         m 	\\
+%     N-S 				&      70.00 &         m 	\\
+% 				    &            &            	\\
+%     \hline
+%     Bandpass        		&            &       		\\
+%     \hline
+%     Central Frequency 		&        408 &        MHz 	\\
+%     Analogue Bandwidth 		&         16 &        MHz 	\\
+% 				    &            &            	\\
+%     %\hline
+%     %Pointing Limits 		&            &            	\\
+%     %\hline
+%     %Declination 			&    (0,+90) &        deg 	\\
+%     %Right Ascension 		&    Local Meridian &  		\\
+% 				    %&            &            	\\
+%     \hline
+%     Primary Beam 			&            &           	\\
+%     \hline
+%     Primary Beam Size 		&      37.62 & $\textrm{deg}^2$ \\
+%     Declination 			&        5.7 &        deg 	\\
+%     Right Ascension 		&        6.6 &        deg 	\\
+% 				    &            &            	\\
+%     \hline
+%     PSF    				&            &       		\\
+%     \hline
+%     PSF FWHM 			&        0.9 & $\textrm{deg}^2$ \\
+%     Declination 			&       0.52 &     deg 		\\
+%     Right ascension 		&       1.73 &     deg 		\\
+% 				    &            &            	\\
+%     \hline
+%     \end{tabular}
+%     %\caption{The top level specifications of the BEST-2 Array, a subset of the collecting area of the Northern Cross, located in Medicina, Italy.}
+%     \label{tbl:best2}
+%     %\end{center}
+%     %\end{table}
+%     }
+%     \caption{a group caption}
+%     \label{fig:layout_and_stats}
+% \end{table}
 
-\begin{table}
-\begin{center}
-\begin{tabular}{| l | l | l |}
-\hline
-\multicolumn{3}{|c|}{BEST-2 Array Specifications}\\
-%\hline
-%Cylinder \& Element Properties & &\\
-%\hline
-%Number of receivers per Cylinder 	&          4 &            	\\
-%Cylinder Diameter 		&        7.5 &          m 	\\
-%Cylinder Length 		&       23.5 &          m 	\\
-%Element Diameter 		&        7.5 &          m 	\\
-%Element Length 			&       5.88 &          m 	\\
-%Element Collecting Area 	&       44.1 &        $m^2$ 	\\
-%Aperture Efficiency 		&       0.71 &            	\\
-%Element Effective Area 		&       31.3 &        $m^2$ 	\\
-%				&            &            	\\
-\hline
-BEST-2 Array Properties		&            &            	\\
-\hline
-Number of Cylinders 		&          8 &            	\\
-Total Number of receivers 		&         32 &            	\\
-Total Collecting Area 		&     1411.2 &        $m^2$ 	\\
-%Total Effective Area 		&    1001.95 &        $m^2$ 	\\
-%Sensitivity / Ant. gain 	&       0.36 &       K/Jy 	\\
-%Antenna Temperature 		&         35 &          K 	\\
-%Receiver Temperature 		&         51 &          K 	\\
-%System Temperature  		&         86 &          K 	\\
-$A_{eff}/T_{sys}$ 		&      11.65 &      $m^2/K$ 	\\
-				&            &            	\\
-\hline
-Longest Baseline 		&            &            	\\
-\hline
-E-W 				&      17.04 &         m 	\\
-N-S 				&      70.00 &         m 	\\
-				&            &            	\\
-\hline
-Bandpass        		&            &       		\\
-\hline
-Central Frequency 		&        408 &        MHz 	\\
-Analogue Bandwidth 		&         16 &        MHz 	\\
-				&            &            	\\
-%\hline
-%Pointing Limits 		&            &            	\\
-%\hline
-%Declination 			&    (0,+90) &        deg 	\\
-%Right Ascension 		&    Local Meridian &  		\\
-				%&            &            	\\
-\hline
-Primary Beam 			&            &           	\\
-\hline
-Primary Beam Size 		&      37.62 & $\textrm{deg}^2$ \\
-Declination 			&        5.7 &        deg 	\\
-Right Ascension 		&        6.6 &        deg 	\\
-				&            &            	\\
-\hline
-PSF    				&            &       		\\
-\hline
-PSF FWHM 			&        0.9 & $\textrm{deg}^2$ \\
-Declination 			&       0.52 &     deg 		\\
-Right ascension 		&       1.73 &     deg 		\\
-				&            &            	\\
-\hline
-\end{tabular}
-\caption{The top level specifications of the BEST-2 Array, a subset of the collecting area of the Northern Cross, located in Medicina, Italy.}
-\label{tbl:best2}
-\end{center}
-\end{table}
 
 \begin{figure}
-    \centering
-    \subfloat[The 32 effective receiving elements of BEST-2, indicated by crosses, lie on a regular 4x8 grid. Each receiver is the analogue sum of 16 dipoles, critically spaced at 408 MHz in the East-West direction.]{
-    \includegraphics[scale=0.6]{graphics/layout.png}
-    \label{fig:ant_layout}
-    }
-    \hspace{10pt}
-    \subfloat[BEST-2 is a subset of eight cylinders in the north-south arm of the Croce del Nord.]{
-    \includegraphics[scale=0.4]{graphics/best2.pdf}
-    \label{fig:best2}
-    }
-    \caption{BEST-2 antenna geometry.}
-    \label{fig:array_layout}
+  \begin{minipage}[c]{0.475\textwidth}
+      \centering
+      \includegraphics[scale=0.7]{graphics/layout.png}
+  \end{minipage}
+  \hspace{0.05\textwidth}
+  \begin{minipage}[c]{0.475\textwidth}
+      %\begin{table}
+      \centering
+      \begin{tabular}{| l | l | l |}
+      \hline
+      \multicolumn{3}{|c|}{BEST-2 Array Specifications}\\
+      %\hline
+      %Cylinder \& Element Properties & &\\
+      %\hline
+      %Number of receivers per Cylinder 	&          4 &            	\\
+      %Cylinder Diameter 		&        7.5 &          m 	\\
+      %Cylinder Length 		&       23.5 &          m 	\\
+      %Element Diameter 		&        7.5 &          m 	\\
+      %Element Length 			&       5.88 &          m 	\\
+      %Element Collecting Area 	&       44.1 &        $m^2$ 	\\
+      %Aperture Efficiency 		&       0.71 &            	\\
+      %Element Effective Area 		&       31.3 &        $m^2$ 	\\
+      %				&            &            	\\
+      \hline
+      Array Properties		&            &            	\\
+      \hline
+      Number of Cylinders 		&          8 &            	\\
+      Total Number of receivers 		&         32 &            	\\
+      Total Collecting Area 		&     1411.2 &        $m^2$ 	\\
+      %Total Effective Area 		&    1001.95 &        $m^2$ 	\\
+      %Sensitivity / Ant. gain 	&       0.36 &       K/Jy 	\\
+      %Antenna Temperature 		&         35 &          K 	\\
+      %Receiver Temperature 		&         51 &          K 	\\
+      %System Temperature  		&         86 &          K 	\\
+      $A_{eff}/T_{sys}$ 		&      11.65 &      $m^2/K$ 	\\
+				      &            &            	\\
+      \hline
+      Longest Baseline 		&            &            	\\
+      \hline
+      E-W 				&      17.04 &         m 	\\
+      N-S 				&      70.00 &         m 	\\
+				      &            &            	\\
+      \hline
+      Bandpass        		&            &       		\\
+      \hline
+      Central Frequency 		&        408 &        MHz 	\\
+      Analogue Bandwidth 		&         16 &        MHz 	\\
+				      &            &            	\\
+      %\hline
+      %Pointing Limits 		&            &            	\\
+      %\hline
+      %Declination 			&    (0,+90) &        deg 	\\
+      %Right Ascension 		&    Local Meridian &  		\\
+				      %&            &            	\\
+      \hline
+      Primary Beam 			&            &           	\\
+      \hline
+      Primary Beam Size 		&      37.62 & $\textrm{deg}^2$ \\
+      Declination 			&        5.7 &        deg 	\\
+      Right Ascension 		&        6.6 &        deg 	\\
+				      &            &            	\\
+      \hline
+      PSF    				&            &       		\\
+      \hline
+      PSF FWHM 			&        0.9 & $\textrm{deg}^2$ \\
+      Declination 			&       0.52 &     deg 		\\
+      Right ascension 		&       1.73 &     deg 		\\
+				      &            &            	\\
+      \hline
+      \end{tabular}     
+      %\end{table}
+  \end{minipage}
+  \begin{minipage}[t]{0.475\textwidth}
+        \caption{The 32 effective receiving elements of BEST-2, indicated by crosses, lie on a regular 4x8 grid. Each receiver is the analogue sum of 16 dipoles, critically spaced at 408 MHz in the East-West direction.}
+        \label{fig:ant_layout}
+  \end{minipage}
+  \hspace{0.035\textwidth}
+  \begin{minipage}[t]{0.475\textwidth}
+        \captionof{table}{The top level specifications of the BEST-2 Array, a subset of the collecting area of the Northern Cross, located in Medicina, Italy.}
+        \label{tbl:best2}
+  \end{minipage}
 \end{figure}
+  
 
-\section{Instrument Design}
-\label{instrument design}
 
+% \begin{figure}
+%     \centering
+%     \subfloat[The 32 effective receiving elements of BEST-2, indicated by crosses, lie on a regular 4x8 grid. Each receiver is the analogue sum of 16 dipoles, critically spaced at 408 MHz in the East-West direction.]{
+%     \includegraphics[scale=0.4\textwidth]{graphics/layout.png}
+%     \label{fig:ant_layout}
+%     }
+%     \hspace{10pt}
+%     \subfloat[BEST-2 is a subset of eight cylinders in the north-south arm of the Croce del Nord.]{
+%     \includegraphics[scale=0.4]{graphics/best2.pdf}
+%     \label{fig:best2}
+%     \caption{BEST-2 antenna geometry.}
+%     }
+%     \label{fig:array_layout}
+% \end{figure}
+
+%\section{Instrument Design}
+%\label{instrument design}
+%
 % An FX correlator and spatial FFT imager have been implemented in digital hardware for use with the BEST-2 array.
 % Both instruments use the same digitization and channelization frontend.
 % The hybrid design of the digital instruments make it possible to use both the correlator and imager concurrently.
@@ -613,7 +711,7 @@ This effect that is likely to be temperature dependent, but may also depend on t
 \begin{figure}
     \centering
     \subfloat[Dirty image of Tau/3c144 formed before applying complex gain calibrations in the F-Engine for the spatial FFT. The uncalibrated phases spread the power through out the image.]{
-    \includegraphics[scale=0.3]{{graphics/img.2455985.25525.tau.uncal.s.ms.DATA.channel.1ch}.pdf}
+    \includegraphics[width=\textwidth]{{graphics/img.2455985.25525.tau.uncal.s.ms.DATA.channel.1ch}.pdf}
     \label{fig:uncal_sfft}
     }
     \hspace{10pt}
