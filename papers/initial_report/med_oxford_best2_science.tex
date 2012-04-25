@@ -1,4 +1,5 @@
-\documentclass[useAMS,macros,usenatbib,onecolumn]{mn2e}
+\documentclass[useAMS,macros,usenatbib]{mn2e}
+%\documentclass[useAMS,macros,usenatbib,onecolumn]{mn2e}
 %\documentclass[useAMS,macros,usenatbib,onecolumn,referee]{mn2e}
 \usepackage{multirow}
 \usepackage{graphicx}
@@ -152,13 +153,13 @@ An upgraded digital backend has been developed using the ROACH board, also devel
 
 
 \begin{figure}
-  \begin{minipage}[c]{0.475\textwidth}
-      \centering
-      \includegraphics[scale=0.7]{graphics/layout.png}
-  \end{minipage}
-  \hspace{0.05\textwidth}
-  \begin{minipage}[c]{0.475\textwidth}
-      %\begin{table}
+  \centering
+  \includegraphics[width=\linewidth]{graphics/layout.png}
+  \caption{The 32 effective receiving elements of BEST-2, indicated by crosses, lie on a regular 4x8 grid. Each receiver is the analogue sum of 16 dipoles, critically spaced at 408 MHz in the East-West direction.}
+  \label{fig:ant_layout}
+\end{figure}
+
+\begin{table}
       \centering
       \begin{tabular}{| l | l | l |}
       \hline
@@ -221,19 +222,11 @@ An upgraded digital backend has been developed using the ROACH board, also devel
       Right ascension 		&       1.73 &     deg 		\\
 				      &            &            	\\
       \hline
-      \end{tabular}     
-      %\end{table}
-  \end{minipage}
-  \begin{minipage}[t]{0.475\textwidth}
-        \caption{The 32 effective receiving elements of BEST-2, indicated by crosses, lie on a regular 4x8 grid. Each receiver is the analogue sum of 16 dipoles, critically spaced at 408 MHz in the East-West direction.}
-        \label{fig:ant_layout}
-  \end{minipage}
-  \hspace{0.035\textwidth}
-  \begin{minipage}[t]{0.475\textwidth}
-        \captionof{table}{The top level specifications of the BEST-2 Array, a subset of the collecting area of the Northern Cross, located in Medicina, Italy.}
-        \label{tbl:best2}
-  \end{minipage}
-\end{figure}
+      \end{tabular}
+      \caption{The top level specifications of the BEST-2 Array, a subset of the collecting area of the Northern Cross, located in Medicina, Italy.}
+      \label{tbl:best2}
+\end{table}
+
   
 
 
@@ -467,7 +460,7 @@ Thus any calibration to the complex gains must be applied before the spatial FFT
 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.6]{graphics/redbl.png}
+    \includegraphics[width=\linewidth]{graphics/redbl.png}
     \caption{A 4 by 8 regularly gridded array has 53 unique baselines, 480 cross correlations are performed. The number of redundant baseline measurements is labelled and represented by the size of each circle.}
     \label{fig:redbl}
 \end{figure}
@@ -527,7 +520,7 @@ The high sidelobes in the primary beam, figure \ref{fig:best2_pb}, cause the bri
 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.6]{{graphics/pb/best2_3_20_primary_beam}.pdf}
+    \includegraphics[width=\linewidth]{{graphics/pb/best2_3_20_primary_beam}.pdf}
     \caption{A measured east-west primary beam based on the correlation between antennas 1N-6-1 and 1N-1-3, which are representative of typical antennas, based on a Cassiopeia A transit. 
     The dashed lines indicate the FWHM points.
     The antennas have a sinc response to a point source, as expected.
@@ -557,34 +550,34 @@ The various stages of imaging and calibration for the source Taurus A is shown i
 Further images and analysis of the data quality are followed in section \ref{sfft_results}.
 
 %image: raw,psf,dirty,clean
-\begin{figure}
+\begin{figure*}
     \centering
 
     \subfloat[Uncalibrated image of Taurus A.]{
-    \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.DATA.channel.1ch}.pdf}
+    \includegraphics[width=0.45\linewidth]{{graphics/fx/corr.2455996.22803.tau.s.ms.DATA.channel.1ch}.pdf}
     \label{fig:fx_tau_data}
     }
-    \hspace{10pt}
+    \hspace{0.05\linewidth}
     \subfloat[Point spread function. The high, regular sidelobes are an effect of the regularly gridded array.]{
     %\includegraphics[scale=0.3]{{graphics/img.2455999.21403.tau.cal.s.ms.psf.channel.1ch.mod.crop}.pdf}
-    \includegraphics[scale=0.3]{{graphics/img.2455999.21403.tau.cal.s.ms.psf.channel.1ch.mod}.pdf}
+    \includegraphics[width=0.45\linewidth]{{graphics/img.2455999.21403.tau.cal.s.ms.psf.channel.1ch.mod}.pdf}
     \label{fig:fx_tau_psf}
     }
     
     \subfloat[Dirty image formed, using natural weighting, after applying complex gain solutions. The structure from the PSF is clearly visible. The dynamic range of this image is $\sim150$.]{
-    \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
+    \includegraphics[width=0.45\linewidth]{{graphics/fx/corr.2455996.22803.tau.s.ms.CORRECTED_DATA.channel.1ch}.pdf}
     \label{fig:fx_tau_dirty}
     }
-    \hspace{10pt}
+    \hspace{0.05\linewidth}
     \subfloat[Cleaned image of the field, Taurus A is the dominating point source with a peak of 730 Jy, the image have a dynamic range of $\sim350$.]{
-    \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
+    \includegraphics[width=0.45\linewidth]{{graphics/fx/corr.2455996.22803.tau.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
     \label{fig:fx_tau_clean}
     }
     
     \caption{Images and PSF formed from an FX correlator two minute snapshot observation of Taurus A.
     }
     \label{fig:fx_tau}
-\end{figure}
+\end{figure*}
 
 %%solar observation
 %\subsubsection{Solar Observation during Highly Active Period}
@@ -637,23 +630,23 @@ It is worth noting that the baselines produced by the spatial FFT imager have an
 To change the weighting of the spatial FFT baselines, reweighting factors must be added to the data based on how redundant each baseline is.
 
 %image: natural,uniform
-\begin{figure}
+\begin{figure*}
     \centering
 
     \subfloat[Dirty image with natural weighting of the point source Taurus A.]{
-    \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.natural.CORRECTED_DATA.channel.1ch}.pdf}
+    \includegraphics[width=0.45\linewidth]{{graphics/fx/corr.2455996.22803.tau.s.ms.natural.CORRECTED_DATA.channel.1ch}.pdf}
     \label{fig:fx_tau_natural}
     }
-    \hspace{10pt}
+    \hspace{0.05\linewidth}
     \subfloat[Dirty image with uniform weighting of the point source Taurus A.]{
-    \includegraphics[scale=0.3]{{graphics/fx/corr.2455996.22803.tau.s.ms.uniform.CORRECTED_DATA.channel.1ch}.pdf}
+    \includegraphics[width=0.45\linewidth]{{graphics/fx/corr.2455996.22803.tau.s.ms.uniform.CORRECTED_DATA.channel.1ch}.pdf}
     \label{fig:fx_tau_uniform}
     }
     
     \caption{Natural versus uniform weighting of a point source.
     }
     \label{fig:fx_weighting}
-\end{figure}
+\end{figure*}
 
 \section{Spatial FFT Results}
 \label{sfft_results}
@@ -687,16 +680,16 @@ The stability of a calibration over several days can only be relied upon to an a
 We note that, unsurprisingly, these variations are greatest when comparing the transits of different sources.
 This effect that is likely to be temperature dependent, but may also depend on the pointing angle of the array.
 
-\begin{figure}
+\begin{figure*}
     \centering
 
     \subfloat[Gain phase variation over different observations]{
-    \includegraphics[width=\textwidth]{{graphics/gain_phs_var_deplane_crop}.pdf}
+    \includegraphics[width=0.9\textwidth]{{graphics/gain_phs_var_deplane_crop}.pdf}
     \label{fig:gain_variation_phase}
     }
-    \hspace{10pt}
+
     \subfloat[Gain amplitude variation over different observations]{
-    \includegraphics[width=\textwidth]{{graphics/gain_amp_var_crop}.pdf}
+    \includegraphics[width=0.9\textwidth]{{graphics/gain_amp_var_crop}.pdf}
     \label{fig:gain_variation_amp}
     }
     
@@ -705,24 +698,24 @@ This effect that is likely to be temperature dependent, but may also depend on t
     Over the period of observations shown Cassiopeia A, Taurus A and Cygnus A transited at approximately 13:30, 18:30 and 09:00 local time, respectively.
     \label{fig:gain_variation}
     }
-\end{figure}
+\end{figure*}
 
 %SFFT correlations of Tau/3c144 before and after calibration
-\begin{figure}
+\begin{figure*}
     \centering
     \subfloat[Dirty image of Tau/3c144 formed before applying complex gain calibrations in the F-Engine for the spatial FFT. The uncalibrated phases spread the power through out the image.]{
-    \includegraphics[width=\textwidth]{{graphics/img.2455985.25525.tau.uncal.s.ms.DATA.channel.1ch}.pdf}
+    \includegraphics[width=0.45\linewidth]{{graphics/img.2455985.25525.tau.uncal.s.ms.DATA.channel.1ch}.pdf}
     \label{fig:uncal_sfft}
     }
-    \hspace{10pt}
+    \hspace{0.05\linewidth}
     \subfloat[Dirty image of Tau/3c144 with complex gain calibrations applied. This image has a signal to noise ratio around 100, a standard CLEAN method can be used to improve the image dynamic range.]{
-    \includegraphics[scale=0.3]{{graphics/img.2455999.21403.tau.cal.s.ms.DATA.channel.1ch}.pdf}
+    \includegraphics[width=0.45\linewidth]{{graphics/img.2455999.21403.tau.cal.s.ms.DATA.channel.1ch}.pdf}
     \label{fig:cal_sfft}
     }
     \caption{After applying complex gain calibration a bright point source such as Tau/3c144 appears similar to the array PSF, and has a significant improvement in the image fidelity compared to the uncalibrated image.
     \label{fig:sfft_calibration}
     }
-\end{figure}
+\end{figure*}
 
 %what is 'sufficiently stable'?
 %variability: source, temp, time of day
@@ -742,7 +735,7 @@ Ongoing work is currently in progress to allow more than 8 beams to be processed
 %fig:sfft beams on the sky
 \begin{figure}
     \centering
-    \includegraphics[scale=0.6]{{graphics/cas_transit_beams_6jun2011_crop}.pdf}
+    \includegraphics[width=\linewidth]{{graphics/cas_transit_beams_6jun2011_crop}.pdf}
     \caption{The power, as a function of time, of a row of 8 beams at approximately constant declination during a transit of Cassiopeia A.}
     \label{fig:casa_beams}
 \end{figure}
@@ -770,24 +763,24 @@ In the following section we look at the results of observations from both instru
 \subsubsection{Image Comparison}
 \label{fx_sfft_image_comp}
 
-\begin{figure}
+\begin{figure*}
     \centering
 
     \subfloat[Dirty image of Taurus formed from the spatial FFT imager, the flux scale has been fixed to the scale based on the same image from the FX correlator. The dynamic range,$\sim100$, is less than that of the FX correlator image, $\sim150$.]{
-    \includegraphics[scale=0.3]{{graphics/sfft/img.2455996.22807.tau.s.ms.DATA.channel.1ch}.pdf}
+    \includegraphics[width=0.45\linewidth]{{graphics/sfft/img.2455996.22807.tau.s.ms.DATA.channel.1ch}.pdf}
     \label{fig:sfft_tau_dirty}
     }
-    \hspace{10pt}
+    \hspace{0.05\linewidth}
     \subfloat[Cleaned image of the Taurus field. The cleaning process brings the dynamic range up to around 300, similar to the value from the FX correlator image in fig. \ref{fig:fx_tau_clean}.
     A notable feature about the the cleaned images from the spatial FFT is the apparent low level skewing of the image, particularly in the east-west direction.]{
-    \includegraphics[scale=0.3]{{graphics/sfft/img.2455996.22807.tau.s.ms.DATA.channel.1ch.restored}.pdf}
+    \includegraphics[width=0.45\linewidth]{{graphics/sfft/img.2455996.22807.tau.s.ms.DATA.channel.1ch.restored}.pdf}
     \label{fig:sfft_tau_clean}
     }
     
     \label{fig:sfft_tau}
     \caption{The images produced by the spatial FFT imager are comparable in noise and dynamic range to those produced with calibrated FX correlator data.
     }
-\end{figure}
+\end{figure*}
 
 A number of 3C source fields have been imaged from concurrent observations of the FX correlator and spatial FFT imager, figures \ref{fig:fx_sfft_set1} and \ref{fig:fx_sfft_set2}.
 To make a comparison between images we define the dynamic range of each image to the peak flux divided by the standard deviation of the noise in a empty region of the image.
@@ -800,7 +793,7 @@ In the image analysis we are not so much interested in the absolute flux and noi
 In table \ref{tbl:src_flux} we list a number of 3C sources along with their measured flux and noise levels.
 For these snapshot images the spatial FFT produces essentially the same results as the FX correlator.
 
-\begin{table}
+\begin{table*}
 \begin{center}
 \begin{tabular}{|c||c|c|c|c|}
 \multicolumn{5}{|c|}{Measured Source Flux and Noise Levels}\\
@@ -816,7 +809,7 @@ Source & 3C Flux (Jy) & Peak Flux (Jy) & FX Noise Level (Jy) & SFFT Noise Level 
 \caption{Noise level for various 3C sources calculated for images formed with data from the FX correlator and the spatial FFT imager.}
 \label{tbl:src_flux}
 \end{center}
-\end{table}
+\end{table*}
 
 Even though the results have comparable dynamic range in the spatial FFT images there is a noticeable distortion.
 The cleaned image of Taurus, fig. \ref{fig:sfft_tau_clean}, begins to form points at the low levels, primarily in the east-west direction.
@@ -840,7 +833,7 @@ After self calibration the FX correlator noise is further reduced and the slope 
 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.6]{{graphics/bls/phase_plot_0_31_cyg}.png}
+    \includegraphics[width=\linewidth]{{graphics/bls/phase_plot_0_31_cyg}.png}
     \caption{The (1N-1-1,1N-8-4) baseline is the one of the non-redundant baselines in the array.
     The solid line is the phase from the spatial FFT imager during a calibrated observation of Cygnus A.
     FX correlator phase data, dashed line, from the same observation has the same noise level, within $20\%$, of the spatial FFT data.
@@ -857,7 +850,7 @@ This is shown to be correct, but again the spatial FFT effective baseline has a 
 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.6]{{graphics/bls/phase_plot_0_4_tau}.png}
+    \includegraphics[width=\linewidth]{{graphics/bls/phase_plot_0_4_tau}.png}
     \caption{Phase plot of an observation of Taurus A.
     Comparison of the FX correlator baselines which are redundant with the (0,4) antenna spacing and the corresponding spatial FFT baseline.
     The lines are: redundant FX correlator baselines(dotted), spatial FFT combined baseline (solid), all the FX baselines averaged together(dashed).
@@ -873,7 +866,7 @@ Yet, the noise standard deviation is higher on every baseline compared to the av
 
 \begin{figure}
     \centering
-    \includegraphics[scale=0.6]{{graphics/bls/tau_bls_v2}.png}
+    \includegraphics[width=\linewidth]{{graphics/bls/tau_bls_v2}.png}
     \caption{Phase noise for each baseline during an observation plotted against the the number of redundant baselines.
     Small dots are the 496 FX correlator baselines.
     %Closed circles with error bars are the average phase noise for FX correlator baselines based on baseline redundancy.
@@ -938,7 +931,7 @@ Work on this is in further development.
 %We would like to thank Medicina Observatory staff including Marco Bartolini, Giovanni Naldi, Germana Bianchi and Federico Perini for their help through out.
 
 %images: compare images of FX and SFFT
-\begin{figure}
+\begin{figure*}
     \centering
 
     \subfloat[]{
@@ -985,9 +978,9 @@ Work on this is in further development.
     The FX correlator and spatial FFT images have comparable noise floors of about 2 Jy in all images and difference in dynamic range varying from a few percent to 10 percent depending on the source.
     }
     \label{fig:fx_sfft_set1}
-\end{figure}
+\end{figure*}
 
-\begin{figure}
+\begin{figure*}
     \centering
 
     \subfloat[]{
@@ -1034,7 +1027,7 @@ Work on this is in further development.
     The FX correlator and spatial FFT images have comparable noise floors of about 2 Jy in all images and difference in dynamic range varying from a few percent to 10 percent depending on the source.
     }
     \label{fig:fx_sfft_set2}
-\end{figure}
+\end{figure*}
 
 \bibliography{refs}{}
 \bibliographystyle{mn2e}
