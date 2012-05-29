@@ -24,7 +24,7 @@ if __name__ == '__main__':
     from optparse import OptionParser
 
     p = OptionParser()
-    p.set_usage('xeng_spead_issue.py [options] CONFIG_FILE')
+    p.set_usage('xeng_spead_issue.py [options] CONFIG_FILE SOURCE_FILE')
     p.set_description(__doc__)
     p.add_option('-v', '--verbose', dest='verbose',action='store_true', default=False, 
         help='Be verbose about errors.')

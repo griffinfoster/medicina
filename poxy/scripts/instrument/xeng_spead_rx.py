@@ -13,7 +13,7 @@ logging.basicConfig(level=logging.WARN)
 if __name__ == '__main__':
     from optparse import OptionParser
     p = OptionParser()
-    p.set_usage('%prog [options] CONFIG_FILE SOURCE_FILE')
+    p.set_usage('%prog [options] CONFIG_FILE')
     p.set_description(__doc__)
     p.add_option('-a', '--disable_autoscale', dest='acc_scale',action='store_false', default=True,
        help='Do not autoscale the data by dividing down by the number of accumulations.  Default: Scale back by n_accs.')
