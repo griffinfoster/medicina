@@ -37,29 +37,31 @@ The system developed provides fast-dump correlation, direct imaging, and beamfor
 
 The digital backend developed for BEST-2 comprises a 32 element digitizer and channeliser, a correlator, spatial Fast Fourier Transform (FFT) imager, and beamformer, implemented on ROACH\footnote{Reconfigurable Open Architecture Computing Hardware -- https://casper.berkeley.edu/wiki/ROACH} FPGA boards.
 Of particular interest is the spatial FFT imager which can produce a complete set of unique baselines using $O(n \log n)$ operations by taking advantage of the regularly gridded array geometry.
-The FX correlator computes all possible baseline pairs which scales as $O(n^2)$.
+The FX correlator computes all possible baseline pairs, which scales as $O(n^2)$.
 Along with producing correlation data the spatial FFT functions as a gridded beamformer which has been used for pulsar observations.
-%The Basic Element for SKA Training (BEST) test beds, consisting of BEST-1, BEST-2, and BEST-3lo, were developed as prototype systems for SKA hardware development.
-%Simplicity of interfacing with different digital backends was a core component of each design.
-%Digital firmware development was designed and tested at Oxford and the designs transferred with minimal changes to the available hardware at Medicina.
-%A digital backend was installed during the initial setup of BEST-2 using a previous generation of CASPER FPGA hardware \citep{}.
-%This new backend implements the same FX correlator functionality but also provides a high speed 10 GbE output interface for millisecond resolution correlations.
-%Along with the correlator a spatial fast Fourier Transform (FFT) imager is incorporated which uses the antenna array grid layout to perform a spatial transform to produce a uniform grid of beams covering the array field of view.
-%The imager also has a selectable 10 GbE beam output with can be used with a pulsar processor.
-These instruments have been installed as prototypes for larger scale instruments currently in development.
-The correlator is being used to study the handling of large output data rates and the development of real time millisecond imaging using many antenna elements.
-The direct imaging system is being used to study the feasibility of such systems in arrays with regular geometric structure, as well as providing a platform for pulsar surveys and space-debris tracking capabilities with BEST-2.
-%Design and deployment of a prototype design is key to understanding the possible future uses for such an instrument.
+%%The Basic Element for SKA Training (BEST) test beds, consisting of BEST-1, BEST-2, and BEST-3lo, were developed as prototype systems for SKA hardware development.
+%%Simplicity of interfacing with different digital backends was a core component of each design.
+%%Digital firmware development was designed and tested at Oxford and the designs transferred with minimal changes to the available hardware at Medicina.
+%%A digital backend was installed during the initial setup of BEST-2 using a previous generation of CASPER FPGA hardware \citep{}.
+%%This new backend implements the same FX correlator functionality but also provides a high speed 10 GbE output interface for millisecond resolution correlations.
+%%Along with the correlator a spatial fast Fourier Transform (FFT) imager is incorporated which uses the antenna array grid layout to perform a spatial transform to produce a uniform grid of beams covering the array field of view.
+%%The imager also has a selectable 10 GbE beam output with can be used with a pulsar processor.
+%These instruments have been installed as prototypes for larger scale instruments currently in development.
+%The correlator is being used to study the handling of large output data rates and the development of real time millisecond imaging using many antenna elements.
+%The direct imaging system is being used to study the feasibility of such systems in arrays with regular geometric structure, as well as providing a platform for pulsar surveys and space-debris tracking capabilities with BEST-2.
+%%Design and deployment of a prototype design is key to understanding the possible future uses for such an instrument.
+This is the first time a spatial FFT instrument has been used as a correlator on a radio telescope array.
 Since deployment, a number of sources with the correlator and imager have been successfully observed.
-Data have been reduced and calibrated using a combination of custom software and existing, popular radio synthesis imaging packages.
+Observations have been reduced and calibrated using a combination of custom software and existing, popular radio synthesis imaging packages.
 
-In the first section of this paper we give an overview of the BEST-2 Array, Sections \ref{channelization}, \ref{correlator} and \ref{s-engine} cover a description of the channelization, correlation and image-domain processing system.
-Results from preliminary observations of bright radio sources from these systems are presented in section \ref{fx_results} and a comparison of data quality between the two instruments is presented in section \ref{sfft_results}, with a discussion of results in section \ref{conclusion}.
+%In the first section of this paper we give an overview of the BEST-2 Array, Sections \ref{channelization}, \ref{correlator} and \ref{s-engine} cover a description of the channelization, correlation and image-domain processing system.
+We present results from preliminary observations of bright radio sources using these systems in section \ref{fx_results} and \ref{sfft_results}
+A comparison of data quality between the two instruments is presented in section \ref{inst_compare}, with a discussion of results in section \ref{conclusion}.
 
 \subsection{BEST-2 Array}
 \label{best-2 array}
 
-The BEST-2 testbed at the Radiotelescopi di Medicina consists of 8 East-West oriented cylindrical concentrators, each with 64 dipole receivers critically sampling a focal line at 408MHz.
+The BEST-2 testbed at the Radiotelescopi di Medicina consists of 8 East-West oriented cylindrical concentrators, each with 64 dipole receivers critically sampling a focal line at 408 MHz.
 Signals from these 64 dipoles are summed in groups of 16, resulting in 4 channels per cylinder, and a total of 32 effective receiving elements laid out on a \emph{4-by-8} grid, shown in Figure \ref{fig:ant_layout}.
 
 BEST-2 was developed as a reliable, low cost frontend to be used in SKA development, with a core design requirement of simplicity in interfacing with different digital backends \citep{best2}.
@@ -70,7 +72,7 @@ Extensive documentation of the development of the analogue chain developed for B
 %Further specifications of the array characteristics have been listed in table \ref{tbl:best2}.
 
 In 2008 the initial digital correlator backend of the array was based on iBOB and BEE2 FPGA boards from the CASPER group \citep{best2-casper}.
-An upgraded digital backend has been developed using the ROACH board, also developed by CASPER, which includes an FX correlator, spatial FFT imager and beamformer.
+An upgraded digital backend has been developed using the ROACH board, also developed by CASPER, which includes an FX correlator, spatial FFT imager and beamformer \citep{med_inst}.
 % \begin{table}
 %     \centering
 %     \subfloat[The 32 effective receiving elements of BEST-2, indicated by crosses, lie on a regular 4x8 grid. Each receiver is the analogue sum of 16 dipoles, critically spaced at 408 MHz in the East-West direction.]{
@@ -211,16 +213,16 @@ An upgraded digital backend has been developed using the ROACH board, also devel
       \hline
       Primary Beam 			&            &           	\\
       \hline
-      Primary Beam Size 		&      37.62 & $\textrm{deg}^2$ \\
-      Declination 			&        5.7 &        deg 	\\
-      Right Ascension 		&        6.6 &        deg 	\\
+      Primary Beam FWHM 		&      37.62 & $\textrm{deg}^2$ \\
+      Declination FWHM 			&        5.7 &        deg 	\\
+      Right Ascension FWHM		&        6.6 &        deg 	\\
 				      &            &            	\\
       \hline
       PSF    				&            &       		\\
       \hline
       PSF FWHM 			&        0.9 & $\textrm{deg}^2$ \\
-      Declination 			&       0.52 &     deg 		\\
-      Right ascension 		&       1.73 &     deg 		\\
+      Declination FWHM			&       0.52 &     deg 		\\
+      Right ascension FWHM		&       1.73 &     deg 		\\
 				      &            &            	\\
       \hline
       \end{tabular}
@@ -363,18 +365,6 @@ An upgraded digital backend has been developed using the ROACH board, also devel
 %    \label{fig:feng_block}
 %\end{figure}
 
-\subsection{FX Correlator}
-\label{correlator}
-
-An FX correlator design is a standard design for large bandwidth and many antenna arrays.
-The F component represents the frequency channelization, and the X is a complex multiply and accumulate (CMAC).
-% An overview of the architecture is presented in \cite{romney_white_book}.
-Architecture efficiency goes as $O( M \textrm{log} M) + O( N^2)$ where $M$ is the number of FFT frequency channels and $N$ is the number of antenna-polarizations.
-The core component to the X stage of the FX correlator is the complex multiplication of all pairs of independent signals for each frequency channel.
-% A pipelined x-engine, based on the general CASPER block originally designed by Lynn Urry\citep{fxcorrelator}, is used for multiplier efficiency.
-% The pipeline design is constructed out of $M/2$ `taps' where the $i^{th}$ tap computes the correlation between antennas $A_j$ and $A_{j+i}$ for every antenna $A_j$ of $M$ total antennas.
-% To maximize the multiplier usage a loopback is added to use every $i^{th}$ tap to compute the correlation of antennas $A_j$ and $A_{M/2+j+i}$, fig. \ref{fig:xeng_pipe}.
-% Each tap accumulates for $t$ time samples to reduce the output data rate.
 
 % \begin{figure}
 %     \centering
@@ -436,9 +426,30 @@ The core component to the X stage of the FX correlator is the complex multiplica
 %    \label{fig:xeng_block}
 %\end{figure}
 
-\subsection{Spatial FFT}
-\label{s-engine}
- 
+\section{Digital Instrumentation}
+\label{digital-inst}
+
+The multi-use digital instrumentation implemented for the BEST-2 array consists of a FX correlator and a spatial FFT imager.
+
+\subsection{FX Correlator}
+\label{correlator}
+An FX correlator design is a standard design for large bandwidth and many antenna arrays.
+The F component represents the frequency channelization, and the X is a complex multiply and accumulate (CMAC).
+Architecture efficiency goes as $O( M \textrm{log} M) + O( N^2)$ where $M$ is the number of FFT frequency channels and $N$ is the number of antenna-polarizations.
+The core component to the X stage of the FX correlator is the complex multiplication of all pairs of independent signals for each frequency channel.
+%An FX correlator design is a standard design for large bandwidth and many antenna arrays.
+%The F component represents the frequency channelization, and the X is a complex multiply and accumulate (CMAC).
+% An overview of the architecture is presented in \cite{romney_white_book}.
+%Architecture efficiency goes as $O( M \textrm{log} M) + O( N^2)$ where $M$ is the number of FFT frequency channels and $N$ is the number of antenna-polarizations.
+%The core component to the X stage of the FX correlator is the complex multiplication of all pairs of independent signals for each frequency channel.
+% A pipelined x-engine, based on the general CASPER block originally designed by Lynn Urry\citep{fxcorrelator}, is used for multiplier efficiency.
+% The pipeline design is constructed out of $M/2$ `taps' where the $i^{th}$ tap computes the correlation between antennas $A_j$ and $A_{j+i}$ for every antenna $A_j$ of $M$ total antennas.
+% To maximize the multiplier usage a loopback is added to use every $i^{th}$ tap to compute the correlation of antennas $A_j$ and $A_{M/2+j+i}$, fig. \ref{fig:xeng_pipe}.
+% Each tap accumulates for $t$ time samples to reduce the output data rate.
+
+\subsection{Spatial FFT Imager}
+\label{sfft}
+A spatial FFT imager is a novel instrument which takes advantage of the baseline redundancy in a regularly gridded array to reduce the correlator cost of an FX design $O(n^2)$ to a FFT cost of $O(n \log{n})$.
 When $N$ receiving elements in an antenna array are placed on a regularly spaced grid, a well known method for producing a complete set of orthogonal beams on the sky is the spatial fast Fourier transform \citep{fastbeamforming}.
 Such a beamforming implementation will generate $N$ beams on the sky, with a computational cost of $O(N\log{N})$. For large arrays, where many beams are desired, this can be a significant computational saving, with the alternative, so-called \emph{DFT beamforming}, requiring $O(N)$ operations per synthesized beam.
 To date, the largest such astronomical implementation of such a spatial fast Fourier transform beamformer is the 64 element dish array constructed in 1994 at Waseda University, Japan \citep{2dfft}.
@@ -490,10 +501,10 @@ Thus any calibration to the complex gains must be applied before the spatial FFT
 %    \label{fig:seng_block}
 %\end{figure}
 
-\section{Deployment and Initial Observations}
+\subsection{Initial Observations}
 \label{observations}
 
-Instrumentation was installed and tested during March 2012, during which time various bright radio sources were observed.
+Instrumentation was installed and tested during March 2012, during which time various bright radio sources were observed with both the FX correlator and spatial FFT imager.
 Since the Northern Cross is a transiting array there is a limited period of time each day in which a source is in the primary beam.
 Bright sources such as Cygnus A, Cassiopeia A and Taurus A along with a number of 3C sources were observed along with multiple constant declination 24 hour cycles.
 
@@ -502,7 +513,7 @@ Bright sources such as Cygnus A, Cassiopeia A and Taurus A along with a number o
 % A python FITS-IDI package has been written to convert HDF5 files into the standard FITS format which can be read by AIPS and CASA\footnote{https://github.com/telegraphic/pyfitsidi}.
 % This allows for conversion to the Measurement Set format which most packages can interface with.
 
-\subsection{FX Correlator Imaging}
+\section{FX Correlator Imaging}
 \label{fx_results}
 
 % During observations no phase tracking is applied to the antenna signals.
@@ -512,19 +523,19 @@ Bright sources such as Cygnus A, Cassiopeia A and Taurus A along with a number o
 % We are limited to a fixed observation length per day for a given source.
 % The UV coverage is essentially the same for any observation, with some variation due to pointing declination. 
 
-The East-West full width half max (FWHM) beam size of an individual element is $\approx11.25^{\circ}$ which translates to a 45 minute `observation time' for a source, as seen in the measured primary beam, figure \ref{fig:best2_pb}.
-For the the bright A class sources this time can be extended since they remain the dominating source well after crossing the FWHM.
+The East-West full width half max (FWHM) beam size of an individual element is $\approx11.25^{\circ}$ which translates to a 45 minute `observation time' for a source, as seen in the measured primary beam, Figure \ref{fig:best2_pb}.
+For the the bright class A sources; Cas A, Cyg A, Tau A, and Virgo A, this time can be extended since they remain the dominating source well after crossing the FWHM.
 Observations of 80-90 minutes are possible which gives an small improvement in uv coverage at the cost of properly accounting for the amplitude modulation due to the primary beam.
 This warrants a small sensitivity benefit for a large calibration cost.
 Most images are created using data within a few minutes of the source transit time.
-The high sidelobes in the primary beam, figure \ref{fig:best2_pb}, cause the bright class A sources to dominate even when they are far from the field of view and makes it difficult to perform calibration and imaging near these sources.
+The high sidelobes in the primary beam, Figure \ref{fig:best2_pb}, cause the bright class A sources to dominate even when they are far from the field of view and makes it difficult to perform calibration and imaging near these sources.
 
 \begin{figure}
     \centering
     \includegraphics[width=\linewidth]{{graphics/pb/best2_3_20_primary_beam}.pdf}
     \caption{A measured east-west primary beam based on the correlation between antennas 1N-6-1 and 1N-1-3, which are representative of typical antennas, based on a Cassiopeia A transit. 
     The dashed lines indicate the FWHM points.
-    The antennas have a sinc response to a point source, as expected.
+    The antennas have a sinc response to a point source.
     The first sidelobes are -15 dB down from the peak.}
     \label{fig:best2_pb}
 \end{figure}
@@ -532,7 +543,7 @@ The high sidelobes in the primary beam, figure \ref{fig:best2_pb}, cause the bri
 %calibration/flux scale
 A transiting array provides a unique challenge of gain calibration since a source's apparent gain will change as it transits the primary beam.
 To account for this variation, a two stage gain calibration method is used.
-Phase calibration and setting the flux scale is accomplished using Cassiopeia A and Cygnus A observations as point source sky models set to their 3C flux levels and known spectral indices.
+Phase calibration and setting the flux scale is accomplished using Cassiopeia A and Cygnus A observations as point source sky models set to their 3C flux levels\citep{3cr} and known spectral indices.
 Since these sources are very bright, only a few seconds at transit is needed produce a high SNR dataset to use for calibration.
 Over this period the primary beam can be approximated as flat.
 A time independent complex gain is derived for an initial calibration.
@@ -544,11 +555,11 @@ This stage is calibrated on short time intervals to account for amplitude change
 %dynamic range/noise/SEFD
 An effect of the density of the antenna layout is a low point spread function (PSF) to field of view ratio (spatial fidelity), thus images tend to contain at most a few spatially separated point sources.
 The grid layout of the BEST-2 array produces strong sidelobes and grating lobes in the PSF as seen in Figure \ref{fig:fx_tau_psf}.
-Observations of bright point sources produces calibrated dirty images in which the PSF is clearly visible, Figure \ref{fig:fx_tau_dirty}.
-After cleaning we measure the residual noise to be around 2 Jy over a number of two minute snapshot observations, table \ref{tbl:src_flux}.
-Imaging using longer source transit times has shown the noise floor to decrease at the expected rate of $\frac{1}{\sqrt{\tau}}$.
-The various stages of imaging and calibration for the source Taurus A is shown in figure \ref{fig:fx_tau}.
-Further images and analysis of the data quality are followed in section \ref{sfft_results}.
+Observations of bright point sources produces calibrated dirty images in which the PSF is visible, Figure \ref{fig:fx_tau_dirty}.
+After cleaning we measure the residual noise to be around 2 Jy over a number of two minute snapshot observations, Table \ref{tbl:src_flux}.
+Imaging using longer source transit times has shown the noise floor to decrease at the expected rate proportional to $\frac{1}{\sqrt{\tau}}$.
+The various stages of imaging and calibration for the source Taurus A is shown in Figure \ref{fig:fx_tau}.
+%Further images and analysis of the data quality are followed in section \ref{sfft_results}.
 
 %image: raw,psf,dirty,clean
 \begin{figure*}
@@ -570,7 +581,7 @@ Further images and analysis of the data quality are followed in section \ref{sff
     \label{fig:fx_tau_dirty}
     }
     \hspace{0.05\linewidth}
-    \subfloat[Cleaned image of the field, Taurus A is the dominating point source with a peak of 730 Jy, the image have a dynamic range of $\sim350$.]{
+    \subfloat[Cleaned image of the field. Taurus A is the dominating point source with a peak of 730 Jy, the image have a dynamic range of $\sim350$.]{
     \includegraphics[width=0.45\linewidth]{{graphics/fx/corr.2455996.22803.tau.s.ms.CORRECTED_DATA.channel.1ch.restored}.pdf}
     \label{fig:fx_tau_clean}
     }
@@ -620,11 +631,11 @@ Further images and analysis of the data quality are followed in section \ref{sff
 %\end{figure}
 
 %weighting
-\subsubsection{Weighting for a Regularly Gridded Array}
+\subsection{Weighting for a Regularly Gridded Array}
 
-As noted, the regular gridded array produces many highly redundant baselines, fig. \ref{fig:fx_tau_psf}.
+As noted, the regular gridded array produces many highly redundant baselines, Figure \ref{fig:fx_tau_psf}.
 When forming the dirty image the choice of weighting greatly effects the outcome of the image.
-In the highly redundant array case of BEST-2 the effects of using uniform versus natural weighting can be seen in fig. \ref{fig:fx_weighting}.
+In the highly redundant array case of BEST-2 the effects of using uniform versus natural weighting can be seen in Figure \ref{fig:fx_weighting}.
 Uniform weighting significantly reduces the sensitivity of the image for a small improvement in spatial resolution.
 We have used a natural weighting scheme through out to produce images.
 It is worth noting that the baselines produced by the spatial FFT imager have an inherent `natural' weighting scheme since all redundant baselines are effectively summed together into a single baseline.
@@ -653,7 +664,7 @@ To change the weighting of the spatial FFT baselines, reweighting factors must b
 \label{sfft_results}
 
 Observations with the FX correlator of various astronomical sources has verified the array and digital system is functioning as expected.
-We will use the FX correlator observations as a baseline to compare the results of observations from the spatial FFT imager.
+We use the FX correlator observations as a baseline to compare the results of observations from the spatial FFT imager.
 In the ideal case, observations using the spatial FFT will be identical to observations using an FX correlator.
 The spatial FFT imager has the effect of averaging together all identical spacing baselines, and produces a set of correlations for each unique baseline.
 Zero padding the data in the spatial FFT preserves the phase information which allows the beams to be transformed into correlations.
@@ -665,7 +676,7 @@ We start this section by discussing the calibration methods used and how the der
 
 As with an interferometric telescope, variations in the complex gains of each receiver must be compensated for before forming images with the correlation matrices.
 In the case of the FX correlator, such gains, once known,  can be applied after data is obtained.
-Conversely, in the case of the spatial FFT correlator, gain corrections must be applied before the spatial FFT is performed, as this operation effectively averages together redundant baselines.
+Conversely, in the case of the spatial FFT correlator, gain corrections must be applied before the spatial FFT is performed, as the operation effectively averages together redundant baselines.
 To illustrate the effect of gain calibration on spatial FFT images, Figure \ref{fig:sfft_calibration} shows an observation of Taurus A with and without gains applied during observation.
 
 Deriving the complex gain terms to be applied to the antennas can be achieved with a wide variety of calibration methods, and may or may not require knowledge of the array topology or sky model \citep{cal_strategies}.
@@ -679,7 +690,7 @@ If an array is sufficiently stable over that time period then this does not pose
 Gain coefficients obtained from several transits of these sources are shown in Figure \ref{fig:gain_variation}.
 The stability of a calibration over several days can only be relied upon to an accuracy of several degrees and $O(0.1\mathrm{dB})$.
 We note that, unsurprisingly, these variations are greatest when comparing the transits of different sources.
-This effect that is likely to be temperature dependent, but may also depend on the pointing angle of the array.
+This effect that is likely to be temperature dependent, but may also depend on the declinationpointing angle.
 
 \begin{figure*}
     \centering
@@ -709,7 +720,7 @@ This effect that is likely to be temperature dependent, but may also depend on t
     \label{fig:uncal_sfft}
     }
     \hspace{0.05\linewidth}
-    \subfloat[Dirty image of Tau/3c144 with complex gain calibrations applied. This image has a signal to noise ratio around 100, a standard CLEAN method can be used to improve the image dynamic range.]{
+    \subfloat[Dirty image of Tau/3c144 with complex gain calibrations applied. This image has a signal to noise ratio around 100, a CLEAN method can be used to improve the image dynamic range.]{
     \includegraphics[width=0.45\linewidth]{{graphics/img.2455999.21403.tau.cal.s.ms.DATA.channel.1ch}.pdf}
     \label{fig:cal_sfft}
     }
@@ -746,7 +757,7 @@ Ongoing work is currently in progress to allow more than 8 beams to be processed
 \subsection{Spatial FFT as a Correlator}
 \label{sfft_correlator}
 
-The output of the spatial FFT is a set of 128 beam powers which can be converted to uv sampled baselines by performing an inverse FFT.
+The spatial FFT imager outputs a set of 128 accumulated beam powers which can be converted to UV sampled baselines by performing an inverse FFT.
 In total 52 unique baselines are produced along with the auto correlation.
 Each spatial FFT baseline is the sum of antenna pair baselines at the same antenna spacing, for a given frequency channel.
 For the case of the spatial FFT we will call them effective baselines.
@@ -754,14 +765,17 @@ Once in the effective baseline correlation format the same pipeline that is used
 
 Due to the calibration limitation of the data no post observation calibration is applied.
 %Though there is a subset of calibration which can be performed...
-The flux scale is set by using the flux scale from FX data.
+The flux scale is set by using the flux scale from FX data taken during the same observation.
 This scale can be set during the observation or in post processing since it is a baseline independent amplitude scaling.
 Figures \ref{fig:sfft_tau_dirty} and \ref{fig:sfft_tau_clean} show the dirty and clean images of Taurus A during a properly calibrated observation.
-The signal to noise of the images are comparable to that of the images formed with the FX correlator during the same observation, fig. \ref{fig:fx_tau}.
+The signal to noise of the images are comparable to that of the images formed with the FX correlator during the same observation, Figure \ref{fig:fx_tau}.
 %We expect both instruments to produce comparable results, though there has been an open question as to how 'good' the real time calibration must be and how often this calibration must change.
 In the following section we look at the results of observations from both instrument to understand to the quality of images produced by the spatial FFT relative to that of the FX correlator.
 
-\subsubsection{Image Comparison}
+\section{Instrument Comparison}
+\label{inst_compare}
+
+\subsection{Image Comparison}
 \label{fx_sfft_image_comp}
 
 \begin{figure*}
@@ -783,16 +797,16 @@ In the following section we look at the results of observations from both instru
     }
 \end{figure*}
 
-A number of 3C source fields have been imaged from concurrent observations of the FX correlator and spatial FFT imager, figures \ref{fig:fx_sfft_set1} and \ref{fig:fx_sfft_set2}.
-To make a comparison between images we define the dynamic range of each image to the peak flux divided by the standard deviation of the noise in a empty region of the image.
+A number of 3C source fields have been imaged from concurrent observations of the FX correlator and spatial FFT imager, Figures \ref{fig:fx_sfft_set1} and \ref{fig:fx_sfft_set2}.
+To make a comparison between images we define the dynamic range of each image to be the peak flux divided by the standard deviation of the noise in a empty region of the image.
 Selecting an empty region of an image can greatly influence the dynamic range if there is low level structure. 
 We took care to select a few regions per image to find a representative region.
 The same region was then used for images from both the FX correlator and the spatial FFT imager as to avoid bias.
 %Though this is a simple way to define and determine the noise level and dynamic range we are not interested in the absolute flux of the images.
 %We are interested in the difference in image quality between the two sets of results.
 In the image analysis we are not so much interested in the absolute flux and noise level of each image but a relative comparison in images between the FX correlator and spatial FFT imager.
-In table \ref{tbl:src_flux} we list a number of 3C sources along with their measured flux and noise levels.
-For these snapshot images the spatial FFT produces essentially the same results as the FX correlator.
+In Table \ref{tbl:src_flux} we list a number of 3C sources along with their measured flux and noise levels.
+For these snapshot images the spatial FFT produces essentially the same dynamic range as the FX correlator.
 
 \begin{table*}
 \begin{center}
@@ -813,8 +827,8 @@ Source & 3C Flux (Jy) & Peak Flux (Jy) & FX Noise Level (Jy) & SFFT Noise Level 
 \end{table*}
 
 Even though the results have comparable dynamic range in the spatial FFT images there is a noticeable distortion.
-The cleaned image of Taurus, fig. \ref{fig:sfft_tau_clean}, begins to form points at the low levels, primarily in the east-west direction.
-The distortion can also be seen in a number of the 3C images in figures \ref{fig:fx_sfft_set1} and \ref{fig:fx_sfft_set2}.
+The cleaned image of Taurus, Figure \ref{fig:sfft_tau_clean}, begins to form points at the low levels, primarily in the east-west direction.
+The distortion can also be seen in a number of the 3C images in Figures \ref{fig:fx_sfft_set1} and \ref{fig:fx_sfft_set2}.
 And is not noticeable until the image has been cleaned.
 The dynamic range of the images does not fully describe the difference between a pair of images.
 We must look at the individual baselines to further compare the data.
@@ -830,6 +844,7 @@ There are two baselines in the array, (1N-1-1,1N-8-4) and (1N-1-4,1N-8-1), which
 The spatial FFT and the FX correlator should produce the same result for these baselines.
 Figure \ref{fig:bl_phase_1} shows the phase for the (1N-1-1,1N-8-4) baseline as calculated from both instruments.
 The output data from both instruments are nearly identical.
+Differences can be attributed to the digital hardware implementation where the two instruments have different data windows and bit rounding operations.
 After self calibration the FX correlator noise is further reduced and the slope is flattened.
 
 \begin{figure}
@@ -845,9 +860,9 @@ After self calibration the FX correlator noise is further reduced and the slope 
     \label{fig:bl_phase_1}
 \end{figure}
 
-If we look at a highly redundant baseline, such as (0,4), we expect the individual FX baselines to have a higher noise figure than the spatial FFT effective baseline, figure \ref{fig:bl_phase_0}.
+Looking at a highly redundant baseline, such as (0,4), we expect the individual FX baselines to have a higher noise figure than the spatial FFT effective baseline, Figure \ref{fig:bl_phase_0}.
 But, the effective FX baseline which is an average of same redundantly spaced baselines should be the same as the effective spatial FFT baseline.
-This is shown to be correct, but again the spatial FFT effective baseline has a higher noise standard deviation.
+This is shown to be correct, but the spatial FFT effective baseline has a higher noise standard deviation.
 
 \begin{figure}
     \centering
@@ -860,7 +875,7 @@ This is shown to be correct, but again the spatial FFT effective baseline has a 
     \label{fig:bl_phase_0}
 \end{figure}
 
-If we look at the noise standard deviation for all the baselines during an observation we see the individual FX baselines have no dependence on baseline length or redundancy, figure \ref{fig:bl_phase_noise}.
+If we look at the noise standard deviation for all the baselines during an observation we see the individual FX baselines have no dependence on baseline length or redundancy, Figure \ref{fig:bl_phase_noise}.
 When the FX baselines are averaged together based on their redundancy the noise decreases as expected.
 The spatial FFT effective baseline noise also falls off with an increase in redundancy.
 Yet, the noise standard deviation is higher on every baseline compared to the averaged FX baselines.
@@ -901,6 +916,10 @@ By combining them we can not use self calibration to apply per antenna calibrati
 The initial phase calibration from a bright source is the same for the both instruments, though the gains are applied during the observation in the spatial FFT case and in post processing for the FX correlator.
 The additional calibration on the FX data by solving for a sky model solution further improves the image quality.
 
+As noted in the previous section, the FX correlator and spatial FFT imager have slightly different data outputs due to different digital signal paths.
+This is due to bit depth limitations in the current designs.
+There are sufficient resources available on the FPGA to increase the bit depth and alleviate this low level difference between the two digital paths.
+
 \section{Conclusion}
 \label{conclusion}
 
@@ -910,6 +929,7 @@ This is the first time a spatial FFT imager has been used to produce complex bas
 Both instruments can operate simulatenously which has allowed us to compare the respective data quality.
 
 We have shown that the spatial FFT imager produces correlations similar to that of a traditional FX correlator.
+Though the spatial FFT baseline data is shown to have a high noise compared to that of the FX correlator baselines since post observation self calibration can be applied to the FX correlator baselines.
 Complex gains are derived from calibration sources and applied during observations.
 The FX correlator data can be improved with further self calibration.
 Self calibration can not be performed on the spatial FFT imager since the effective baseline is a linear combination of redundant spacing baselines.
@@ -918,10 +938,10 @@ Bright sources are needed in the field of view to derive calibrations.
 A more advanced calibration method which can take into account multiple sources would allow more fields to be used for calibration and improve the time difference between calibration observation and science observation.
 
 For low frequency dipole arrays which have a very large field of view there will always be bright sources in the field to calibrate against.
-With a fast enough calibration algorithm a small correlator can be used to derive gains on short timescales $O(seconds)$ and apply them to the spatial FFT imager.
+With a fast enough calibration algorithm a small calibration correlator can be used to derive gains on short timescales $O(seconds)$ and apply them to the spatial FFT imager.
 A good sky model and close time proximity between calibration observations and science observations will bring the spatial FFT calibration closer quality to a FX self calibration result.
 
-With the successful installation and testing with the spatial FFT imager on the BEST-2 array we are working on developing the system further for science observations.
+With the successful installation and testing of the spatial FFT imager on the BEST-2 array we are working on developing the system further for science observations.
 Medicina Observatory is involved with space debris tracking using BEST-2 in a beamformer mode.
 The spatial FFT provides all beams within the field of view.
 This would improve the ability to detect and track space debris with the array.
