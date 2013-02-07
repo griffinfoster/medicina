@@ -10,6 +10,7 @@ import numpy as n
 import pylab
 import h5py
 import sys
+import time
 import cPickle as pickle
 from optparse import OptionParser
 
@@ -22,6 +23,8 @@ p.add_option('-c', '--chan_range', dest='chan_range', default='0_-1',
         help='Calibration fit channel range in form \'<start_chan>_<stop_chan>\'. Default: 0_-1 (i.e. all channels)')
 p.add_option('-t', '--time_range', dest='time_range', default='0_-1',
         help='Time range to average before calculating calibration \'<start_time>_<stop_time>\'. Default: 0_-1 (i.e. all times in file)')
+p.add_option('-u', '--utc_range', dest='utc_range', default=None,
+        help='Time range to average in UTC in \'D/M/YYYY HH:MM:SS_D/M/YYYY HH:MM:SS\' format')
 p.add_option('-p', '--plot_chan', dest='plot_chan', type='int', default=610,
         help='Channel to plot at end of script. Default: 610')
 p.add_option('-o', '--poly_order', dest='poly_order', type='int', default=8,
@@ -32,6 +35,10 @@ opts, args = p.parse_args(sys.argv[1:])
 
 fnames= args
 time_start, time_stop = map(int,opts.time_range.split('_'))
+if opts.utc_range is not None:
+    utc_start_str, utc_stop_str = opts.utc_range.split('_')
+    utc_start = time.strptime(utc_start_str, '%d/%m/%Y %H:%M:%S')
+    utc_stop  = time.strptime(utc_stop_str, '%d/%m/%Y %H:%M:%S')
 
 #Channels over which to fit corrections
 chan_start, chan_stop = map(int,opts.chan_range.split('_'))
@@ -46,7 +53,7 @@ eq = {}
 for fi, fname in enumerate(fnames):
     print "Opening: %s (%d of %d)" %(fname, fi+1, n_files)
     fh = h5py.File(fname, 'r')
-    t = fh.get('timestamp0')
+    t = fh.get('timestamp0')[:]
     if fi==0:
         # Get some parameters
         calname = fname+'.cal'
@@ -58,8 +65,12 @@ for fi, fname in enumerate(fnames):
         bl_order = fh['bl_order'].value
         d = fh.get('xeng_raw0')[:,:,:,0,:] #Single pol
         for key in fh.get('EQ').keys(): eq[key] = n.array(fh.get('EQ')[key][:])
-    else: d = n.concatenate((d, fh.get('xeng_raw0')[:,:,:,0,:]))
+    else:
+        d = n.concatenate((d, fh.get('xeng_raw0')[:,:,:,0,:]))
+        t = n.concatenate((t, fh.get('timestamp0')[:]))
     fh.close()
+
+
 
 #Grab the amplitude coeffs and put them in a [nants,nchans] array
 n_coeffs = len(eq['eq_amp_coeff_0x'][-1])
@@ -77,8 +88,24 @@ for ant in range(n_ants):
     eq_array_master[ant,:]   =          n.array(eq['eq_amp_coeff_%dx'%ant][-1][:].tolist()*dec_factor).reshape(dec_factor,n_coeffs).flatten('F')[::-1]
 
 d = d[:,:,:,1]+d[:,:,:,0]*1j #complexify
-print 'Averaging time range %d - %d' %(time_start, time_stop)
-d = n.mean(d[time_start:time_stop,:,:],axis=0)
+
+if opts.utc_range is not None:
+    #print t
+    print 'Averaging time range %s - %s' %(utc_start, utc_stop)
+    time_bool = (t<time.mktime(utc_stop)) & (t>time.mktime(utc_start))
+    #print time_bool
+    n_times = time_bool.sum()
+    if n_times == 0:
+        print 'ERROR: No timestamps match UTC limits.'
+        print 'First time in timestamp is:', time.gmtime(t[0])
+        print 'last time in timestamp is:', time.gmtime(t[-1])
+        exit()
+    else:
+        print 'Averaging %d integrations' %time_bool.sum()
+    d = n.mean(d[time_bool,:,:],axis=0)
+else:
+    print 'Averaging time range %d - %d' %(time_start, time_stop)
+    d = n.mean(d[time_start:time_stop,:,:],axis=0)
 
 
 print 'Populating matrix and dividing by EQ coefficients'

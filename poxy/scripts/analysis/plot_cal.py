@@ -26,6 +26,8 @@ p.add_option('-c', '--chan', dest='chan', type='string', default='0_1023',
     help='Chan range to plot')
 p.add_option('-a', '--ants', dest='ants', type='string', default='0_31',
     help='Antennas to plot')
+p.add_option('-r', '--ref', dest='refant', type='int', default=0,
+    help='Reference antenna')
 
 opts, args = p.parse_args(sys.argv[1:])
 
@@ -43,7 +45,7 @@ for f in gain_files:
     fh = open(f,'r')
     pk = pickle.load(fh)
     g = pk['cal']
-    eq = pk['eq_master'][:,:]
+    #eq = pk['eq_master'][:,:]
     #cals.append(g/n.transpose(eq))
     cals.append(g)
     fh.close()
@@ -53,9 +55,9 @@ n_chans,n_ants = cals[0].shape
 ##renormalise the coefficients (the EQ isn't normalised)
 normed_cal = n.zeros([n_files,n_chans,n_ants], dtype=complex)
 for i in range(n_files):
-    norm_factor = cals[i][:,0]
+    norm_factor = cals[i][:,opts.refant]
     for ant in range(n_ants):
-        normed_cal[i,:,ant] = cals[i][:,ant]/cals[i][:,0]
+        normed_cal[i,:,ant] = cals[i][:,ant]/cals[i][:,opts.refant]
 
 ants_to_plot = len(ant_range)
 x_subplots = float(ants_to_plot) / n.floor(n.sqrt(ants_to_plot))
@@ -76,7 +78,7 @@ for an,ant in enumerate(ant_range):
     pylab.subplot(x_subplots,y_subplots,an+1)
     pylab.title("Ant %d, phs"%ant)
     for cn,cal in enumerate(normed_cal):
-        pylab.plot(n.angle(cal[chan_range,ant]), label=calnames[cn])
+        pylab.plot(n.angle(cal[chan_range,ant])*180./n.pi, label=calnames[cn])
 pylab.legend()
 
 pylab.show()
