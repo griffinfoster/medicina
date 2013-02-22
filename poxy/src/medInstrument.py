@@ -1283,7 +1283,7 @@ class sEngine(Instrument):
                 print '   Getting current ctrl_sw state'
                 self.get_ctrl_sw()
 
-    def load_eq(self,verbose=False, send_spead_update=True):
+    def load_eq(self,verbose=False, send_spead_update=True,use_trivial=True):
         in_name='xengine'
         out_name ='sengine'
         mode = 'amp'
@@ -1305,9 +1305,12 @@ class sEngine(Instrument):
             for i in range(32):
                 print i, eq_amp_x.get_coeffs('base')
 
-        inverse_coeffs = 1./eq_amp_x.get_coeffs('base')
-        # Normalise to 1
-        inverse_coeffs = inverse_coeffs/numpy.max(inverse_coeffs)
+        if use_trivial:
+            inverse_coeffs = numpy.ones_like(eq_amp_x.get_coeffs('base'))
+        else:
+            inverse_coeffs = 1./eq_amp_x.get_coeffs('base')
+            # Normalise to 1
+            inverse_coeffs = inverse_coeffs/numpy.max(inverse_coeffs)
 
         self.eq_amp = equalization.EQ(mode='amp',nchans=self.fConf.n_chan, nants=self.fConf.n_ants_sp, npols=self.fConf.pols_per_ant, decimation=2, dtype=float, fn=output_pkl_file)
 

@@ -34,6 +34,8 @@ if __name__ == '__main__':
         help='Mask one or more of the 4 X-FFT inputs with zeros. Valid values are 4 bit integers')
     p.add_option('-y', '--ymask', dest='ymask', default=0, 
         help='Mask one or more of the 8 Y-FFT inputs with zeros. Valid values are 8 bit integers')
+    p.add_option('-e', '--trivial_eq', dest='trivial_eq', action='store_false', default=True, 
+            help='Apply inverse EQ coefficients (this ensures calibration is correct if noise powers are different) Default: False')
     p.add_option('-t', '--tx', dest='tx', action='store_true', default=False, 
         help='(Re)start the tx script corr_tx_spead.py on the imager ROACH')
     p.add_option('-v', '--verbose', dest='verbose',action='store_true', default=False, 
@@ -111,8 +113,11 @@ try:
     print '\t%s' %('done')
 
     # Set EQ bram
-    print ''' Loading inverse EQ coefficients into S-engine ...'''
-    seng.load_eq(verbose=opts.verbose)
+    if opts.trivial_eq:
+        print ''' Loading trivial EQ coefficients into S-engine ...'''
+    else:
+        print ''' Loading inverse EQ coefficients into S-engine ...'''
+    seng.load_eq(use_trivial=opts.trivial_eq,verbose=opts.verbose)
 
     #Set beam output connection
     print ''' Configuring 10GbE beam output'''
