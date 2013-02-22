@@ -44,7 +44,10 @@ if __name__ == '__main__':
     o.add_option('-p', '--pol', dest='pol', default='all',
         help='Select which polarization to plot (xx,yy,xy,yx,all). Default=all')
     o.add_option('-t', '--time', dest='time', type='string', default='all', help='Select which time sample to plot. Default=all')
-    o.add_option('-s', '--scale', dest='time_scale', type='string', default='time', help='Select unit of time axis. time=hours since reference. ha=hour angle')
+    o.add_option('-s', '--scale', dest='time_scale', type='string', default='time',
+        help='Select unit of time axis. time=hours since reference. ha=hour angle. lst=lst of observatory')
+    o.add_option('-r', '--ra', type='string', default='23:23:58.45',
+        help='RA of source (only for use when plotting transits or hour angles). Format is HH:MM:SS.S')
     o.add_option('--legend', dest='legend', action='store_true',
         help='Show a legend for every plot.')
     o.add_option('--share', dest='share', action='store_true',
@@ -204,7 +207,7 @@ for fi, fname in enumerate(fnames):
         if opts.time_scale == 'time':
             t = gen_time_axis(t,scale_factor,get_attr(fh,'sync_time'))
         elif opts.time_scale == 'ha':
-            t = gen_ha_axis(t,scale_factor,get_attr(fh,'sync_time'),ephem.hours('23:23:26.0'))
+            t = gen_ha_axis(t,scale_factor,get_attr(fh,'sync_time'),ephem.hours(opts.ra))
         else: 
             t = gen_ha_axis(t,scale_factor,get_attr(fh,'sync_time'),0.0)
     fh.close()
@@ -317,15 +320,14 @@ else:
                     pylab.legend()
   
             # Set the x axis to be hours/mins/secs
-            if opts.time_scale == 'ha' or 'lst':
-                #plot ha every degree
+            if opts.time_scale == 'ha' or opts.time_scale == 'lst':
                 xticks_loc, xticks_labels = pylab.xticks()
                 xticks_labels = []
                 for x in xticks_loc:
                     ra_hours = '%s' %ephem.hours(numpy.deg2rad(x))
                     hours, mins, secs = map(float,ra_hours.split(':'))
-                    xticks_labels.append('$%d^{\mathrm{h}} %d^{\mathrm{m}} %d^{\mathrm{s}}$' %(hours,mins,secs))
-            pylab.xticks(xticks_loc, xticks_labels)
+                    xticks_labels.append('$%.0f^{\mathrm{h}} %d^{\mathrm{m}} %d^{\mathrm{s}}$' %(hours,mins,secs))
+                pylab.xticks(xticks_loc, xticks_labels)
 
   
             if not opts.share:
