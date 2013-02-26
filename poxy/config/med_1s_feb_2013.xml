@@ -1,0 +1,318 @@
+<?xml version="1.0" encoding="ISO-8859-15"?>
+
+<instrument>
+    <fengine id='0' name="roach3" port='7147'>
+        <!--<bitstream>x64_32f_024i_2011_Apr_17_1634.bof</bitstream>-->
+        <bitstream>feng_latest.bof</bitstream>
+
+        <adc name="x64"> <!-- set clock power to 0 dBm-->
+            <clk>40000000.0</clk> <!-- data sample clock rate in Hz-->
+            <bits>12</bits>
+            <!--<acc_len>8192</acc_len>--> <!-- adc samples to accumulate to compute power-->
+            <acc_len>32</acc_len> <!-- 8192 samples are accumulated but the bottom 8 bits are sliced off(i.e a divide by 256)--><!--adc samples to accumulate to compute power-->
+        </adc>
+
+        <n_ants>16</n_ants> <!-- number of dual pol antenna inputs, n_ants*2 for single pol-->
+        <n_stokes>4</n_stokes> <!-- Nuber of stokes parameters calculated -->
+        <n_ants_sp>32</n_ants_sp> <!-- number of actual antennas without dual pol convention-->
+        <pols_per_ant>1</pols_per_ant> <!-- Are the n_ants_sp above dual pol receivers?-->
+        <n_chan>1024</n_chan> <!-- number of fft channels-->
+        <ant_mux>4</ant_mux> <!-- number of signals per input line-->
+        <obs_freq>408000000.0</obs_freq> <!-- central observing frequency in Hz-->
+        <!--<fft_shift>0b10101010101</fft_shift>--> <!-- shift schedule, each stage is 1 bit-->
+        <fft_shift>0b11101010101</fft_shift> <!-- shift schedule, each stage is 1 bit-->
+
+        <eq name="xengine" type="amp">
+            <n_bits>4</n_bits>
+            <binary_point>3</binary_point>
+            <decimation>2</decimation> <!-- number of channels per eq coefficent-->
+            <auto>false</auto> <!-- if true preform auto equalization-->
+            <!--<default>poly</default>--> <!-- poly:generate a polynomial based on eq_poly, coeff:a list of n_chan/decimation values-->
+            <default>poly</default> <!-- poly:generate a polynomial based on eq_poly, coeff:a list of n_chan/decimation values-->
+            <tolerance>0.01</tolerance> <!-- eq tolerance when preforming auto eq-->
+            <!--
+            Starting point for auto-equalization or values for manual eq programming.
+            one line entry per polarisation. Item is a list of polynomial coefficients.
+            e.g. <eq_poly id="0" pol="x">10,30,40</eq_poly>
+            corresponds to 10x^2 + 30x + 40 where x is the frequency channel index.
+            -->
+
+            <eq_poly id="0" pol="x">200</eq_poly>
+            <eq_poly id="1" pol="x">200</eq_poly>
+            <eq_poly id="2" pol="x">200</eq_poly>
+            <eq_poly id="3" pol="x">200</eq_poly>
+            <eq_poly id="4" pol="x">200</eq_poly>
+            <eq_poly id="5" pol="x">200</eq_poly>
+            <eq_poly id="6" pol="x">200</eq_poly>
+            <eq_poly id="7" pol="x">200</eq_poly>
+            
+            <eq_poly id="8" pol="x">200</eq_poly>
+            <eq_poly id="9" pol="x">200</eq_poly>
+            <eq_poly id="10" pol="x">200</eq_poly>
+            <eq_poly id="11" pol="x">200</eq_poly>
+            <eq_poly id="12" pol="x">200</eq_poly>
+            <eq_poly id="13" pol="x">200</eq_poly>
+            <eq_poly id="14" pol="x">200</eq_poly>
+            <eq_poly id="15" pol="x">200</eq_poly>
+            
+            <eq_poly id="16" pol="x">200</eq_poly>
+            <eq_poly id="17" pol="x">200</eq_poly>
+            <eq_poly id="18" pol="x">200</eq_poly>
+            <eq_poly id="19" pol="x">200</eq_poly>
+            <eq_poly id="20" pol="x">200</eq_poly>
+            <eq_poly id="21" pol="x">200</eq_poly>
+            <eq_poly id="22" pol="x">200</eq_poly>
+            <eq_poly id="23" pol="x">200</eq_poly>
+            
+            <eq_poly id="24" pol="x">200</eq_poly>
+            <eq_poly id="25" pol="x">200</eq_poly>
+            <eq_poly id="26" pol="x">200</eq_poly>
+            <eq_poly id="27" pol="x">200</eq_poly>
+            <eq_poly id="28" pol="x">200</eq_poly>
+            <eq_poly id="29" pol="x">200</eq_poly>
+            <eq_poly id="30" pol="x">200</eq_poly>
+            <eq_poly id="31" pol="x">200</eq_poly>
+
+            <eq_coeff id="5" pol="x">
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+                800 800 800 800 800 800 800 800 800 800 800 800 800 800 800 800
+            </eq_coeff>
+        </eq>
+
+        <eq name="xengine" type="amp" level='bandpass'>
+            <!-- NOTE - THESE coefficients should describe the bandpass, **NOT** the required 1/bandpass correction-->
+            <n_bits>4</n_bits>
+            <binary_point>3</binary_point>
+            <decimation>2</decimation> <!-- number of channels per eq coefficent-->
+            <start_chan>160</start_chan>
+            <end_chan>880</end_chan>
+            <auto>false</auto> <!-- if true preform auto equalization-->
+            <!--<default>poly</default>--> <!-- poly:generate a polynomial based on eq_poly, coeff:a list of n_chan/decimation values-->
+            <default>poly</default> <!-- poly:generate a polynomial based on eq_poly, coeff:a list of n_chan/decimation values-->
+            <tolerance>0.01</tolerance> <!-- eq tolerance when preforming auto eq-->
+            <!--
+            Starting point for auto-equalization or values for manual eq programming.
+            one line entry per polarisation. Item is a list of polynomial coefficients.
+            e.g. <eq_poly id="0" pol="x">10,30,40</eq_poly>
+            corresponds to 10x^2 + 30x + 40 where x is the frequency channel index.
+            -->
+            <!-- NOTE - THESE coefficients should describe the bandpass, **NOT** the required 1/bandpass correction-->
+            <!--<eq_poly id="0" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="1" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="2" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="3" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="4" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="5" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="6" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="7" pol="x">200</eq_poly>-->
+            <!--                                     -->
+            <!--<eq_poly id="8" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="9" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="10" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="11" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="12" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="13" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="14" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="15" pol="x">200</eq_poly>-->
+            <!--                                      -->
+            <!--<eq_poly id="16" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="17" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="18" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="19" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="20" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="21" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="22" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="23" pol="x">200</eq_poly>-->
+            <!--                                      -->
+            <!--<eq_poly id="24" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="25" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="26" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="27" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="28" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="29" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="30" pol="x">200</eq_poly>-->
+            <!--<eq_poly id="31" pol="x">200</eq_poly>-->
+            <!-- NOTE - THESE coefficients should describe the bandpass, **NOT** the required 1/bandpass correction-->
+            <eq_poly id="0" pol="x"> -1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="1" pol="x"> -1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="2" pol="x"> -1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="3" pol="x"> -1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="4" pol="x"> -1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="5" pol="x"> -1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="6" pol="x"> -1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="7" pol="x"> -1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            
+            <eq_poly id="8" pol="x"> -1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="9" pol="x"> -1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="10" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="11" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="12" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="13" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="14" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="15" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+                           
+            <eq_poly id="16" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="17" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="18" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="19" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="20" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="21" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="22" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="23" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+                         
+            <eq_poly id="24" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="25" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="26" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="27" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="28" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="29" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="30" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+            <eq_poly id="31" pol="x">-1.0247e-20, 4.2399e-17, -7.4576e-14, 7.2724e-11, -4.2977e-8, 1.5770e-5, -3.5187e-3, 4.3833e-1, -2.1285e1</eq_poly>
+        </eq>
+    </fengine>
+
+    <xengine id='0' name="x" port='7147'>
+        <!--<bitstream>xeng_hdl.bof</bitstream> --><!-- hdl xengine - in testing -->
+        <bitstream>med_16a_2x_r113c_2011_Mar_31_1159.bof</bitstream> <!-- sw reg for mux idle time-->
+        <!--<bitstream>med_16a_2x_r113a_2011_Mar_23_1358.bof</bitstream>--> <!-- use for > 1 second integrations-->
+        <!--<bitstream>med_16a_2x_r113b_2011_Mar_23_1703.bof</bitstream>--> <!-- use for < 1 second integrations-->
+        <clk>200000000</clk> <!-- clk rate in Hz-->
+        
+        <n_xaui>1</n_xaui> <!-- number of fengine XAUIs connected to this board-->
+        <xaui id='0'>
+            <n_ants>16</n_ants> <!-- number of daul pol antennas on this XAUI-->
+        </xaui>
+        
+        <x_per_fpga>2</x_per_fpga> <!-- number of xengine blocks per FPGA-->
+        <bits>4</bits> <!-- number of quantization bits-->
+        <fix_pnt_pos>3</fix_pnt_pos> <!-- position of binary point-->
+        <n_chan>1024</n_chan> <!-- number of channels processed in this X Engine-->
+        <n_ants>16</n_ants> <!-- number of dual pol antennas processed-->
+        <n_stokes>4</n_stokes>
+        <xeng_acc_len>128</xeng_acc_len> <!-- accumulation in the xengine block-->
+        <qdr_acc_len>256</qdr_acc_len> <!-- accumulation length in the QDR, total accumulation length is xeng_acc_len*qdr_acc_len-->
+        <clk_per_sync>262144</clk_per_sync> <!--Number of F engine clock cycles between X engine syncs. This is generated by the descramble block in the X engines. 2^18 = 262144-->
+        <ntp_server>192.167.189.67</ntp_server>
+        
+        <udp_output>
+            <tx_ip>192.168.11.104</tx_ip> <!-- FPGA IP address-->
+            <rx_ip>192.168.11.12</rx_ip> <!-- IP address to send integration packets to-->
+            <rx_port>7148</rx_port>
+            <spead_ip>192.168.10.6</spead_ip><!-- IP Address to send Meta data packets to-->
+            <file_time>1200</file_time><!-- Time per file (seconds)-->
+        </udp_output>
+    </xengine>
+
+    <sengine id='0' name="s" port='7147'>
+        <bitstream>seng_latest3.bof</bitstream>
+        <clk>180000000</clk> <!-- clk rate in Hz-->
+        <n_ants>32</n_ants> <!-- Number of antennas processed -->
+        <grid>
+            <x_dim>4</x_dim> <!-- size of grid in x dimension -->
+            <y_dim>8</y_dim> <!-- size of grid in y dimension -->
+        </grid>
+        <n_stokes>1</n_stokes> <!-- Number of stokes parameters calculated -->
+        <is_dual_pol>False</is_dual_pol> <!-- Is the output dual pol -->
+        <s_per_fpga>1</s_per_fpga> <!-- number of s-engine blocks per FPGA-->
+        <x_fft_shift>0b111</x_fft_shift> <!-- FFT shifting schedule for first spatial FFT-->
+        <y_fft_shift>0b1111</y_fft_shift> <!-- FFT shifting schedule for second spatial FFT-->
+        <!-- acc scale: 1 gaurantees no overflow. 2^(16-N) where N is 16-log2(qdr_acc_len) should
+             not be able to overflow -->
+        <acc_scale>4096</acc_scale> <!--Scaling factor by which to scale 'image' before accumulating-->
+        <int_acc_len>128</int_acc_len> <!-- Integration length before QDR-->
+        <acc_len>256</acc_len> <!-- Number of vectors to accumulate in QDR-->
+        <bits>4</bits> <!-- number of quantization bits-->
+        <fix_pnt_pos>3</fix_pnt_pos> <!-- position of binary point-->
+        <bits_out>32</bits_out> <!-- number of bits in vacc output-->
+
+        <udp_output>
+            <tx_ip>192.168.10.11</tx_ip> <!-- FPGA IP address-->
+            <rx_ip>192.168.10.5</rx_ip> <!-- IP address to send integration packets to-->
+            <rx_port>7149</rx_port> <!-- Port to sent integration packets to-->
+        </udp_output>
+        <beam_config>
+            <packet_size>4096</packet_size>
+            <samples_per_block>128</samples_per_block>
+            <bytes_per_sample>4</bytes_per_sample>
+            <start_chan>152</start_chan> <!--THIS SHOULD BE IN INCREMENTS OF CHANS/PACKET, CURRENTLY 8-->
+            <end_chan>663</end_chan>  <!--THIS SHOULD BE IN INCREMENTS OF (N_CHANS-1) - CHANS/PACKET-->
+            <!--The IP and MAC below are required by the medicina system. They can be generated for a given roach and port
+             using the medroach.utils.get_port_params(roach_hostname, 10gbe_port). These must be changed if the roach
+             being used changes, otherwise address clashes will occur on the network-->
+            <beam_output id='0' name='ten_Gbe_v2' ip='192.168.11.133' dest_ip='192.168.11.12' port='10000' mac='0x0060c0a80b85'>
+                <beam id='0'>
+                    <x>0</x>
+                    <y>0</y>
+                </beam> 
+                <!-- <beam id='1'>  
+                    <x>0</x>   
+                    <y>1</y> 
+                </beam> 
+                <beam id='2'> 
+                    <x>0</x> 
+                    <y>2</y> 
+                </beam>  
+                <beam id='3'>     
+                    <x>0</x>   
+                    <y>3</y>
+                </beam>   
+                <beam id='4'>
+                    <x>0</x>
+                    <y>4</y>
+                </beam> 
+                <beam id='5'>  
+                    <x>0</x>   
+                    <y>5</y> 
+                </beam> 
+                <beam id='6'> 
+                    <x>0</x> 
+                    <y>6</y> 
+                </beam>  
+                <beam id='7'>     
+                    <x>0</x>   
+                    <y>7</y>
+                </beam>   -->
+            </beam_output>
+        </beam_config>
+    </sengine>
+
+    <receiver>
+        <sengine>
+            <file_time>1800</file_time> <!-- Time per file (seconds)-->
+            <rx_ip>192.168.10.5</rx_ip> <!-- IP address on which to listen for data -->
+            <rx_port>7149</rx_port> <!-- Port on which to listen for data-->
+            <spead_ip>192.168.10.5</spead_ip><!-- IP Address to send Meta data packets to-->
+        </sengine>
+    </receiver>
+
+</instrument> 
