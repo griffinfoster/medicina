@@ -45,7 +45,7 @@ def sum_times(cm,ts,dec):
 
 def append_history(fh,hist_str):
     if not('history' in fh.keys()):
-        rv = new_fh.create_dataset('history', data=n.array([hist_str]))
+        rv = fh.create_dataset('history', data=n.array([hist_str]))
     else:
         hv = fh['history'].value
         del fh['history']
