@@ -28,6 +28,10 @@ if __name__ == '__main__':
         help='Produce a waterfall plot of a time range using -t <t_0>_<t_n>')
     o.add_option('-u', '--unmask', dest='unmask', default=False, action='store_true',
         help='Plot the raw data.')
+    o.add_option('-f', '--freqaxis', dest='freqaxis', default=False, action='store_true',
+        help='Plot frequency (rather than channel) as x axis.')
+    o.add_option('-s', '--savefig', dest='savefig', default='None',
+        help='Name with which to save figure.')
     o.add_option('--chan', dest='chan_time', action='store_true',
         help='Plot individual channels as a function of time')
     o.add_option('--legend', dest='legend', action='store_true',
@@ -96,6 +100,18 @@ def convert_pol(arg):
         for pi in arg: rv.append(pol_map[pi])
         return rv
 
+def get_freq_range(fh):
+    """return array of frequency channel bin center values"""
+    cf = fh.attrs.get('center_freq')
+    n_chans = fh.attrs.get('n_chans')
+    bw = fh.attrs.get('bandwidth')
+    start_freq = cf - (bw/2)
+    freq_range = numpy.arange(start_freq,start_freq+bw,bw/n_chans)/1e6
+    unit = 'MHz'
+    return unit,freq_range
+
+
+
 bl_order=None
 decimate=int(opts.decimate)
 flags=None
@@ -110,6 +126,8 @@ for fi, fname in enumerate(fnames):
     if decimate>1:
         time_index=time_index[::decimate]
     if fi==0:
+        # get the frequency axis
+        freq_unit, freq_range = get_freq_range(fh)
         if 'pol' in fh.keys() and opts.pol.startswith('all'):
             unique_pols = list(numpy.unique(fh['pol']))
             pols = []
@@ -133,6 +151,11 @@ for fi, fname in enumerate(fnames):
         if bl_order is None: bl_order = poxy.casper.get_bl_order(n_ants)
         if opts.chan_index == 'all': chan_index = range(0,fh.attrs.get('n_chans'))
         else: chan_index = convert_arg_range(opts.chan_index)
+        if opts.freqaxis:
+            freq_range = freq_range[chan_index]
+        else:
+            freq_range = chan_index
+            freq_unit = 'channel'
    
         d = fh.get('xeng_raw0')[time_index][:,chan_index][:,:,bl_index][:,:,:,pols]
         if 'flags' in fh.keys() and not opts.unmask:
@@ -144,6 +167,7 @@ for fi, fname in enumerate(fnames):
     fh.flush()
     fh.close()
 
+ylabel=''
 for cnt,bl in enumerate(bl_index):
     if not opts.share:
         pylab.subplot(m2, m1, cnt+1)
@@ -164,9 +188,15 @@ for cnt,bl in enumerate(bl_index):
             di = numpy.ma.concatenate([di[di.shape[0]/2:], di[:di.shape[0]/2]], axis=0)
         if opts.mode.startswith('lin'):
             di = numpy.absolute(di)
+            ylabel = 'DBU'
         if opts.mode.startswith('log'):
             di = numpy.absolute(di)
             di = numpy.log10(di)
+            ylabel = 'log(DBU)'
+        if opts.mode.startswith('db'):
+            di = numpy.absolute(di)
+            di = 10*numpy.log10(di)
+            ylabel = 'dB (arbitrary reference)'
         if opts.mode.startswith('real'): di = di.real
         if opts.mode.startswith('imag'): di = di.imag
         if opts.mode.startswith('ph'):
@@ -195,19 +225,27 @@ for cnt,bl in enumerate(bl_index):
                 for t in range(len(time_index)):
                     #pylab.plot(di[t], '.', label=label)
                     if opts.mode.startswith('comp'):
-                        pylab.plot(di[t].real)
-                        pylab.plot(di[t].imag)
-                    else: pylab.plot(di[t])
+                        pylab.plot(freq_range,di[t].real)
+                        pylab.plot(freq_range,di[t].imag)
+                    else: pylab.plot(freq_range,di[t])
+                pylab.xlim(freq_range[0],freq_range[-1])
+                pylab.xlabel('Frequency (%s)'%freq_unit)
+                pylab.ylabel('%s'%ylabel)
                     #pylab.plot(di[t], label=label)
 
     if not opts.share and not opts.water:
         pylab.ylim(dmin,dmax)
-    pylab.title(bl_order[bl])
+        pylab.title(bl_order[bl])
 
 if opts.legend: pylab.legend()
 #if opts.water: pylab.colorbar()
 print 'done'
 pylab.subplots_adjust(hspace=0.5)
 if opts.water: pylab.colorbar()
+
+if opts.savefig is not None:
+    pylab.savefig(opts.savefig, bbox_inches='tight')
 pylab.show()
+
+
 
