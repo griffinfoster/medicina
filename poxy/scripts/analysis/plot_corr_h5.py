@@ -30,7 +30,7 @@ if __name__ == '__main__':
         help='Plot the raw data.')
     o.add_option('-f', '--freqaxis', dest='freqaxis', default=False, action='store_true',
         help='Plot frequency (rather than channel) as x axis.')
-    o.add_option('-s', '--savefig', dest='savefig', default='None',
+    o.add_option('-s', '--savefig', dest='savefig', default=None,
         help='Name with which to save figure.')
     o.add_option('--chan', dest='chan_time', action='store_true',
         help='Plot individual channels as a function of time')
